@@ -33,12 +33,8 @@ object NavRoutes {
     const val FD_RD_CALCULATOR   = "fd_rd_calculator"
     const val SIP_CALCULATOR     = "sip_calculator"
 
-    // --- Reminder sub-screens ---
-    const val ADD_REMINDER = "add_reminder/{loanId}"
-
     // --- Helpers ---
     fun loanDetail(loanId: Int)         = "loan_detail/$loanId"
-    fun addReminder(loanId: Int = -1)   = "add_reminder/$loanId"
     fun calculatorResults(p: Double, r: Double, t: Int) = "calculator_results/$p/$r/$t"
     fun interestTypeSelector(p: Double, r: Double, t: Int, type: String) =
         "interest_type/$p/$r/$t/$type"

@@ -79,13 +79,14 @@ fun LoanDetailScreen(
         },
         containerColor = MaterialTheme.colorScheme.background,
     ) { padding ->
-        if (loan == null) {
+        val currentLoan = loan
+        if (currentLoan == null) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Indigo600)
             }
         } else {
             LoanDetailContent(
-                loan = loan!!,
+                loan = currentLoan,
                 fmt = fmt,
                 padding = padding,
                 onViewAmortization = onViewAmortization,

@@ -187,7 +187,7 @@ fun RemindersScreen(
                             reminder = r,
                             daysText = "Overdue by ${todayDay - r.dueDayOfMonth}d",
                             chipColor = UrgentRed,
-                            onClick = { r.loanId?.let(onReminderClick) },
+                            onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
                         )
                     }
@@ -207,7 +207,7 @@ fun RemindersScreen(
                             reminder = r,
                             daysText = if (daysLeft == 0) "Due today!" else "Due in ${daysLeft}d",
                             chipColor = if (daysLeft <= 2) WarnOrange else SafeGreen,
-                            onClick = { r.loanId?.let(onReminderClick) },
+                            onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
                         )
                     }
@@ -222,7 +222,7 @@ fun RemindersScreen(
                             reminder = r,
                             daysText = "Paid",
                             chipColor = Color(0xFF94A3B8),
-                            onClick = { r.loanId?.let(onReminderClick) },
+                            onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
                         )
                     }

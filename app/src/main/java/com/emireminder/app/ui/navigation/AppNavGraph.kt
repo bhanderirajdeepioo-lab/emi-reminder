@@ -86,8 +86,6 @@ fun AppNavGraph() {
                     onNavigate = { route ->
                         navController.navigate(route) {
                             popUpTo(NavRoutes.HOME) {
-                                // Never save sub-screen state for REMINDERS; add_reminder must
-                                // not be restored when the user taps the Reminders tab again.
                                 saveState = route != NavRoutes.REMINDERS
                             }
                             launchSingleTop = true
