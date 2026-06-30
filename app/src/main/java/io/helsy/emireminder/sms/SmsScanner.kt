@@ -39,7 +39,7 @@ class SmsScanner @Inject constructor(
                 val body    = it.getString(bodyIdx) ?: continue
                 val result  = SmsParser.parse(address, body)
                 if (result.confidence >= 0.4f) {
-                    results += result
+                    results += result.copy(senderAddress = address)
                 }
             }
         }

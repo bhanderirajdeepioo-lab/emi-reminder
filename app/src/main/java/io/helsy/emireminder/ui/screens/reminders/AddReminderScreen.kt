@@ -41,9 +41,8 @@ fun AddReminderScreen(
         mutableStateOf(loans.firstOrNull { it.id == loanId } ?: loans.firstOrNull())
     }
     var loanDropdownOpen by remember { mutableStateOf(false) }
-    var dueDay by remember { mutableStateOf(selectedLoan?.let { "1" } ?: "1") }
-    var notes by remember { mutableStateOf("") }
     var saving by remember { mutableStateOf(false) }
+    val handleDismiss = { viewModel.resetForm(); onBack() }
     val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
 
     // Update selectedLoan when loans load
@@ -57,7 +56,7 @@ fun AddReminderScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Add Reminder", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) } },
+                navigationIcon = { IconButton(onClick = handleDismiss) { Icon(Icons.Default.ArrowBack, null) } },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Indigo600,
                     titleContentColor = Color.White,
@@ -153,11 +152,8 @@ fun AddReminderScreen(
             // Due day of month
             FormLabel("Due Day of Month")
             OutlinedTextField(
-                value = dueDay,
-                onValueChange = { v ->
-                    val n = v.filter { it.isDigit() }
-                    if (n.isEmpty() || n.toIntOrNull()?.let { it in 1..31 } == true) dueDay = n
-                },
+                value = viewModel.dueDay,
+                onValueChange = { viewModel.onDueDayChange(it) },
                 label = { Text("Day (1–31)") },
                 leadingIcon = { Icon(Icons.Default.CalendarToday, null, tint = Indigo600) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -172,12 +168,12 @@ fun AddReminderScreen(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 listOf(1, 5, 10, 15, 20, 25, 28).forEach { day ->
-                    val selected = dueDay.toIntOrNull() == day
+                    val selected = viewModel.dueDay.toIntOrNull() == day
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .background(if (selected) Indigo600 else Indigo50)
-                            .clickable { dueDay = day.toString() }
+                            .clickable { viewModel.onDueDayChange(day.toString()) }
                             .padding(horizontal = 10.dp, vertical = 6.dp),
                     ) {
                         Text(

@@ -19,40 +19,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.*
+import io.helsy.emireminder.sms.BankSource
+import io.helsy.emireminder.sms.SmsParseResult
 import io.helsy.emireminder.ui.theme.*
-
-private enum class SmsState { MATCHED, UNCERTAIN, UNMATCHED }
-
-private data class SmsItem(
-    val id: Int,
-    val sender: String,
-    val message: String,
-    val state: SmsState,
-    val detectedAmount: Double? = null,
-    val detectedBank: String? = null,
-)
-
-private val sampleSmsItems = listOf(
-    SmsItem(1, "HDFCBK", "Your Home Loan EMI of Rs 23,456 has been debited from account xx1234 on 01-Jun.", SmsState.MATCHED, 23456.0, "HDFC Bank"),
-    SmsItem(2, "ICICIBK", "Dear Customer, EMI of Rs 8,750 due on 5-Jun for your Car Loan. Ensure adequate balance.", SmsState.MATCHED, 8750.0, "ICICI Bank"),
-    SmsItem(3, "SBIMSG", "Loan instalment Rs 12000 credited to account. Ref no: 8761234.", SmsState.UNCERTAIN, 12000.0, "SBI"),
-    SmsItem(4, "AXISBK", "Your a/c XX4321 is debited INR 5,200. UPI Ref: 893721.", SmsState.UNMATCHED),
-    SmsItem(5, "KOTAKBK", "Personal Loan EMI of INR 6,500 debited on 10-Jun. Principal OS: Rs 1,45,000.", SmsState.MATCHED, 6500.0, "Kotak Bank"),
-    SmsItem(6, "ADCBK", "Transaction of Rs 3,000 debited. OTP: 789231.", SmsState.UNMATCHED),
-)
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun SMSImportScreen(onBack: () -> Unit) {
+fun SMSImportScreen(
+    onBack: () -> Unit,
+    viewModel: SMSImportViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val smsPermission = rememberPermissionState(android.Manifest.permission.READ_SMS)
-    var scanned by remember { mutableStateOf(false) }
-    var items by remember { mutableStateOf(sampleSmsItems) }
-    var importedCount by remember { mutableIntStateOf(0) }
 
-    val matched = items.filter { it.state == SmsState.MATCHED }
-    val uncertain = items.filter { it.state == SmsState.UNCERTAIN }
-    val unmatched = items.filter { it.state == SmsState.UNMATCHED }
+    val matched = (state as? SmsImportState.Results)?.items?.filter { it.isConfident } ?: emptyList()
+    val uncertain = (state as? SmsImportState.Results)?.items?.filter { it.isUncertain } ?: emptyList()
+    val importedCount = (state as? SmsImportState.Results)?.importedCount ?: 0
+    val isResults = state is SmsImportState.Results
 
     Scaffold(
         topBar = {
@@ -66,54 +52,91 @@ fun SMSImportScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null, tint = Color.White) }
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, null, tint = Color.White)
+                    }
                     Text("SMS Import", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
-                if (scanned) {
-                    Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (isResults) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         StatusChip("${matched.size} Matched", SafeGreen)
                         StatusChip("${uncertain.size} Uncertain", WarnOrange)
-                        StatusChip("${unmatched.size} No match", Color(0xFF94A3B8))
                     }
                 }
             }
         },
     ) { padding ->
-        if (!smsPermission.status.isGranted) {
-            PermissionRequest(modifier = Modifier.fillMaxSize().padding(padding)) { smsPermission.launchPermissionRequest() }
-        } else if (!scanned) {
-            ScanPrompt(modifier = Modifier.fillMaxSize().padding(padding)) { scanned = true }
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 24.dp)) {
-                if (matched.isNotEmpty()) {
-                    item { SectionHeader("MATCHED EMIs", matched.size, SafeGreen) }
-                    items(matched, key = { it.id }) { item ->
-                        SmsCard(item = item, onImport = { items = items.filterNot { s -> s.id == item.id }; importedCount++ }, onDismiss = { items = items.filterNot { s -> s.id == item.id } })
+        when {
+            !smsPermission.status.isGranted ->
+                PermissionRequest(
+                    modifier = Modifier.fillMaxSize().padding(padding),
+                    onRequest = { smsPermission.launchPermissionRequest() },
+                )
+
+            state is SmsImportState.Scanning ->
+                ScanningIndicator(modifier = Modifier.fillMaxSize().padding(padding))
+
+            state is SmsImportState.Error ->
+                ErrorState(
+                    message = (state as SmsImportState.Error).message,
+                    modifier = Modifier.fillMaxSize().padding(padding),
+                    onRetry = { viewModel.reset() },
+                )
+
+            !isResults ->
+                ScanPrompt(
+                    modifier = Modifier.fillMaxSize().padding(padding),
+                    onScan = { viewModel.scanSmsInbox() },
+                )
+
+            else -> {
+                val results = state as SmsImportState.Results
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().padding(padding),
+                    contentPadding = PaddingValues(bottom = 24.dp),
+                ) {
+                    if (matched.isNotEmpty()) {
+                        item { SectionHeader("MATCHED EMIs", matched.size, SafeGreen) }
+                        items(matched, key = { it.rawBody.hashCode().toLong() * 31 + it.bank.ordinal }) { result ->
+                            SmsCard(
+                                result = result,
+                                onImport = { viewModel.importResult(result) },
+                                onDismiss = { viewModel.dismissResult(result) },
+                            )
+                        }
                     }
-                }
-                if (uncertain.isNotEmpty()) {
-                    item { SectionHeader("NEEDS REVIEW", uncertain.size, WarnOrange) }
-                    items(uncertain, key = { it.id }) { item ->
-                        SmsCard(item = item, onImport = { items = items.filterNot { s -> s.id == item.id }; importedCount++ }, onDismiss = { items = items.filterNot { s -> s.id == item.id } })
+                    if (uncertain.isNotEmpty()) {
+                        item { SectionHeader("NEEDS REVIEW", uncertain.size, WarnOrange) }
+                        items(uncertain, key = { it.rawBody.hashCode().toLong() * 31 + it.bank.ordinal + 1000L }) { result ->
+                            SmsCard(
+                                result = result,
+                                onImport = { viewModel.importResult(result) },
+                                onDismiss = { viewModel.dismissResult(result) },
+                            )
+                        }
                     }
-                }
-                if (unmatched.isNotEmpty()) {
-                    item { SectionHeader("NOT DETECTED", unmatched.size, Color(0xFF94A3B8)) }
-                    items(unmatched, key = { it.id }) { item ->
-                        SmsCard(item = item, onImport = null, onDismiss = { items = items.filterNot { s -> s.id == item.id } })
+                    if (results.items.isEmpty() && importedCount == 0) {
+                        item { EmptyResults(Modifier.fillParentMaxSize()) }
                     }
-                }
-                if (importedCount > 0) {
-                    item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            shape = RoundedCornerShape(14.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF0FDF4)),
-                        ) {
-                            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.CheckCircle, null, tint = SafeGreen, modifier = Modifier.size(28.dp))
-                                Spacer(Modifier.width(12.dp))
-                                Text("$importedCount loan${if (importedCount > 1) "s" else ""} imported!", fontWeight = FontWeight.SemiBold, color = SafeGreen)
+                    if (importedCount > 0) {
+                        item {
+                            Card(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF0FDF4)),
+                            ) {
+                                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.CheckCircle, null, tint = SafeGreen, modifier = Modifier.size(28.dp))
+                                    Spacer(Modifier.width(12.dp))
+                                    Text(
+                                        "$importedCount loan${if (importedCount > 1) "s" else ""} imported!",
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = SafeGreen,
+                                    )
+                                }
                             }
                         }
                     }
@@ -124,11 +147,22 @@ fun SMSImportScreen(onBack: () -> Unit) {
 }
 
 @Composable
-private fun SmsCard(item: SmsItem, onImport: (() -> Unit)?, onDismiss: () -> Unit) {
-    val stateColor = when (item.state) {
-        SmsState.MATCHED -> SafeGreen
-        SmsState.UNCERTAIN -> WarnOrange
-        SmsState.UNMATCHED -> Color(0xFF94A3B8)
+private fun SmsCard(
+    result: SmsParseResult,
+    onImport: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val stateColor = when {
+        result.isConfident -> SafeGreen
+        result.isUncertain -> WarnOrange
+        else               -> Color(0xFF94A3B8)
+    }
+    val bankLabel = when (result.bank) {
+        BankSource.HDFC    -> "HDFC Bank"
+        BankSource.SBI     -> "State Bank of India"
+        BankSource.ICICI   -> "ICICI Bank"
+        BankSource.GENERIC -> "Bank (generic)"
+        BankSource.UNKNOWN -> null
     }
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
@@ -144,33 +178,43 @@ private fun SmsCard(item: SmsItem, onImport: (() -> Unit)?, onDismiss: () -> Uni
                     Icon(Icons.Default.Message, null, tint = stateColor, modifier = Modifier.size(16.dp))
                 }
                 Spacer(Modifier.width(8.dp))
-                Text(item.sender, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text(result.senderAddress.ifEmpty { result.bank.name }, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 Spacer(Modifier.weight(1f))
-                if (item.detectedAmount != null) {
-                    Text("₹${"%,.0f".format(item.detectedAmount)}", fontWeight = FontWeight.ExtraBold, color = stateColor, fontSize = 15.sp)
+                if (result.emiAmount > 0) {
+                    Text(
+                        "₹${"%,.0f".format(result.emiAmount)}",
+                        fontWeight = FontWeight.ExtraBold,
+                        color = stateColor,
+                        fontSize = 15.sp,
+                    )
                 }
             }
             Spacer(Modifier.height(8.dp))
-            Text(item.message, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 18.sp)
-            if (item.detectedBank != null) {
+            Text(
+                result.rawBody,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = 18.sp,
+            )
+            if (bankLabel != null) {
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.AccountBalance, null, tint = Indigo600, modifier = Modifier.size(14.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("${item.detectedBank} detected", fontSize = 12.sp, color = Indigo600, fontWeight = FontWeight.Medium)
+                    Text("$bankLabel detected", fontSize = 12.sp, color = Indigo600, fontWeight = FontWeight.Medium)
                 }
             }
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (onImport != null) {
-                    Button(
-                        onClick = onImport,
-                        modifier = Modifier.weight(1f).height(36.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
-                        contentPadding = PaddingValues(0.dp),
-                    ) { Text("Import", fontSize = 13.sp, fontWeight = FontWeight.SemiBold) }
-                }
+                Button(
+                    onClick = onImport,
+                    modifier = Modifier.weight(1f).height(36.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
+                    contentPadding = PaddingValues(0.dp),
+                ) { Text("Import", fontSize = 13.sp, fontWeight = FontWeight.SemiBold) }
                 OutlinedButton(
                     onClick = onDismiss,
                     modifier = Modifier.height(36.dp),
@@ -207,7 +251,12 @@ private fun PermissionRequest(modifier: Modifier, onRequest: () -> Unit) {
         Spacer(Modifier.height(24.dp))
         Text("SMS Permission Required", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(Modifier.height(8.dp))
-        Text("Allow SMS access to automatically detect your EMI loans from bank messages.", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 22.sp)
+        Text(
+            "Allow SMS access to automatically detect your EMI loans from bank messages.",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = 22.sp,
+        )
         Spacer(Modifier.height(32.dp))
         Button(
             onClick = onRequest,
@@ -231,7 +280,12 @@ private fun ScanPrompt(modifier: Modifier, onScan: () -> Unit) {
         Spacer(Modifier.height(24.dp))
         Text("Scan Bank Messages", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
         Spacer(Modifier.height(8.dp))
-        Text("We'll analyze your SMS inbox to find EMI-related bank messages and import them automatically.", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 22.sp)
+        Text(
+            "We'll analyze your SMS inbox to find EMI-related bank messages and import them automatically.",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = 22.sp,
+        )
         Spacer(Modifier.height(32.dp))
         Button(
             onClick = onScan,
@@ -243,5 +297,43 @@ private fun ScanPrompt(modifier: Modifier, onScan: () -> Unit) {
             Spacer(Modifier.width(8.dp))
             Text("Scan SMS Messages", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
         }
+    }
+}
+
+@Composable
+private fun ScanningIndicator(modifier: Modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        CircularProgressIndicator(color = Indigo600, modifier = Modifier.size(56.dp))
+        Spacer(Modifier.height(24.dp))
+        Text(
+            "Scanning messages…",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun ErrorState(message: String, modifier: Modifier, onRetry: () -> Unit) {
+    Column(modifier = modifier.padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Icon(Icons.Default.ErrorOutline, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(56.dp))
+        Spacer(Modifier.height(16.dp))
+        Text(message, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(24.dp))
+        OutlinedButton(onClick = onRetry) { Text("Try Again") }
+    }
+}
+
+@Composable
+private fun EmptyResults(modifier: Modifier) {
+    Column(modifier = modifier.padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Icon(Icons.Default.CheckCircle, null, tint = SafeGreen, modifier = Modifier.size(56.dp))
+        Spacer(Modifier.height(16.dp))
+        Text(
+            "All done! All messages have been imported or dismissed.",
+            fontSize = 15.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }

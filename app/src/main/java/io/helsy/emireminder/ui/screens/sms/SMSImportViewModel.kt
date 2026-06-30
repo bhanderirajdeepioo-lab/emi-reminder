@@ -16,7 +16,10 @@ import javax.inject.Inject
 sealed interface SmsImportState {
     data object Idle : SmsImportState
     data object Scanning : SmsImportState
-    data class Results(val items: List<SmsParseResult>) : SmsImportState
+    data class Results(
+        val items: List<SmsParseResult>,
+        val importedCount: Int = 0,
+    ) : SmsImportState
     data class Error(val message: String) : SmsImportState
 }
 
@@ -48,18 +51,28 @@ class SMSImportViewModel @Inject constructor(
     }
 
     fun importResult(result: SmsParseResult) {
+        val current = _state.value as? SmsImportState.Results ?: return
+        _state.value = current.copy(
+            items = current.items - result,
+            importedCount = current.importedCount + 1,
+        )
         viewModelScope.launch {
             reminderRepository.insertSmsImport(
                 SMSImport(
-                    senderAddress      = "",
-                    rawBody            = result.rawBody,
-                    detectedLoanName   = result.bank.name,
-                    detectedEmiAmount  = result.emiAmount,
-                    detectedDueDate    = "",
-                    isConfirmed        = false,
+                    senderAddress     = result.senderAddress,
+                    rawBody           = result.rawBody,
+                    detectedLoanName  = result.bank.name,
+                    detectedEmiAmount = result.emiAmount,
+                    detectedDueDate   = "",
+                    isConfirmed       = result.isConfident,
                 ),
             )
         }
+    }
+
+    fun dismissResult(result: SmsParseResult) {
+        val current = _state.value as? SmsImportState.Results ?: return
+        _state.value = current.copy(items = current.items - result)
     }
 
     fun reset() { _state.value = SmsImportState.Idle }

@@ -8,6 +8,7 @@ data class SmsParseResult(
     val loanAccount: String,
     val confidence: Float,
     val rawBody: String,
+    val senderAddress: String = "",
 ) {
     val isConfident: Boolean get() = confidence >= 0.8f
     val isUncertain: Boolean get() = confidence in 0.4f..0.8f

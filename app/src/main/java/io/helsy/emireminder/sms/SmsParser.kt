@@ -19,10 +19,13 @@ object SmsParser {
         RegexOption.IGNORE_CASE,
     )
 
+    // Debit/credit action keywords — order-independent check
+    private val ACTION_RE = Regex("""(?i)(?:debited?|paid|process(?:ed)?|credited?|deducted?|auto.?debit)""")
+
     // ──── HDFC ────
     private val HDFC_SENDER = Regex("""(?i)HDFC|HDFCBK|HDFCBN|HDFCBANKL""")
     private val HDFC_BODY   = Regex("""(?i)HDFC\s*Bank""")
-    private val HDFC_EMI    = Regex("""(?i)(?:EMI|equated\s+monthly).*?(?:debit|paid|process|credit)""")
+    private val HDFC_EMI    = Regex("""(?i)(?:EMI|equated\s+monthly)""")
 
     // ──── SBI ────
     private val SBI_SENDER = Regex("""(?i)\bSBI\b|SBIINB|SBICRD|SBIMSG|SBICARD""")
@@ -65,7 +68,8 @@ object SmsParser {
         emiPattern: Regex,
     ): SmsParseResult {
         if (amount == null) return SmsParseResult(bank, 0.0, "", 0.3f, body)
-        val confidence = if (emiPattern.containsMatchIn(body)) 0.9f else 0.65f
+        // High confidence requires BOTH an EMI keyword AND a transaction action — order doesn't matter
+        val confidence = if (emiPattern.containsMatchIn(body) && ACTION_RE.containsMatchIn(body)) 0.9f else 0.65f
         return SmsParseResult(bank, amount, extractAccount(body), confidence, body)
     }
 
