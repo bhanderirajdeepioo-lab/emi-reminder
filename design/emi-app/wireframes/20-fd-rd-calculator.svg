@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="slider" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#FCD34D"/>
+    </linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="#FFFBEB"/>
+
+  <!-- status bar -->
+  <rect width="390" height="48" fill="#D97706"/>
+  <text x="16" y="32" font-size="12" fill="#FEF3C7">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#FEF3C7" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#FEF3C7"/>
+
+  <!-- header -->
+  <rect x="0" y="48" width="390" height="56" fill="url(#hdr)"/>
+  <text x="20" y="84" font-size="20" fill="#FFFFFF">←</text>
+  <text x="195" y="84" font-size="18" font-weight="700" text-anchor="middle" fill="#FFFFFF">FD / RD Calculator</text>
+
+  <!-- tabs: FD vs RD -->
+  <rect x="16" y="116" width="358" height="38" rx="10" fill="#92400E"/>
+  <rect x="18" y="118" width="175" height="34" rx="8" fill="#FFFFFF"/>
+  <text x="105" y="139" font-size="13" font-weight="700" text-anchor="middle" fill="#D97706">Fixed Deposit (FD)</text>
+  <text x="286" y="139" font-size="13" text-anchor="middle" fill="#FEF3C7">Recurring Deposit (RD)</text>
+
+  <!-- Amount card -->
+  <rect x="16" y="166" width="358" height="80" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="188" font-size="11" fill="#64748B">Deposit Amount</text>
+  <text x="32" y="222" font-size="28" font-weight="800" fill="#1E293B">₹ 1,00,000</text>
+  <rect x="32" y="234" width="322" height="5" rx="2.5" fill="#FEF3C7"/>
+  <rect x="32" y="234" width="160" height="5" rx="2.5" fill="url(#slider)"/>
+  <circle cx="192" cy="236" r="9" fill="#D97706" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- Interest Rate + Tenure row -->
+  <rect x="16" y="258" width="172" height="72" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="278" font-size="11" fill="#64748B">Interest Rate (% p.a.)</text>
+  <rect x="32" y="287" width="32" height="28" rx="8" fill="#FFFBEB"/>
+  <text x="48" y="306" font-size="16" text-anchor="middle" fill="#D97706">−</text>
+  <text x="104" y="308" font-size="20" font-weight="800" text-anchor="middle" fill="#1E293B">7.25</text>
+  <rect x="148" y="287" width="32" height="28" rx="8" fill="#FFFBEB"/>
+  <text x="164" y="306" font-size="16" text-anchor="middle" fill="#D97706">+</text>
+
+  <rect x="202" y="258" width="172" height="72" rx="14" fill="#FFFFFF"/>
+  <text x="218" y="278" font-size="11" fill="#64748B">Tenure</text>
+  <text x="218" y="308" font-size="20" font-weight="700" fill="#1E293B">3 Years</text>
+  <text x="282" y="308" font-size="13" fill="#94A3B8">(36 mo)</text>
+  <rect x="320" y="268" width="46" height="24" rx="12" fill="#FFFBEB"/>
+  <rect x="320" y="268" width="23" height="24" rx="12" fill="#D97706"/>
+  <text x="331" y="284" font-size="10" text-anchor="middle" fill="#FFFFFF">Yr</text>
+  <text x="354" y="284" font-size="10" text-anchor="middle" fill="#D97706">Mo</text>
+
+  <!-- Compounding frequency -->
+  <rect x="16" y="342" width="358" height="52" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="364" font-size="11" fill="#64748B">Compounding Frequency</text>
+  <rect x="32" y="374" width="72" height="12" rx="6" fill="#D97706"/>
+  <text x="68" y="384" font-size="10" text-anchor="middle" fill="#FFFFFF">Quarterly</text>
+  <rect x="112" y="374" width="72" height="12" rx="6" fill="#FEF3C7"/>
+  <text x="148" y="384" font-size="10" text-anchor="middle" fill="#92400E">Monthly</text>
+  <rect x="192" y="374" width="72" height="12" rx="6" fill="#FEF3C7"/>
+  <text x="228" y="384" font-size="10" text-anchor="middle" fill="#92400E">Annually</text>
+  <rect x="272" y="374" width="80" height="12" rx="6" fill="#FEF3C7"/>
+  <text x="312" y="384" font-size="10" text-anchor="middle" fill="#92400E">At Maturity</text>
+
+  <!-- RESULTS section -->
+  <text x="16" y="418" font-size="11" font-weight="700" fill="#64748B">MATURITY BREAKDOWN</text>
+
+  <!-- hero result -->
+  <rect x="16" y="426" width="358" height="76" rx="16" fill="#1E293B"/>
+  <text x="32" y="452" font-size="12" fill="#94A3B8">Maturity Value</text>
+  <text x="32" y="488" font-size="30" font-weight="800" fill="#FFFFFF">₹ 1,27,218</text>
+  <text x="270" y="452" font-size="11" fill="#64748B">SBI / HDFC / ICICI</text>
+  <rect x="270" y="458" width="88" height="22" rx="11" fill="#312E81"/>
+  <text x="314" y="473" font-size="11" text-anchor="middle" fill="#A5B4FC">View rates ›</text>
+
+  <!-- Result cards -->
+  <rect x="16" y="514" width="108" height="72" rx="14" fill="#FFFFFF"/>
+  <text x="70" y="536" font-size="10" text-anchor="middle" fill="#64748B">Principal</text>
+  <text x="70" y="570" font-size="17" font-weight="700" text-anchor="middle" fill="#1E293B">₹1,00,000</text>
+
+  <rect x="141" y="514" width="108" height="72" rx="14" fill="#FFFFFF"/>
+  <text x="195" y="536" font-size="10" text-anchor="middle" fill="#64748B">Total Interest</text>
+  <text x="195" y="570" font-size="17" font-weight="700" text-anchor="middle" fill="#D97706">₹27,218</text>
+
+  <rect x="266" y="514" width="108" height="72" rx="14" fill="#FFFFFF"/>
+  <text x="320" y="536" font-size="10" text-anchor="middle" fill="#64748B">Eff. Rate</text>
+  <text x="320" y="570" font-size="17" font-weight="700" text-anchor="middle" fill="#059669">7.53%</text>
+
+  <!-- Bank comparison table -->
+  <rect x="16" y="598" width="358" height="130" rx="16" fill="#FFFFFF"/>
+  <text x="32" y="622" font-size="13" font-weight="700" fill="#1E293B">Top Bank FD Rates (3 yr)</text>
+  <!-- header row -->
+  <rect x="32" y="630" width="320" height="22" rx="4" fill="#FEF3C7"/>
+  <text x="48" y="645" font-size="10" font-weight="700" fill="#92400E">Bank</text>
+  <text x="180" y="645" font-size="10" font-weight="700" fill="#92400E">Rate</text>
+  <text x="280" y="645" font-size="10" font-weight="700" fill="#92400E">Maturity</text>
+  <!-- rows -->
+  <text x="48" y="668" font-size="12" fill="#1E293B">SBI</text>
+  <text x="180" y="668" font-size="12" font-weight="700" fill="#059669">7.10%</text>
+  <text x="280" y="668" font-size="12" fill="#1E293B">₹1,23,456</text>
+  <text x="48" y="690" font-size="12" fill="#1E293B">HDFC Bank</text>
+  <text x="180" y="690" font-size="12" font-weight="700" fill="#059669">7.25%</text>
+  <text x="280" y="690" font-size="12" fill="#1E293B">₹1,27,218</text>
+  <text x="48" y="712" font-size="12" fill="#1E293B">Bajaj Finance</text>
+  <rect x="160" y="702" width="48" height="16" rx="8" fill="#D97706"/>
+  <text x="184" y="714" font-size="10" font-weight="700" text-anchor="middle" fill="#FFFFFF">8.35% ★</text>
+  <text x="280" y="712" font-size="12" fill="#1E293B">₹1,28,660</text>
+
+  <!-- CTA -->
+  <rect x="16" y="740" width="358" height="48" rx="14" fill="#D97706"/>
+  <text x="195" y="770" font-size="14" font-weight="700" text-anchor="middle" fill="#FFFFFF">Calculate Recurring Deposit →</text>
+
+  <!-- bottom nav -->
+  <rect x="0" y="796" width="390" height="48" fill="#FFFFFF"/>
+  <rect x="0" y="796" width="390" height="1" fill="#E2E8F0"/>
+  <text x="66" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Dashboard</text>
+  <rect x="153" y="802" width="84" height="34" rx="17" fill="#FFFBEB"/>
+  <text x="195" y="824" font-size="11" font-weight="700" text-anchor="middle" fill="#D97706">Tools</text>
+  <text x="324" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Reminders</text>
+</svg>

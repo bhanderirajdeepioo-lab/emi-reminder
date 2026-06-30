@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="#EEF2FF"/>
+
+  <!-- status bar -->
+  <rect width="390" height="48" fill="#4F46E5"/>
+  <text x="16" y="32" font-size="12" fill="#C7D2FE">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#C7D2FE"/>
+
+  <!-- header -->
+  <rect x="0" y="48" width="390" height="56" fill="url(#hdr)"/>
+  <text x="20" y="84" font-size="20" fill="#FFFFFF">←</text>
+  <text x="195" y="84" font-size="18" font-weight="700" text-anchor="middle" fill="#FFFFFF">Finance Tools</text>
+
+  <!-- search bar -->
+  <rect x="16" y="116" width="358" height="40" rx="12" fill="#FFFFFF"/>
+  <text x="40" y="140" font-size="14" fill="#CBD5E1">🔍</text>
+  <text x="62" y="140" font-size="13" fill="#94A3B8">Search tools…</text>
+
+  <!-- ── LOAN CALCULATORS section ── -->
+  <text x="16" y="176" font-size="11" font-weight="700" fill="#4F46E5">LOAN CALCULATORS</text>
+
+  <!-- EMI Calculator -->
+  <rect x="16" y="184" width="358" height="56" rx="14" fill="#FFFFFF"/>
+  <rect x="28" y="196" width="32" height="32" rx="10" fill="#EEF2FF"/>
+  <text x="44" y="217" font-size="18" text-anchor="middle" fill="#4F46E5">⚡</text>
+  <text x="74" y="208" font-size="14" font-weight="700" fill="#1E293B">EMI Calculator</text>
+  <text x="74" y="226" font-size="12" fill="#64748B">Reducing balance &amp; flat rate</text>
+  <text x="362" y="216" font-size="18" text-anchor="end" fill="#CBD5E1">›</text>
+
+  <!-- Loan Comparison -->
+  <rect x="16" y="248" width="358" height="56" rx="14" fill="#FFFFFF"/>
+  <rect x="28" y="260" width="32" height="32" rx="10" fill="#F3E8FF"/>
+  <text x="44" y="281" font-size="16" text-anchor="middle" fill="#7C3AED">⚖</text>
+  <text x="74" y="272" font-size="14" font-weight="700" fill="#1E293B">Loan Comparison</text>
+  <text x="74" y="290" font-size="12" fill="#64748B">Compare 2 loan offers side by side</text>
+  <text x="362" y="280" font-size="18" text-anchor="end" fill="#CBD5E1">›</text>
+
+  <!-- Prepayment Calculator -->
+  <rect x="16" y="312" width="358" height="56" rx="14" fill="#FFFFFF"/>
+  <rect x="28" y="324" width="32" height="32" rx="10" fill="#F0FDF4"/>
+  <text x="44" y="345" font-size="16" text-anchor="middle" fill="#059669">💰</text>
+  <text x="74" y="336" font-size="14" font-weight="700" fill="#1E293B">Prepayment / Foreclosure</text>
+  <text x="74" y="354" font-size="12" fill="#64748B">Save interest with part-payment</text>
+  <text x="362" y="344" font-size="18" text-anchor="end" fill="#CBD5E1">›</text>
+
+  <!-- Step-up EMI -->
+  <rect x="16" y="376" width="358" height="56" rx="14" fill="#FFFFFF"/>
+  <rect x="28" y="388" width="32" height="32" rx="10" fill="#EFF6FF"/>
+  <text x="44" y="409" font-size="16" text-anchor="middle" fill="#2563EB">📈</text>
+  <text x="74" y="400" font-size="14" font-weight="700" fill="#1E293B">Step-up EMI</text>
+  <text x="74" y="418" font-size="12" fill="#64748B">Increase EMI with salary growth</text>
+  <rect x="296" y="390" width="62" height="20" rx="10" fill="#EEF2FF"/>
+  <text x="327" y="404" font-size="10" font-weight="700" text-anchor="middle" fill="#4F46E5">NEW ✦</text>
+  <text x="362" y="408" font-size="18" text-anchor="end" fill="#CBD5E1">›</text>
+
+  <!-- Balance Transfer -->
+  <rect x="16" y="440" width="358" height="56" rx="14" fill="#FFFFFF"/>
+  <rect x="28" y="452" width="32" height="32" rx="10" fill="#F5F3FF"/>
+  <text x="44" y="473" font-size="16" text-anchor="middle" fill="#8B5CF6">🔄</text>
+  <text x="74" y="464" font-size="14" font-weight="700" fill="#1E293B">Balance Transfer</text>
+  <text x="74" y="482" font-size="12" fill="#64748B">Check savings on switching lender</text>
+  <rect x="296" y="454" width="62" height="20" rx="10" fill="#EEF2FF"/>
+  <text x="327" y="468" font-size="10" font-weight="700" text-anchor="middle" fill="#4F46E5">NEW ✦</text>
+  <text x="362" y="472" font-size="18" text-anchor="end" fill="#CBD5E1">›</text>
+
+  <!-- ── INVESTMENT TOOLS section ── -->
+  <text x="16" y="520" font-size="11" font-weight="700" fill="#059669">INVESTMENT TOOLS</text>
+
+  <!-- SIP Calculator -->
+  <rect x="16" y="528" width="172" height="80" rx="14" fill="#FFFFFF"/>
+  <rect x="28" y="542" width="32" height="32" rx="10" fill="#EEF2FF"/>
+  <text x="44" y="563" font-size="16" text-anchor="middle" fill="#4F46E5">📊</text>
+  <text x="74" y="556" font-size="13" font-weight="700" fill="#1E293B">SIP</text>
+  <text x="74" y="574" font-size="11" fill="#64748B">Mutual Fund</text>
+  <text x="74" y="590" font-size="11" fill="#64748B">Calculator</text>
+
+  <!-- FD/RD Calculator -->
+  <rect x="202" y="528" width="172" height="80" rx="14" fill="#FFFFFF"/>
+  <rect x="214" y="542" width="32" height="32" rx="10" fill="#FFFBEB"/>
+  <text x="230" y="563" font-size="16" text-anchor="middle" fill="#D97706">🏦</text>
+  <text x="260" y="556" font-size="13" font-weight="700" fill="#1E293B">FD / RD</text>
+  <text x="260" y="574" font-size="11" fill="#64748B">Fixed &amp; Recurring</text>
+  <text x="260" y="590" font-size="11" fill="#64748B">Deposit</text>
+
+  <!-- PPF Calculator -->
+  <rect x="16" y="616" width="172" height="80" rx="14" fill="#FFFFFF"/>
+  <rect x="28" y="630" width="32" height="32" rx="10" fill="#F3E8FF"/>
+  <text x="44" y="651" font-size="16" text-anchor="middle" fill="#7C3AED">🔐</text>
+  <text x="74" y="644" font-size="13" font-weight="700" fill="#1E293B">PPF</text>
+  <text x="74" y="662" font-size="11" fill="#64748B">Public Provident</text>
+  <text x="74" y="678" font-size="11" fill="#64748B">Fund</text>
+
+  <!-- ── TAX / OTHER section ── -->
+  <!-- GST Calculator -->
+  <rect x="202" y="616" width="172" height="80" rx="14" fill="#FFFFFF"/>
+  <rect x="214" y="630" width="32" height="32" rx="10" fill="#ECFEFF"/>
+  <text x="230" y="651" font-size="16" text-anchor="middle" fill="#0891B2">🧾</text>
+  <text x="260" y="644" font-size="13" font-weight="700" fill="#1E293B">GST</text>
+  <text x="260" y="662" font-size="11" fill="#64748B">Goods &amp; Services</text>
+  <text x="260" y="678" font-size="11" fill="#64748B">Tax</text>
+
+  <!-- MORE TOOLS strip -->
+  <rect x="16" y="710" width="358" height="40" rx="12" fill="#4F46E5"/>
+  <text x="195" y="735" font-size="13" font-weight="700" text-anchor="middle" fill="#FFFFFF">+ 4 more: Income Tax · Inflation · HRA · CIBIL →</text>
+
+  <!-- bottom nav -->
+  <rect x="0" y="796" width="390" height="48" fill="#FFFFFF"/>
+  <rect x="0" y="796" width="390" height="1" fill="#E2E8F0"/>
+  <text x="66" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Dashboard</text>
+  <rect x="153" y="802" width="84" height="34" rx="17" fill="#EEF2FF"/>
+  <text x="195" y="824" font-size="11" font-weight="700" text-anchor="middle" fill="#4F46E5">Tools</text>
+  <text x="324" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Reminders</text>
+
+  <!-- annotations -->
+  <circle cx="374" cy="212" r="12" fill="#EEF2FF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="374" y="216" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">1</text>
+  <circle cx="374" cy="568" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="374" y="572" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">2</text>
+</svg>

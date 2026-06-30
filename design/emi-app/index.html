@@ -174,7 +174,7 @@
     </summary>
     <nav class="toc-body" aria-label="Section navigation">
       <h1>HEL-17</h1>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">EMI Reminder — Full App Mockup · 17 screens</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">EMI Reminder — Full App Mockup · 21 screens</div>
 
       <h2>Foundation</h2>
       <a href="#tokens"><span class="num">◈</span>Design tokens</a>
@@ -205,9 +205,17 @@
       <a href="#s9"><span class="num">9</span>Loan analytics <span class="badge new">NEW</span></a>
       <a href="#s10"><span class="num">10</span>Loan detail <span class="badge new">NEW</span></a>
 
+      <h2>Loan Categories</h2>
+      <a href="#s18"><span class="num">18</span>All Loan Types <span class="badge new">NEW</span></a>
+
+      <h2>Finance Tools</h2>
+      <a href="#s19"><span class="num">19</span>Finance Tools Hub <span class="badge new">NEW</span></a>
+      <a href="#s20"><span class="num">20</span>FD / RD Calculator <span class="badge new">NEW</span></a>
+      <a href="#s21"><span class="num">21</span>SIP Calculator <span class="badge new">NEW</span></a>
+
       <h2>System</h2>
       <a href="#s7"><span class="num">7</span>Notifications</a>
-      <a href="#s15"><span class="num">15</span>Settings <span class="badge new">NEW</span></a>
+      <a href="#s15"><span class="num">15</span>Settings</a>
 
       <h2>Open questions</h2>
       <a href="#open"><span class="num">?</span>For reviewer</a>
@@ -220,11 +228,11 @@
       <h1>EMI Reminder — Full App Design</h1>
       <p>Complete wireframe specification for all 17 screens of the Android EMI Calculator &amp; Loan Reminder app. Covers the full user journey from first launch through advanced features: loan comparison, prepayment calculator, amortization schedule, portfolio analytics, and SMS auto-import.</p>
       <div class="pills">
-        <span class="pill dark">17 screens total</span>
-        <span class="pill dark">10 new screens (HEL-17)</span>
+        <span class="pill dark">21 screens total</span>
+        <span class="pill dark">14 new screens (HEL-17)</span>
         <span class="pill">390×844 · portrait mobile</span>
-        <span class="pill">Material Design 3</span>
-        <span class="pill">Lo-fi · monochrome</span>
+        <span class="pill">Material Design 3 · Indigo/Violet</span>
+        <span class="pill">12 loan categories · 10 finance tools</span>
         <span class="pill">Click any wireframe to zoom</span>
       </div>
     </header>
@@ -760,6 +768,101 @@
               <li><b>4</b> — Data / Export: CSV triggers FileProvider share sheet. Google Drive backup uses Drive Backup API — does not require user to sign in separately if Google account is on device.</li>
             </ul>
             <div class="why"><b>Design lens — Shneiderman's 8 Golden Rules:</b> Settings groups by function (not alphabetical). Most dangerous action (data wipe) absent from this screen — not surfaced here, requires separate confirmation flow if ever added.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 18: Loan Categories ========== -->
+    <section id="s18">
+      <div class="lede">Loan Categories <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">18.</span>All Loan Categories</h2>
+      <p class="desc">Full grid of 12 supported loan types, each with a colour-coded icon badge, category name, and indicative loan limit. Includes: Home, Car, Personal, Education, Business, Two-Wheeler, Gold, Medical, Loan Against Property, Consumer Durable, Credit Card EMI, and Agriculture. A Custom Loan row allows any other type. Tapping any tile enters the EMI Calculator pre-selected for that loan type.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="18 · Loan Categories">
+          <div class="label"><span>18-loan-categories.svg</span><span>390×844</span></div>
+          <img src="wireframes/18-loan-categories.svg" alt="Loan Categories wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Top 3 (Home, Car, Personal) shown first — highest usage. POPULAR badge on Home Loan.</li>
+              <li><b>2</b> — Row 3 covers niche but high-value categories: Gold Loan (quick disbursal, shorter tenure), Medical (emergency credit line), LAP/Mortgage (secured, high limit).</li>
+              <li><b>3</b> — Row 4: Consumer Durable (0% EMI schemes), CC EMI conversion, Agriculture / Kisan Credit Card.</li>
+            </ul>
+            <div class="why"><b>Design lens:</b> Each tile's background tint and icon badge colour are the loan's accent colour from the design token system — same colour is used on that loan's reminder cards, detail screen, and analytics chart slice.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 19: Finance Tools Hub ========== -->
+    <section id="s19">
+      <div class="lede">Finance Tools <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">19.</span>Finance Tools Hub</h2>
+      <p class="desc">Central hub for all finance calculators beyond basic EMI. Divided into two groups — Loan Calculators (EMI, Comparison, Prepayment, Step-up EMI, Balance Transfer) and Investment Tools (SIP, FD/RD, PPF, GST). A "4 more" strip links to Income Tax, Inflation, HRA, and CIBIL Score screens.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="19 · Finance Tools Hub">
+          <div class="label"><span>19-finance-tools-hub.svg</span><span>390×844</span></div>
+          <img src="wireframes/19-finance-tools-hub.svg" alt="Finance Tools Hub wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Loan Calculators section: 5 tools in a vertical list with colour-coded icon badges. Step-up EMI and Balance Transfer marked NEW.</li>
+              <li><b>2</b> — Investment Tools: 2×2 grid (SIP, FD/RD, PPF, GST) — tappable cards that open dedicated calculator screens.</li>
+            </ul>
+            <div class="why"><b>All 10 tools planned:</b> EMI · Loan Comparison · Prepayment · Step-up EMI · Balance Transfer · SIP · FD/RD · PPF · GST · Income Tax</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 20: FD/RD Calculator ========== -->
+    <section id="s20">
+      <div class="lede">Investment Tool <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">20.</span>FD / RD Calculator</h2>
+      <p class="desc">Fixed Deposit and Recurring Deposit calculator with tab switch between FD (lump-sum) and RD (monthly contribution). Inputs: deposit amount, interest rate (−/+ stepper), tenure, compounding frequency (Quarterly/Monthly/Annually/At Maturity). Results: Maturity Value, Total Interest, Effective Rate. Bonus: live bank FD rate comparison table (SBI, HDFC, Bajaj Finance).</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="20 · FD/RD Calculator">
+          <div class="label"><span>20-fd-rd-calculator.svg</span><span>390×844</span></div>
+          <img src="wireframes/20-fd-rd-calculator.svg" alt="FD RD Calculator wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Compounding frequency selector: pill chips (Quarterly default for most Indian banks, Monthly for some corporate FDs).</li>
+              <li><b>2</b> — Maturity hero card (dark slate) shows total value prominently; beneath it a 3-up grid for Principal / Interest / Effective Rate.</li>
+              <li><b>3</b> — Bank comparison table: live data sorted by rate. Bajaj Finance at 8.35% highlighted with star badge — helps user pick the best institution.</li>
+            </ul>
+            <div class="why"><b>Design lens:</b> Amber/Gold colour theme (different from indigo EMI theme) provides instant visual context-switching — user knows they're in savings mode, not loan mode.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 21: SIP Calculator ========== -->
+    <section id="s21">
+      <div class="lede">Investment Tool <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">21.</span>SIP Wealth Builder Calculator</h2>
+      <p class="desc">SIP (Systematic Investment Plan) calculator with three modes: Regular SIP, Step-up SIP (annual increment %), Lump Sum. Inputs: monthly amount, expected return rate, investment period. Outputs: total corpus, total returns, return %, and an area-fill wealth projection chart showing invested vs total wealth over time. Includes Step-up SIP teaser showing the uplift from increasing the SIP amount by 10% per year.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="21 · SIP Calculator">
+          <div class="label"><span>21-sip-calculator.svg</span><span>390×844</span></div>
+          <img src="wireframes/21-sip-calculator.svg" alt="SIP Calculator wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Wealth result hero card (dark slate): Total corpus in emerald green, returns figure in indigo, invested amount as sub-text — communicates the power of compounding visually.</li>
+              <li><b>2</b> — Dual area chart: solid emerald = total wealth, dashed indigo = amount invested — gap between the two lines is the return. Grows exponentially right-side, teaching compounding intuitively.</li>
+              <li><b>3</b> — Step-up SIP prompt card: shows how stepping up 10%/yr takes ₹50.5L → ₹81.3L, nudging the user toward the Step-up SIP tab.</li>
+            </ul>
+            <div class="why"><b>Design lens:</b> Indigo→Emerald gradient header signals wealth-building, distinct from the loan (Indigo→Violet) and savings (Amber) colour themes. 21 screens total with this addition.</div>
           </div>
         </div>
       </div>

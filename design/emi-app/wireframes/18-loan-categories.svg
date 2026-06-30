@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="#EEF2FF"/>
+
+  <!-- status bar -->
+  <rect width="390" height="48" fill="#4F46E5"/>
+  <text x="16" y="32" font-size="12" fill="#C7D2FE">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#C7D2FE"/>
+
+  <!-- header -->
+  <rect x="0" y="48" width="390" height="56" fill="url(#hdr)"/>
+  <text x="20" y="84" font-size="20" fill="#FFFFFF">←</text>
+  <text x="195" y="84" font-size="18" font-weight="700" text-anchor="middle" fill="#FFFFFF">Loan Categories</text>
+
+  <!-- subtitle -->
+  <text x="16" y="126" font-size="13" fill="#64748B">Choose a loan type to calculate or add a reminder</text>
+
+  <!-- ── ROW 1 ── -->
+  <!-- Home Loan -->
+  <rect x="16" y="136" width="108" height="108" rx="16" fill="#EFF6FF"/>
+  <rect x="50" y="150" width="40" height="40" rx="12" fill="#2563EB"/>
+  <text x="70" y="176" font-size="22" text-anchor="middle" fill="#FFFFFF">🏠</text>
+  <text x="70" y="210" font-size="12" font-weight="700" text-anchor="middle" fill="#1E293B">Home Loan</text>
+  <text x="70" y="226" font-size="10" text-anchor="middle" fill="#64748B">Up to ₹2 Cr</text>
+
+  <!-- Car Loan -->
+  <rect x="141" y="136" width="108" height="108" rx="16" fill="#F3E8FF"/>
+  <rect x="175" y="150" width="40" height="40" rx="12" fill="#7C3AED"/>
+  <text x="195" y="176" font-size="22" text-anchor="middle" fill="#FFFFFF">🚗</text>
+  <text x="195" y="210" font-size="12" font-weight="700" text-anchor="middle" fill="#1E293B">Car Loan</text>
+  <text x="195" y="226" font-size="10" text-anchor="middle" fill="#64748B">Up to ₹50 L</text>
+
+  <!-- Personal Loan -->
+  <rect x="266" y="136" width="108" height="108" rx="16" fill="#FFF7ED"/>
+  <rect x="300" y="150" width="40" height="40" rx="12" fill="#F97316"/>
+  <text x="320" y="176" font-size="22" text-anchor="middle" fill="#FFFFFF">💳</text>
+  <text x="320" y="210" font-size="12" font-weight="700" text-anchor="middle" fill="#1E293B">Personal</text>
+  <text x="320" y="226" font-size="10" text-anchor="middle" fill="#64748B">Up to ₹40 L</text>
+
+  <!-- ── ROW 2 ── -->
+  <!-- Education Loan -->
+  <rect x="16" y="256" width="108" height="108" rx="16" fill="#ECFEFF"/>
+  <rect x="50" y="270" width="40" height="40" rx="12" fill="#0891B2"/>
+  <text x="70" y="296" font-size="22" text-anchor="middle" fill="#FFFFFF">🎓</text>
+  <text x="70" y="330" font-size="12" font-weight="700" text-anchor="middle" fill="#1E293B">Education</text>
+  <text x="70" y="346" font-size="10" text-anchor="middle" fill="#64748B">Up to ₹75 L</text>
+
+  <!-- Business Loan -->
+  <rect x="141" y="256" width="108" height="108" rx="16" fill="#F0FDF4"/>
+  <rect x="175" y="270" width="40" height="40" rx="12" fill="#059669"/>
+  <text x="195" y="296" font-size="22" text-anchor="middle" fill="#FFFFFF">🏢</text>
+  <text x="195" y="330" font-size="12" font-weight="700" text-anchor="middle" fill="#1E293B">Business</text>
+  <text x="195" y="346" font-size="10" text-anchor="middle" fill="#64748B">Up to ₹5 Cr</text>
+
+  <!-- Two-Wheeler Loan -->
+  <rect x="266" y="256" width="108" height="108" rx="16" fill="#FEF2F2"/>
+  <rect x="300" y="270" width="40" height="40" rx="12" fill="#DC2626"/>
+  <text x="320" y="296" font-size="22" text-anchor="middle" fill="#FFFFFF">🏍</text>
+  <text x="320" y="330" font-size="12" font-weight="700" text-anchor="middle" fill="#1E293B">Two-Wheeler</text>
+  <text x="320" y="346" font-size="10" text-anchor="middle" fill="#64748B">Up to ₹10 L</text>
+
+  <!-- ── ROW 3 ── -->
+  <!-- Gold Loan -->
+  <rect x="16" y="376" width="108" height="108" rx="16" fill="#FFFBEB"/>
+  <rect x="50" y="390" width="40" height="40" rx="12" fill="#D97706"/>
+  <text x="70" y="416" font-size="22" text-anchor="middle" fill="#FFFFFF">🪙</text>
+  <text x="70" y="450" font-size="12" font-weight="700" text-anchor="middle" fill="#1E293B">Gold Loan</text>
+  <text x="70" y="466" font-size="10" text-anchor="middle" fill="#64748B">Quick disbursal</text>
+
+  <!-- Medical Loan -->
+  <rect x="141" y="376" width="108" height="108" rx="16" fill="#FDF2F8"/>
+  <rect x="175" y="390" width="40" height="40" rx="12" fill="#EC4899"/>
+  <text x="195" y="416" font-size="22" text-anchor="middle" fill="#FFFFFF">🏥</text>
+  <text x="195" y="450" font-size="12" font-weight="700" text-anchor="middle" fill="#1E293B">Medical</text>
+  <text x="195" y="466" font-size="10" text-anchor="middle" fill="#64748B">Emergency loan</text>
+
+  <!-- LAP / Mortgage -->
+  <rect x="266" y="376" width="108" height="108" rx="16" fill="#F5F3FF"/>
+  <rect x="300" y="390" width="40" height="40" rx="12" fill="#8B5CF6"/>
+  <text x="320" y="416" font-size="22" text-anchor="middle" fill="#FFFFFF">🏗</text>
+  <text x="320" y="450" font-size="12" font-weight="700" text-anchor="middle" fill="#1E293B">Loan vs Prop</text>
+  <text x="320" y="466" font-size="10" text-anchor="middle" fill="#64748B">LAP · Up to 70%</text>
+
+  <!-- ── ROW 4 ── -->
+  <!-- Consumer Durable -->
+  <rect x="16" y="496" width="108" height="108" rx="16" fill="#ECFEFF"/>
+  <rect x="50" y="510" width="40" height="40" rx="12" fill="#06B6D4"/>
+  <text x="70" y="536" font-size="22" text-anchor="middle" fill="#FFFFFF">📺</text>
+  <text x="70" y="570" font-size="12" font-weight="700" text-anchor="middle" fill="#1E293B">Consumer</text>
+  <text x="70" y="586" font-size="10" text-anchor="middle" fill="#64748B">Electronics/Applia</text>
+
+  <!-- Credit Card EMI -->
+  <rect x="141" y="496" width="108" height="108" rx="16" fill="#FFFBEB"/>
+  <rect x="175" y="510" width="40" height="40" rx="12" fill="#F59E0B"/>
+  <text x="195" y="536" font-size="22" text-anchor="middle" fill="#FFFFFF">💳</text>
+  <text x="195" y="570" font-size="12" font-weight="700" text-anchor="middle" fill="#1E293B">CC EMI</text>
+  <text x="195" y="586" font-size="10" text-anchor="middle" fill="#64748B">Credit card convert</text>
+
+  <!-- Agriculture Loan -->
+  <rect x="266" y="496" width="108" height="108" rx="16" fill="#F7FEE7"/>
+  <rect x="300" y="510" width="40" height="40" rx="12" fill="#84CC16"/>
+  <text x="320" y="536" font-size="22" text-anchor="middle" fill="#FFFFFF">🌾</text>
+  <text x="320" y="570" font-size="12" font-weight="700" text-anchor="middle" fill="#1E293B">Agriculture</text>
+  <text x="320" y="586" font-size="10" text-anchor="middle" fill="#64748B">Kisan Credit Card</text>
+
+  <!-- custom loan CTA -->
+  <rect x="16" y="616" width="358" height="56" rx="16" fill="#FFFFFF"/>
+  <text x="40" y="640" font-size="20">➕</text>
+  <text x="70" y="636" font-size="14" font-weight="700" fill="#1E293B">Custom Loan Type</text>
+  <text x="70" y="656" font-size="12" fill="#64748B">Add any other loan or credit line</text>
+  <text x="362" y="647" font-size="18" text-anchor="end" fill="#4F46E5">›</text>
+
+  <!-- popular badge on Home Loan -->
+  <rect x="56" y="136" width="60" height="18" rx="9" fill="#DC2626"/>
+  <text x="86" y="149" font-size="9" font-weight="700" text-anchor="middle" fill="#FFFFFF">POPULAR</text>
+
+  <!-- bottom nav -->
+  <rect x="0" y="796" width="390" height="48" fill="#FFFFFF"/>
+  <rect x="0" y="796" width="390" height="1" fill="#E2E8F0"/>
+  <text x="66" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Dashboard</text>
+  <rect x="153" y="802" width="84" height="34" rx="17" fill="#EEF2FF"/>
+  <text x="195" y="824" font-size="11" font-weight="700" text-anchor="middle" fill="#4F46E5">Calculator</text>
+  <text x="324" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Reminders</text>
+
+  <!-- annotations -->
+  <circle cx="374" cy="186" r="12" fill="#EFF6FF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="374" y="190" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">1</text>
+  <circle cx="374" cy="426" r="12" fill="#FFFBEB" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="374" y="430" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">2</text>
+  <circle cx="374" cy="546" r="12" fill="#ECFEFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="374" y="550" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">3</text>
+</svg>
