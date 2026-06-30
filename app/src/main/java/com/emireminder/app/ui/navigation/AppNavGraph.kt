@@ -62,8 +62,11 @@ private fun isFirstLaunch(context: Context): Boolean =
         .getBoolean("is_first_launch", true)
 
 private fun markOnboardingDone(context: Context) {
+    // commit() instead of apply() so the write is flushed synchronously before process death;
+    // apply() is async — an ANR kill between completion and flush resets app to onboarding.
+    @Suppress("ApplySharedPref")
     context.getSharedPreferences("emi_prefs", Context.MODE_PRIVATE)
-        .edit().putBoolean("is_first_launch", false).apply()
+        .edit().putBoolean("is_first_launch", false).commit()
 }
 
 @Composable
@@ -99,7 +102,11 @@ fun AppNavGraph() {
         NavHost(
             navController = navController,
             startDestination = NavRoutes.SPLASH,
-            modifier = if (showBottomBar) Modifier.padding(innerPadding) else Modifier,
+            // Always apply innerPadding — when there is no bottom bar, Scaffold returns zero bottom
+            // inset, so this is a no-op. Conditionally reading showBottomBar here caused the Scaffold
+            // ScaffoldLayoutWithMeasureFix snapshotFlow to iterate a null IdentityArraySet entry
+            // on focus-loss events (ANR: Input dispatching timed out after 5024 ms).
+            modifier = Modifier.padding(innerPadding),
             enterTransition = { slideInHorizontally(tween(280)) { it } },
             exitTransition = { slideOutHorizontally(tween(280)) { -it } },
             popEnterTransition = { slideInHorizontally(tween(280)) { -it } },
