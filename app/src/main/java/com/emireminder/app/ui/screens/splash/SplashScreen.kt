@@ -44,6 +44,8 @@ fun SplashScreen(
     val logoAlpha = remember { Animatable(0f) }
     val textAlpha = remember { Animatable(0f) }
     var activeDot by remember { mutableStateOf(1) }
+    // Read the live value at navigation time so the async IO read in AppNavGraph is visible here.
+    val currentIsFirstLaunch by rememberUpdatedState(isFirstLaunch)
 
     LaunchedEffect(Unit) {
         launch { logoScale.animateTo(1f, animationSpec = tween(350, easing = FastOutSlowInEasing)) }
@@ -51,7 +53,7 @@ fun SplashScreen(
         delay(150)
         textAlpha.animateTo(1f, animationSpec = tween(300, easing = EaseInOut))
         delay(400)
-        if (isFirstLaunch) onNavigateToOnboarding() else onNavigateToHome()
+        if (currentIsFirstLaunch) onNavigateToOnboarding() else onNavigateToHome()
     }
 
     LaunchedEffect("dots") {

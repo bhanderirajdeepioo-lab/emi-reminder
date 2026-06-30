@@ -25,7 +25,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -125,14 +124,12 @@ fun HomeScreen(
 
 @Composable
 private fun DashboardHeader(onNavigateToSettings: () -> Unit) {
-    val context = LocalContext.current
     val dateText = remember {
         LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.ENGLISH))
     }
-    val userName = remember {
-        context.getSharedPreferences("emi_prefs", android.content.Context.MODE_PRIVATE)
-            .getString("user_name", "") ?: ""
-    }
+    // user_name preference is not yet persisted anywhere; avoids a main-thread SharedPreferences
+    // disk read on first composition. Re-introduce once a settings field writes this key.
+    val userName = ""
     val greeting = remember {
         val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         when {

@@ -78,7 +78,7 @@ fun AppNavGraph() {
     val currentRoute = navBackStackEntry?.destination?.route
     val context = LocalContext.current
     // Async read so SharedPreferences disk access doesn't block the first composition frame.
-    // The IO read completes in < 1ms (after process start) — long before the 850ms splash ends.
+    // The IO read completes in < 1ms — long before the 850ms splash animation ends.
     var firstLaunch by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         firstLaunch = withContext(Dispatchers.IO) { isFirstLaunch(context) }
