@@ -50,6 +50,15 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".receiver.NotificationActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="io.helsy.emireminder.ACTION_MARK_PAID" />
+                <action android:name="io.helsy.emireminder.ACTION_SNOOZE" />
+            </intent-filter>
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
