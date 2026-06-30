@@ -1,5 +1,6 @@
 package com.emireminder.app.ui.screens.home
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,9 +20,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +43,7 @@ import com.emireminder.app.ui.theme.Violet600
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Locale
 
 private val headerGradient = Brush.linearGradient(
@@ -49,7 +55,9 @@ fun HomeScreen(
     onNavigateToLoanDetail: (Int) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToAnalytics: () -> Unit,
+    onNavigateToReminders: () -> Unit,
     onNavigateToSmsImport: () -> Unit,
+    onNavigateToAddLoan: () -> Unit,
     onNavigateToAddReminder: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -58,10 +66,10 @@ fun HomeScreen(
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onNavigateToAddReminder,
+                onClick = onNavigateToAddLoan,
                 containerColor = Indigo600,
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Reminder", tint = Color.White)
+                Icon(Icons.Default.Add, contentDescription = "Add Loan", tint = Color.White)
             }
         },
         containerColor = Indigo50,
@@ -79,10 +87,10 @@ fun HomeScreen(
             }
 
             if (loans.isEmpty()) {
-                item { EmptyState(onNavigateToAddReminder, onNavigateToSmsImport) }
+                item { EmptyState(onNavigateToAddLoan, onNavigateToSmsImport) }
             } else {
                 item { LoanSummarySection(loans) }
-                item { QuickActionsSection(onNavigateToAddReminder, onNavigateToAnalytics) }
+                item { QuickActionsSection(onNavigateToAddLoan, onNavigateToAnalytics) }
                 item {
                     Row(
                         modifier = Modifier
@@ -102,7 +110,7 @@ fun HomeScreen(
                             "See all →",
                             fontSize = 12.sp,
                             color = Indigo600,
-                            modifier = Modifier.clickable { onNavigateToAnalytics() },
+                            modifier = Modifier.clickable { onNavigateToReminders() },
                         )
                     }
                 }
@@ -118,8 +126,28 @@ fun HomeScreen(
 
 @Composable
 private fun DashboardHeader(onNavigateToSettings: () -> Unit) {
+    val context = LocalContext.current
     val dateText = remember {
         LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.ENGLISH))
+    }
+    val userName = remember {
+        context.getSharedPreferences("emi_prefs", android.content.Context.MODE_PRIVATE)
+            .getString("user_name", "") ?: ""
+    }
+    val greeting = remember {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        when {
+            hour < 12 -> "Good morning"
+            hour < 17 -> "Good afternoon"
+            else      -> "Good evening"
+        }
+    }
+    val initials = remember(userName) {
+        if (userName.isBlank()) "₹"
+        else userName.trim().split(" ").take(2).joinToString("") { it.first().uppercase() }
+    }
+    val displayGreeting = remember(userName) {
+        if (userName.isBlank()) greeting else "$greeting, ${userName.trim().split(" ").first()}"
     }
 
     Box(
@@ -133,7 +161,7 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // App logo circle
+            // Avatar initials circle
             Box(
                 modifier = Modifier
                     .size(44.dp)
@@ -141,15 +169,20 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit) {
                     .background(Color(0xFF312E81)),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("₹", fontSize = 20.sp, color = Indigo100, fontWeight = FontWeight.Bold)
+                Text(
+                    initials,
+                    fontSize = if (initials == "₹") 20.sp else 15.sp,
+                    color = Indigo100,
+                    fontWeight = FontWeight.Bold,
+                )
             }
 
             Spacer(Modifier.width(12.dp))
 
-            // App name + date
+            // Greeting + date
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "EMI Reminder & Calculator",
+                    displayGreeting,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White,
@@ -157,7 +190,7 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit) {
                 Text(dateText, fontSize = 12.sp, color = Color(0xFFC7D2FE))
             }
 
-            // Settings gear — fully tappable, no overlapping elements
+            // Settings gear
             IconButton(onClick = onNavigateToSettings) {
                 Icon(
                     Icons.Default.Settings,
@@ -183,7 +216,6 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit) {
                         modifier = Modifier.size(20.dp),
                     )
                 }
-                // Badge
                 Box(
                     modifier = Modifier
                         .size(14.dp)
@@ -383,7 +415,7 @@ private fun LoanSummarySection(loans: List<Loan>) {
 
         Spacer(Modifier.height(12.dp))
 
-        // Total EMI / month
+        // Total EMI / month with mini trend chart
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),
@@ -397,6 +429,15 @@ private fun LoanSummarySection(loans: List<Loan>) {
                     fontSize = 26.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White,
+                )
+                Spacer(Modifier.height(12.dp))
+                // Mini horizontal bar chart: placeholder trend for last 6 months
+                MiniBarChart(
+                    bars = listOf(0.60f, 0.72f, 0.65f, 0.80f, 0.75f, 1.00f),
+                    barColor = Indigo600.copy(alpha = 0.7f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(36.dp),
                 )
             }
         }
@@ -559,6 +600,31 @@ private fun LoanReminderCard(loan: Loan, onClick: () -> Unit) {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+@Composable
+private fun MiniBarChart(
+    bars: List<Float>,
+    barColor: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier = modifier) {
+        val barCount = bars.size
+        val gap = size.width * 0.04f
+        val totalGap = gap * (barCount - 1)
+        val barWidth = (size.width - totalGap) / barCount
+        bars.forEachIndexed { index, fraction ->
+            val barHeight = size.height * fraction.coerceIn(0.1f, 1.0f)
+            val left = index * (barWidth + gap)
+            val top = size.height - barHeight
+            drawRoundRect(
+                color = barColor,
+                topLeft = Offset(left, top),
+                size = Size(barWidth, barHeight),
+                cornerRadius = CornerRadius(4.dp.toPx()),
+            )
+        }
+    }
+}
 
 @Composable
 private fun SectionLabel(text: String) {

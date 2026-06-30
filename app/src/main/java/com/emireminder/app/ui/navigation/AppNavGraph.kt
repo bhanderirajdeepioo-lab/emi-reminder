@@ -51,10 +51,10 @@ private data class NavItem(
 )
 
 private val bottomNavItems = listOf(
-    NavItem(NavRoutes.HOME,              "Home",       Icons.Filled.Home,                  Icons.Outlined.Home),
-    NavItem(NavRoutes.REMINDERS,         "Reminders",  Icons.Filled.Notifications,          Icons.Outlined.Notifications),
-    NavItem(NavRoutes.FINANCE_TOOLS_HUB, "Calculator", Icons.Filled.Calculate,              Icons.Outlined.Calculate),
-    NavItem(NavRoutes.FINANCE,           "Finance",    Icons.Filled.AccountBalanceWallet,    Icons.Outlined.AccountBalanceWallet),
+    NavItem(NavRoutes.HOME,             "Home",       Icons.Filled.Home,               Icons.Outlined.Home),
+    NavItem(NavRoutes.EMI_CALCULATOR,   "Calculator", Icons.Filled.Calculate,          Icons.Outlined.Calculate),
+    NavItem(NavRoutes.REMINDERS,        "Reminders",  Icons.Filled.Notifications,      Icons.Outlined.Notifications),
+    NavItem(NavRoutes.FINANCE,          "Finance",    Icons.Filled.AccountBalanceWallet, Icons.Outlined.AccountBalanceWallet),
 )
 
 private fun isFirstLaunch(context: Context): Boolean =
@@ -123,10 +123,18 @@ fun AppNavGraph() {
             // 3 — Home Dashboard (bottom tab)
             composable(NavRoutes.HOME) {
                 HomeScreen(
-                    onNavigateToLoanDetail = { id -> navController.navigate(NavRoutes.loanDetail(id)) },
-                    onNavigateToSettings   = { navController.navigate(NavRoutes.SETTINGS) },
-                    onNavigateToAnalytics  = { navController.navigate(NavRoutes.LOAN_ANALYTICS) },
-                    onNavigateToSmsImport  = { navController.navigate(NavRoutes.SMS_IMPORT) },
+                    onNavigateToLoanDetail  = { id -> navController.navigate(NavRoutes.loanDetail(id)) },
+                    onNavigateToSettings    = { navController.navigate(NavRoutes.SETTINGS) },
+                    onNavigateToAnalytics   = { navController.navigate(NavRoutes.LOAN_ANALYTICS) },
+                    onNavigateToReminders   = {
+                        navController.navigate(NavRoutes.REMINDERS) {
+                            popUpTo(NavRoutes.HOME) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToSmsImport   = { navController.navigate(NavRoutes.SMS_IMPORT) },
+                    onNavigateToAddLoan     = { navController.navigate(NavRoutes.ADD_LOAN) },
                     onNavigateToAddReminder = { navController.navigate(NavRoutes.addReminder()) },
                 )
             }
@@ -134,10 +142,12 @@ fun AppNavGraph() {
             // 4 — Empty Home (alternate start state)
             composable(NavRoutes.EMPTY_HOME) {
                 HomeScreen(
-                    onNavigateToLoanDetail = { id -> navController.navigate(NavRoutes.loanDetail(id)) },
-                    onNavigateToSettings   = { navController.navigate(NavRoutes.SETTINGS) },
-                    onNavigateToAnalytics  = { navController.navigate(NavRoutes.LOAN_ANALYTICS) },
-                    onNavigateToSmsImport  = { navController.navigate(NavRoutes.SMS_IMPORT) },
+                    onNavigateToLoanDetail  = { id -> navController.navigate(NavRoutes.loanDetail(id)) },
+                    onNavigateToSettings    = { navController.navigate(NavRoutes.SETTINGS) },
+                    onNavigateToAnalytics   = { navController.navigate(NavRoutes.LOAN_ANALYTICS) },
+                    onNavigateToReminders   = { navController.navigate(NavRoutes.REMINDERS) },
+                    onNavigateToSmsImport   = { navController.navigate(NavRoutes.SMS_IMPORT) },
+                    onNavigateToAddLoan     = { navController.navigate(NavRoutes.ADD_LOAN) },
                     onNavigateToAddReminder = { navController.navigate(NavRoutes.addReminder()) },
                 )
             }
@@ -179,9 +189,12 @@ fun AppNavGraph() {
                 )
             }
 
-            // 9 — EMI Calculator
+            // 9 — EMI Calculator (also the Calculator bottom-nav tab destination)
             composable(NavRoutes.EMI_CALCULATOR) {
+                val prevRoute = navController.previousBackStackEntry?.destination?.route
+                val isTabEntry = prevRoute == null || prevRoute in bottomNavRoutes
                 EMICalculatorScreen(
+                    showBackButton = !isTabEntry,
                     onBack = { navController.popBackStack() },
                     onShowResults = { p, r, t -> navController.navigate(NavRoutes.calculatorResults(p, r, t)) },
                     onInterestTypeSelector = { p, r, t, type ->
@@ -265,6 +278,11 @@ fun AppNavGraph() {
                 SettingsScreen(onBack = { navController.popBackStack() })
             }
 
+            // Add Loan form
+            composable(NavRoutes.ADD_LOAN) {
+                AddLoanScreen(onBack = { navController.popBackStack() })
+            }
+
             // 17 — Loan Analytics
             composable(NavRoutes.LOAN_ANALYTICS) {
                 LoanAnalyticsScreen(onBack = { navController.popBackStack() })
@@ -295,7 +313,8 @@ fun AppNavGraph() {
             // 20 — Finance Monthly EMI (bottom tab)
             composable(NavRoutes.FINANCE) {
                 FinanceMonthlyEMIScreen(
-                    onNavigateToLoanDetail = { id -> navController.navigate(NavRoutes.loanDetail(id)) },
+                    onNavigateToLoanDetail     = { id -> navController.navigate(NavRoutes.loanDetail(id)) },
+                    onNavigateToFinanceToolsHub = { navController.navigate(NavRoutes.FINANCE_TOOLS_HUB) },
                 )
             }
 

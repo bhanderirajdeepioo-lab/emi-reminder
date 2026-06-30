@@ -13,6 +13,7 @@ object NavRoutes {
 
     // --- Home sub-screens ---
     const val EMPTY_HOME         = "empty_home"
+    const val ADD_LOAN           = "add_loan"
     const val LOAN_ANALYTICS     = "loan_analytics"
     const val LOAN_DETAIL        = "loan_detail/{loanId}"
     const val SMS_IMPORT         = "sms_import"
@@ -47,7 +48,7 @@ object NavRoutes {
 
 val bottomNavRoutes = setOf(
     NavRoutes.HOME,
+    NavRoutes.EMI_CALCULATOR,
     NavRoutes.REMINDERS,
-    NavRoutes.FINANCE_TOOLS_HUB,
     NavRoutes.FINANCE,
 )
