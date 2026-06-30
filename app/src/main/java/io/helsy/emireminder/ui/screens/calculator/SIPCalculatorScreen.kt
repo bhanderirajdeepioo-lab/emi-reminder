@@ -27,6 +27,7 @@ import io.helsy.emireminder.ui.theme.*
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.pow
+import kotlin.math.roundToLong
 
 private val SipGreen = Color(0xFF059669)
 private val SipGreen50 = Color(0xFFECFDF5)
@@ -63,7 +64,7 @@ private fun calcStepUpSIPCorpus(monthly: Double, annualRate: Double, years: Int,
 private fun fmtSip(amount: Double): String {
     val nf = NumberFormat.getNumberInstance(Locale("en", "IN"))
     nf.maximumFractionDigits = 0
-    return "₹${nf.format(amount.toLong())}"
+    return "₹${nf.format(amount.roundToLong())}"
 }
 
 private fun fmtCr(amount: Double): String {

@@ -22,6 +22,7 @@ import io.helsy.emireminder.ui.theme.*
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.pow
+import kotlin.math.roundToLong
 
 private val Amber700 = Color(0xFFD97706)
 private val Amber50  = Color(0xFFFFFBEB)
@@ -65,7 +66,7 @@ private fun calcRD(monthly: Double, ratePercent: Double, tenureYears: Double, fr
 private fun fmt(amount: Double): String {
     val nf = NumberFormat.getNumberInstance(Locale("en", "IN"))
     nf.maximumFractionDigits = 0
-    return "₹${nf.format(amount.toLong())}"
+    return "₹${nf.format(amount.roundToLong())}"
 }
 
 @Composable
