@@ -41,7 +41,7 @@ fun RemindersScreen(
     viewModel: RemindersViewModel = hiltViewModel(),
 ) {
     var showAddSheet by remember { mutableStateOf(false) }
-    val onAddReminder = { showAddSheet = true }
+    val onAddReminder: () -> Unit = remember { { showAddSheet = true } }
     val reminders by viewModel.reminders.collectAsState()
     val today = remember { LocalDate.now() }
     val todayDay = today.dayOfMonth

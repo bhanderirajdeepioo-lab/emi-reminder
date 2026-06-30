@@ -1,5 +1,6 @@
 package com.emireminder.app.ui.screens.reminders
 
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -35,8 +36,9 @@ class AddReminderViewModel @Inject constructor(
     var isSaving by mutableStateOf(false)
         private set
 
-    val isFormValid: Boolean
-        get() = loanName.isNotBlank() && emiAmount.isNotBlank() && dueDay.isNotBlank()
+    val isFormValid by derivedStateOf {
+        loanName.isNotBlank() && emiAmount.isNotBlank() && dueDay.isNotBlank()
+    }
 
     fun onLoanNameChange(v: String) { loanName = v }
     fun onBankNameChange(v: String) { bankName = v }
@@ -62,24 +64,27 @@ class AddReminderViewModel @Inject constructor(
         isSaving = false
     }
 
-    fun saveReminder(onSuccess: () -> Unit) = viewModelScope.launch {
-        val amount = emiAmount.toDoubleOrNull() ?: return@launch
-        val day = dueDay.toIntOrNull() ?: return@launch
+    fun saveReminder(onSuccess: () -> Unit) {
+        if (isSaving) return
         isSaving = true
-        val reminder = Reminder(
-            loanName = loanName,
-            bankName = bankName,
-            emiAmount = amount,
-            dueDayOfMonth = day,
-            frequency = repeatFrequency.uppercase(),
-            notes = notes,
-            notificationEnabled = notificationEnabled,
-        )
-        val insertedId = reminderRepository.insertReminder(reminder)
-        if (notificationEnabled) {
-            notificationScheduler.scheduleReminder(reminder.copy(id = insertedId.toInt()))
+        viewModelScope.launch {
+            val amount = emiAmount.toDoubleOrNull() ?: run { isSaving = false; return@launch }
+            val day = dueDay.toIntOrNull() ?: run { isSaving = false; return@launch }
+            val reminder = Reminder(
+                loanName = loanName,
+                bankName = bankName,
+                emiAmount = amount,
+                dueDayOfMonth = day,
+                frequency = repeatFrequency.uppercase(),
+                notes = notes,
+                notificationEnabled = notificationEnabled,
+            )
+            val insertedId = reminderRepository.insertReminder(reminder)
+            if (notificationEnabled) {
+                notificationScheduler.scheduleReminder(reminder.copy(id = insertedId.toInt()))
+            }
+            isSaving = false
+            onSuccess()
         }
-        isSaving = false
-        onSuccess()
     }
 }
