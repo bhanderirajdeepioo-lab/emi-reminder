@@ -49,7 +49,7 @@ fun FinanceToolsHubScreen(
     onNavigateToSip: () -> Unit,
     onNavigateToLoanCategories: () -> Unit,
 ) {
-    val loanTools = listOf(
+    val loanTools = remember { listOf(
         ListTool(
             icon = Icons.Default.Category,
             iconBg = Color(0xFFFFF7ED), iconTint = WarnOrange,
@@ -94,9 +94,9 @@ fun FinanceToolsHubScreen(
             isNew = true,
             onClick = { /* coming soon */ },
         ),
-    )
+    ) }
 
-    val investmentTools = listOf(
+    val investmentTools = remember { listOf(
         GridTool(
             icon = Icons.Default.BarChart,
             iconBg = Indigo50, iconTint = Indigo600,
@@ -127,9 +127,23 @@ fun FinanceToolsHubScreen(
             isComingSoon = true,
             onClick = { },
         ),
-    )
+    ) }
 
     var searchQuery by remember { mutableStateOf("") }
+    val filteredLoanTools by remember { derivedStateOf {
+        if (searchQuery.isBlank()) loanTools
+        else loanTools.filter {
+            it.label.contains(searchQuery, ignoreCase = true) ||
+                it.subtitle.contains(searchQuery, ignoreCase = true)
+        }
+    } }
+    val filteredInvestmentTools by remember { derivedStateOf {
+        if (searchQuery.isBlank()) investmentTools
+        else investmentTools.filter {
+            it.label.contains(searchQuery, ignoreCase = true) ||
+                it.sublabel.contains(searchQuery, ignoreCase = true)
+        }
+    } }
 
     Scaffold(
         topBar = {
@@ -189,14 +203,9 @@ fun FinanceToolsHubScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                 ) {
                     Column {
-                        val filtered = loanTools.filter {
-                            searchQuery.isBlank() ||
-                                it.label.contains(searchQuery, ignoreCase = true) ||
-                                it.subtitle.contains(searchQuery, ignoreCase = true)
-                        }
-                        filtered.forEachIndexed { idx, tool ->
+                        filteredLoanTools.forEachIndexed { idx, tool ->
                             ToolListRow(tool = tool)
-                            if (idx < filtered.lastIndex) {
+                            if (idx < filteredLoanTools.lastIndex) {
                                 HorizontalDivider(modifier = Modifier.padding(start = 68.dp))
                             }
                         }
@@ -220,12 +229,7 @@ fun FinanceToolsHubScreen(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    val filtered = investmentTools.filter {
-                        searchQuery.isBlank() ||
-                            it.label.contains(searchQuery, ignoreCase = true) ||
-                            it.sublabel.contains(searchQuery, ignoreCase = true)
-                    }
-                    val rows = filtered.chunked(2)
+                    val rows = filteredInvestmentTools.chunked(2)
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.weight(1f)) {
                         rows.forEach { row ->
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
