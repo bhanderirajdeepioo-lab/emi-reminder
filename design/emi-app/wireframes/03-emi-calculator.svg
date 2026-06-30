@@ -87,13 +87,22 @@
   <rect x="16" y="640" width="358" height="56" rx="16" fill="#4F46E5"/>
   <text x="195" y="675" font-size="16" font-weight="700" text-anchor="middle" fill="#FFFFFF">Calculate EMI →</text>
 
-  <!-- bottom nav -->
+  <!-- bottom nav — 4 tabs with icons -->
   <rect x="0" y="796" width="390" height="48" fill="#FFFFFF"/>
   <rect x="0" y="796" width="390" height="1" fill="#E2E8F0"/>
-  <text x="66" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Dashboard</text>
-  <rect x="153" y="802" width="84" height="34" rx="17" fill="#EEF2FF"/>
-  <text x="195" y="824" font-size="11" font-weight="700" text-anchor="middle" fill="#4F46E5">Calculator</text>
-  <text x="324" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Reminders</text>
+  <!-- Home -->
+  <text x="49" y="815" font-size="16" text-anchor="middle" fill="#94A3B8">🏠</text>
+  <text x="49" y="834" font-size="9" text-anchor="middle" fill="#94A3B8">Home</text>
+  <!-- active: Calculator -->
+  <rect x="103" y="798" width="88" height="44" rx="12" fill="#EEF2FF"/>
+  <text x="147" y="815" font-size="16" text-anchor="middle" fill="#4F46E5">⚡</text>
+  <text x="147" y="834" font-size="9" font-weight="700" text-anchor="middle" fill="#4F46E5">Calculator</text>
+  <!-- Reminders -->
+  <text x="244" y="815" font-size="16" text-anchor="middle" fill="#94A3B8">🔔</text>
+  <text x="244" y="834" font-size="9" text-anchor="middle" fill="#94A3B8">Reminders</text>
+  <!-- Finance -->
+  <text x="341" y="815" font-size="16" text-anchor="middle" fill="#94A3B8">💰</text>
+  <text x="341" y="834" font-size="9" text-anchor="middle" fill="#94A3B8">Finance</text>
 
   <!-- annotations -->
   <circle cx="365" cy="330" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>

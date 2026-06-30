@@ -174,7 +174,7 @@
     </summary>
     <nav class="toc-body" aria-label="Section navigation">
       <h1>HEL-17</h1>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">EMI Reminder — Full App Mockup · 21 screens</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">EMI Reminder — Full App Mockup · 22 screens · 4-tab nav</div>
 
       <h2>Foundation</h2>
       <a href="#tokens"><span class="num">◈</span>Design tokens</a>
@@ -208,6 +208,9 @@
       <h2>Loan Categories</h2>
       <a href="#s18"><span class="num">18</span>All Loan Types <span class="badge new">NEW</span></a>
 
+      <h2>Finance Tab</h2>
+      <a href="#s22"><span class="num">22</span>Monthly EMI View <span class="badge new">NEW</span></a>
+
       <h2>Finance Tools</h2>
       <a href="#s19"><span class="num">19</span>Finance Tools Hub <span class="badge new">NEW</span></a>
       <a href="#s20"><span class="num">20</span>FD / RD Calculator <span class="badge new">NEW</span></a>
@@ -228,8 +231,8 @@
       <h1>EMI Reminder — Full App Design</h1>
       <p>Complete wireframe specification for all 17 screens of the Android EMI Calculator &amp; Loan Reminder app. Covers the full user journey from first launch through advanced features: loan comparison, prepayment calculator, amortization schedule, portfolio analytics, and SMS auto-import.</p>
       <div class="pills">
-        <span class="pill dark">21 screens total</span>
-        <span class="pill dark">14 new screens (HEL-17)</span>
+        <span class="pill dark">22 screens total</span>
+        <span class="pill dark">4-tab nav with icons</span>
         <span class="pill">390×844 · portrait mobile</span>
         <span class="pill">Material Design 3 · Indigo/Violet</span>
         <span class="pill">12 loan categories · 10 finance tools</span>
@@ -768,6 +771,31 @@
               <li><b>4</b> — Data / Export: CSV triggers FileProvider share sheet. Google Drive backup uses Drive Backup API — does not require user to sign in separately if Google account is on device.</li>
             </ul>
             <div class="why"><b>Design lens — Shneiderman's 8 Golden Rules:</b> Settings groups by function (not alphabetical). Most dangerous action (data wipe) absent from this screen — not surfaced here, requires separate confirmation flow if ever added.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 22: Finance Tab ========== -->
+    <section id="s22">
+      <div class="lede">Finance Tab · 4th Tab <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">22.</span>Finance — Monthly EMI View</h2>
+      <p class="desc">The 4th tab in the new 4-icon bottom navigation. Shows every EMI across all loans grouped by month. Top: horizontal month scroller (Jan–Dec with active month highlighted). Monthly summary card: total EMI, paid vs remaining progress bar. EMI rows: each loan's date badge, name, bank, EMI number, amount, and Paid/Due/Upcoming status badge. Bottom: 12-month mini bar chart showing annual outflow at a glance. Active Finance tab icon 💰 highlighted in Indigo.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="22 · Finance Monthly EMI View">
+          <div class="label"><span>22-finance-monthly-emi.svg</span><span>390×844</span></div>
+          <img src="wireframes/22-finance-monthly-emi.svg" alt="Finance Monthly EMI wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Monthly summary hero (dark slate): Total EMI for the month, paid/remaining progress bar, % paid badge. At a glance: June 2026 — ₹51,891 — 84% paid.</li>
+              <li><b>2</b> — EMI row structure: left-border accent = loan type colour, date badge shows day-of-month in loan colour, right side shows amount + status chip (PAID ✓ green / DUE amber / OVERDUE red / UPCOMING slate).</li>
+              <li><b>3</b> — Filter chips: All / Paid / Upcoming — tap to filter the month's list.</li>
+              <li><b>4</b> — 12-month bar chart: current month bar fills Indigo, past months in Indigo-200, future months in Indigo-100. Annual total shown below. Tap any bar to jump to that month.</li>
+            </ul>
+            <div class="why"><b>Navigation change:</b> Bottom nav updated from 3 text-only tabs to 4 icon+label tabs: 🏠 Home · ⚡ Calculator · 🔔 Reminders · 💰 Finance. This pattern is applied to all screens. Active tab shows a rounded-rectangle highlight pill behind the icon+label.</div>
           </div>
         </div>
       </div>
