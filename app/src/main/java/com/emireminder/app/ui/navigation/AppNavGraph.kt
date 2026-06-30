@@ -139,7 +139,13 @@ fun AppNavGraph() {
                     },
                     onNavigateToSmsImport   = { navController.navigate(NavRoutes.SMS_IMPORT) },
                     onNavigateToAddLoan     = { navController.navigate(NavRoutes.ADD_LOAN) },
-                    onNavigateToAddReminder = { navController.navigate(NavRoutes.addReminder()) },
+                    onNavigateToAddReminder = {
+                        navController.navigate(NavRoutes.REMINDERS) {
+                            popUpTo(NavRoutes.HOME) { saveState = false }
+                            launchSingleTop = true
+                            restoreState = false
+                        }
+                    },
                 )
             }
 
@@ -152,27 +158,15 @@ fun AppNavGraph() {
                     onNavigateToReminders   = { navController.navigate(NavRoutes.REMINDERS) },
                     onNavigateToSmsImport   = { navController.navigate(NavRoutes.SMS_IMPORT) },
                     onNavigateToAddLoan     = { navController.navigate(NavRoutes.ADD_LOAN) },
-                    onNavigateToAddReminder = { navController.navigate(NavRoutes.addReminder()) },
+                    onNavigateToAddReminder = { navController.navigate(NavRoutes.REMINDERS) },
                 )
             }
 
-            // 5 — Reminders List (bottom tab)
+            // 5 — Reminders List (bottom tab) — Add Reminder sheet is owned by RemindersScreen
             composable(NavRoutes.REMINDERS) {
                 RemindersScreen(
-                    onAddReminder = { navController.navigate(NavRoutes.addReminder()) },
                     onReminderClick = { loanId -> navController.navigate(NavRoutes.loanDetail(loanId)) },
                     onNavigateToNotificationPreview = { navController.navigate(NavRoutes.NOTIFICATION) },
-                )
-            }
-
-            // 6 — Add Reminder
-            composable(
-                NavRoutes.ADD_REMINDER,
-                arguments = listOf(navArgument("loanId") { type = NavType.IntType; defaultValue = -1 })
-            ) { back ->
-                AddReminderScreen(
-                    loanId = back.arguments?.getInt("loanId") ?: -1,
-                    onBack = { navController.popBackStack() },
                 )
             }
 

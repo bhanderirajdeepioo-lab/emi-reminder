@@ -2,7 +2,6 @@ package com.emireminder.app.ui.screens.reminders
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,7 +11,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,42 +24,30 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.emireminder.app.data.db.entity.Loan
-import com.emireminder.app.ui.theme.Indigo100
 import com.emireminder.app.ui.theme.Indigo50
 import com.emireminder.app.ui.theme.Indigo600
-import java.text.NumberFormat
-import java.util.Locale
 
+private val FREQUENCIES = listOf("Monthly", "Weekly", "Quarterly", "Yearly")
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddReminderScreen(
     loanId: Int,
     onBack: () -> Unit,
     viewModel: AddReminderViewModel = hiltViewModel(),
 ) {
-    val loans by viewModel.loans.collectAsState()
-    var selectedLoan by remember(loanId, loans) {
-        mutableStateOf(loans.firstOrNull { it.id == loanId } ?: loans.firstOrNull())
-    }
-    var loanDropdownOpen by remember { mutableStateOf(false) }
-    var saving by remember { mutableStateOf(false) }
     val handleDismiss = { viewModel.resetForm(); onBack() }
-    val fmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+    var freqDropdownOpen by remember { mutableStateOf(false) }
 
     BackHandler(onBack = handleDismiss)
-
-    // Update selectedLoan when loans load
-    LaunchedEffect(loans) {
-        if (selectedLoan == null && loans.isNotEmpty()) {
-            selectedLoan = loans.firstOrNull { it.id == loanId } ?: loans.first()
-        }
-    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Add Reminder", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = handleDismiss) { Icon(Icons.Default.ArrowBack, null) } },
+                navigationIcon = {
+                    IconButton(onClick = handleDismiss) { Icon(Icons.Default.ArrowBack, null) }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Indigo600,
                     titleContentColor = Color.White,
@@ -74,86 +62,45 @@ fun AddReminderScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
 
-            // Loan selector
-            FormLabel("Select Loan")
-            Box {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(14.dp))
-                        .clickable { loanDropdownOpen = true }
-                        .padding(16.dp),
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            if (selectedLoan != null) {
-                                Text(selectedLoan!!.name, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                                Text(
-                                    "${selectedLoan!!.type.capitalize()} • EMI: ${fmt.format(selectedLoan!!.emiAmount)}",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            } else {
-                                Text("No loans added yet", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        }
-                        Icon(Icons.Default.ExpandMore, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-                DropdownMenu(
-                    expanded = loanDropdownOpen,
-                    onDismissRequest = { loanDropdownOpen = false },
-                    modifier = Modifier.fillMaxWidth(0.9f),
-                ) {
-                    loans.forEach { loan ->
-                        DropdownMenuItem(
-                            text = {
-                                Column {
-                                    Text(loan.name, fontWeight = FontWeight.Medium)
-                                    Text("EMI: ${fmt.format(loan.emiAmount)}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            },
-                            onClick = {
-                                selectedLoan = loan
-                                loanDropdownOpen = false
-                            },
-                        )
-                    }
-                    if (loans.isEmpty()) {
-                        DropdownMenuItem(
-                            text = { Text("No loans found", color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                            onClick = {},
-                            enabled = false,
-                        )
-                    }
-                }
-            }
+            // Loan Name
+            FormLabel("Loan Name *")
+            OutlinedTextField(
+                value = viewModel.loanName,
+                onValueChange = { viewModel.onLoanNameChange(it) },
+                label = { Text("E.g. HDFC Home Loan") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                singleLine = true,
+            )
 
-            // EMI amount display (read-only from loan)
-            if (selectedLoan != null) {
-                FormLabel("EMI Amount")
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Indigo50)
-                        .padding(16.dp),
-                ) {
-                    Text(
-                        fmt.format(selectedLoan!!.emiAmount),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Indigo600,
-                    )
-                }
-            }
+            // Bank / Lender
+            FormLabel("Bank / Lender")
+            OutlinedTextField(
+                value = viewModel.bankName,
+                onValueChange = { viewModel.onBankNameChange(it) },
+                label = { Text("E.g. HDFC Bank") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                singleLine = true,
+            )
 
-            // Due day of month
-            FormLabel("Due Day of Month")
+            // EMI Amount
+            FormLabel("EMI Amount (₹) *")
+            OutlinedTextField(
+                value = viewModel.emiAmount,
+                onValueChange = { viewModel.onEmiAmountChange(it) },
+                label = { Text("E.g. 12500") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                singleLine = true,
+            )
+
+            // Due Day
+            FormLabel("Due Day of Month *")
             OutlinedTextField(
                 value = viewModel.dueDay,
                 onValueChange = { viewModel.onDueDayChange(it) },
@@ -165,7 +112,7 @@ fun AddReminderScreen(
                 singleLine = true,
             )
 
-            // Day picker chips (1-31)
+            // Day quick-pick chips
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -189,32 +136,81 @@ fun AddReminderScreen(
                 }
             }
 
+            // Repeat Frequency
+            FormLabel("Repeat")
+            ExposedDropdownMenuBox(
+                expanded = freqDropdownOpen,
+                onExpandedChange = { freqDropdownOpen = it },
+            ) {
+                OutlinedTextField(
+                    value = viewModel.repeatFrequency,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = freqDropdownOpen) },
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                )
+                ExposedDropdownMenu(
+                    expanded = freqDropdownOpen,
+                    onDismissRequest = { freqDropdownOpen = false },
+                ) {
+                    FREQUENCIES.forEach { freq ->
+                        DropdownMenuItem(
+                            text = { Text(freq) },
+                            onClick = {
+                                viewModel.onRepeatFrequencyChange(freq)
+                                freqDropdownOpen = false
+                            },
+                        )
+                    }
+                }
+            }
+
             // Notes
             FormLabel("Notes (optional)")
             OutlinedTextField(
                 value = viewModel.notes,
                 onValueChange = { viewModel.onNotesChange(it) },
-                label = { Text("E.g. HDFC Home Loan account") },
-                modifier = Modifier.fillMaxWidth().height(100.dp),
+                label = { Text("Any details about this reminder") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp),
                 shape = RoundedCornerShape(14.dp),
                 maxLines = 3,
             )
 
-            // Summary card
-            if (selectedLoan != null) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = Indigo50),
+            // Notification toggle
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("Reminder Summary", fontWeight = FontWeight.Bold, color = Indigo600, fontSize = 13.sp)
-                        SummaryRow("Loan", selectedLoan!!.name)
-                        SummaryRow("EMI Amount", fmt.format(selectedLoan!!.emiAmount))
-                        SummaryRow("Due every", "${viewModel.dueDay.ifBlank { "—" }}${viewModel.dueDay.toIntOrNull()?.let { dayOrdinal(it) } ?: ""} of month")
-                        SummaryRow("Frequency", "Monthly")
+                    Icon(
+                        if (viewModel.notificationEnabled) Icons.Default.Notifications else Icons.Default.NotificationsOff,
+                        contentDescription = null,
+                        tint = if (viewModel.notificationEnabled) Indigo600 else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Column {
+                        Text("Notifications", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                        Text(
+                            if (viewModel.notificationEnabled) "Enabled" else "Disabled",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
+                Switch(
+                    checked = viewModel.notificationEnabled,
+                    onCheckedChange = { viewModel.onNotificationToggle() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Indigo600,
+                    ),
+                )
             }
 
             Spacer(Modifier.height(8.dp))
@@ -222,25 +218,21 @@ fun AddReminderScreen(
             // Save button
             Button(
                 onClick = {
-                    val loan = selectedLoan ?: return@Button
-                    val day = viewModel.dueDay.toIntOrNull() ?: return@Button
-                    saving = true
-                    viewModel.saveReminder(
-                        loanId = loan.id,
-                        loanName = loan.name,
-                        emiAmount = loan.emiAmount,
-                        dueDayOfMonth = day,
-                        notes = viewModel.notes,
-                        onSuccess = { viewModel.resetForm(); onBack() },
-                    )
+                    viewModel.saveReminder(onSuccess = { viewModel.resetForm(); onBack() })
                 },
-                modifier = Modifier.fillMaxWidth().height(52.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
-                enabled = !saving && selectedLoan != null && viewModel.dueDay.isNotBlank(),
+                enabled = viewModel.isFormValid && !viewModel.isSaving,
             ) {
-                if (saving) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+                if (viewModel.isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp,
+                    )
                 } else {
                     Text("Save Reminder", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                 }
@@ -251,23 +243,10 @@ fun AddReminderScreen(
 
 @Composable
 private fun FormLabel(text: String) {
-    Text(text, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(
+        text,
+        fontSize = 13.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
-
-@Composable
-private fun SummaryRow(label: String, value: String) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
-    }
-}
-
-private fun dayOrdinal(day: Int) = when {
-    day in 11..13 -> "th"
-    day % 10 == 1 -> "st"
-    day % 10 == 2 -> "nd"
-    day % 10 == 3 -> "rd"
-    else -> "th"
-}
-
-private fun String.capitalize() = replaceFirstChar { it.uppercase() }

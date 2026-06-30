@@ -36,11 +36,12 @@ import java.util.Locale
 
 @Composable
 fun RemindersScreen(
-    onAddReminder: () -> Unit,
     onReminderClick: (Int) -> Unit,
     onNavigateToNotificationPreview: () -> Unit = {},
     viewModel: RemindersViewModel = hiltViewModel(),
 ) {
+    var showAddSheet by remember { mutableStateOf(false) }
+    val onAddReminder = { showAddSheet = true }
     val reminders by viewModel.reminders.collectAsState()
     val today = remember { LocalDate.now() }
     val todayDay = today.dayOfMonth
@@ -186,7 +187,7 @@ fun RemindersScreen(
                             reminder = r,
                             daysText = "Overdue by ${todayDay - r.dueDayOfMonth}d",
                             chipColor = UrgentRed,
-                            onClick = { onReminderClick(r.loanId) },
+                            onClick = { r.loanId?.let(onReminderClick) },
                             onDelete = { viewModel.deleteReminder(r) },
                         )
                     }
@@ -206,7 +207,7 @@ fun RemindersScreen(
                             reminder = r,
                             daysText = if (daysLeft == 0) "Due today!" else "Due in ${daysLeft}d",
                             chipColor = if (daysLeft <= 2) WarnOrange else SafeGreen,
-                            onClick = { onReminderClick(r.loanId) },
+                            onClick = { r.loanId?.let(onReminderClick) },
                             onDelete = { viewModel.deleteReminder(r) },
                         )
                     }
@@ -221,13 +222,17 @@ fun RemindersScreen(
                             reminder = r,
                             daysText = "Paid",
                             chipColor = Color(0xFF94A3B8),
-                            onClick = { onReminderClick(r.loanId) },
+                            onClick = { r.loanId?.let(onReminderClick) },
                             onDelete = { viewModel.deleteReminder(r) },
                         )
                     }
                 }
             }
         }
+    }
+
+    if (showAddSheet) {
+        AddReminderSheet(onDismiss = { showAddSheet = false })
     }
 }
 
