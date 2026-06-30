@@ -147,6 +147,7 @@ fun AppNavGraph() {
                 RemindersScreen(
                     onAddReminder = { navController.navigate(NavRoutes.addReminder()) },
                     onReminderClick = { loanId -> navController.navigate(NavRoutes.loanDetail(loanId)) },
+                    onNavigateToNotificationPreview = { navController.navigate(NavRoutes.NOTIFICATION) },
                 )
             }
 
