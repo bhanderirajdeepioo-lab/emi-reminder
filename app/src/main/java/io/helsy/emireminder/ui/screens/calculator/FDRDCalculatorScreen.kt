@@ -50,14 +50,23 @@ private fun calcFD(principal: Double, ratePercent: Double, tenureYears: Double, 
 
 private fun calcRD(monthly: Double, ratePercent: Double, tenureYears: Double, freq: CompoundFreq): Double {
     val r = ratePercent / 100.0
-    val n = if (freq == CompoundFreq.AT_MATURITY) 1.0 else freq.n.toDouble()
-    val rPerPeriod = r / n
-    val monthsPerPeriod = 12.0 / n
-    var maturity = 0.0
     val totalMonths = (tenureYears * 12).toInt()
-    for (m in 1..totalMonths) {
-        val periodsRemaining = (totalMonths - m + 1).toDouble() / monthsPerPeriod
-        maturity += monthly * (1 + rPerPeriod).pow(periodsRemaining)
+    var maturity = 0.0
+    if (freq == CompoundFreq.AT_MATURITY) {
+        // Each installment earns simple interest for its remaining term, matching
+        // how calcFD handles AT_MATURITY (no intermediate compounding).
+        for (m in 1..totalMonths) {
+            val remainingYears = (totalMonths - m + 1) / 12.0
+            maturity += monthly * (1 + r * remainingYears)
+        }
+    } else {
+        val n = freq.n.toDouble()
+        val rPerPeriod = r / n
+        val monthsPerPeriod = 12.0 / n
+        for (m in 1..totalMonths) {
+            val periodsRemaining = (totalMonths - m + 1).toDouble() / monthsPerPeriod
+            maturity += monthly * (1 + rPerPeriod).pow(periodsRemaining)
+        }
     }
     return maturity
 }
