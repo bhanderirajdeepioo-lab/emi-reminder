@@ -26,6 +26,7 @@ object DatabaseModule {
             "emi_reminder.db"
         )
         .fallbackToDestructiveMigration()
+        .fallbackToDestructiveMigrationOnDowngrade()
         .build()
 
     @Provides
