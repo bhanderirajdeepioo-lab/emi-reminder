@@ -1,116 +1,124 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
-     font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
-  <!-- canvas: 390x844 · interest type selector (flat vs reducing balance) on calculator screen -->
-
-  <rect width="390" height="844" fill="#f4f4f4" stroke="none" />
-
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="slider" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#818CF8"/>
+    </linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="#EEF2FF"/>
   <!-- status bar -->
-  <rect width="390" height="48" fill="#fff" stroke="none" />
-  <text x="16" y="32" font-size="12" stroke="none" fill="#000">9:41</text>
-  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#000" stroke-width="1.5" />
-  <rect x="342" y="19" width="24" height="10" rx="1" fill="#000" stroke="none" />
-
+  <rect width="390" height="48" fill="#4F46E5"/>
+  <text x="16" y="32" font-size="12" fill="#C7D2FE">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#C7D2FE"/>
   <!-- header -->
-  <rect x="0" y="48" width="390" height="56" fill="#fff" stroke="none" />
-  <line x1="0" y1="104" x2="390" y2="104" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="84" font-size="20" stroke="none" fill="#000">←</text>
-  <text x="195" y="84" font-size="18" font-weight="700" text-anchor="middle" stroke="none" fill="#000">EMI Calculator</text>
+  <rect x="0" y="48" width="390" height="56" fill="url(#hdr)"/>
+  <text x="20" y="84" font-size="20" fill="#FFFFFF">←</text>
+  <text x="195" y="84" font-size="18" font-weight="700" text-anchor="middle" fill="#FFFFFF">EMI Calculator</text>
 
   <!-- loan type tabs -->
-  <rect x="16" y="112" width="358" height="36" rx="8" fill="#e6e6e6" stroke="none" />
-  <rect x="18" y="114" width="112" height="32" rx="6" fill="#000" stroke="none" />
-  <text x="74" y="134" font-size="12" font-weight="600" text-anchor="middle" stroke="none" fill="#fff">Home Loan</text>
-  <text x="195" y="134" font-size="12" text-anchor="middle" stroke="none" fill="#666">Car Loan</text>
-  <text x="314" y="134" font-size="12" text-anchor="middle" stroke="none" fill="#666">Personal</text>
+  <rect x="16" y="116" width="358" height="38" rx="10" fill="#312E81"/>
+  <rect x="18" y="118" width="116" height="34" rx="8" fill="#FFFFFF"/>
+  <text x="76" y="139" font-size="13" font-weight="700" text-anchor="middle" fill="#4F46E5">Home Loan</text>
+  <text x="207" y="139" font-size="13" text-anchor="middle" fill="#A5B4FC">Car Loan</text>
+  <text x="326" y="139" font-size="13" text-anchor="middle" fill="#A5B4FC">Personal</text>
 
-  <!-- loan amount field -->
-  <rect x="16" y="160" width="358" height="72" rx="10" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <text x="36" y="184" font-size="11" stroke="none" fill="#666">Loan Amount</text>
-  <text x="36" y="218" font-size="28" font-weight="700" stroke="none" fill="#000">₹ 50,00,000</text>
-  <!-- slider track -->
-  <rect x="36" y="226" width="322" height="4" rx="2" fill="#e6e6e6" stroke="none" />
-  <rect x="36" y="226" width="200" height="4" rx="2" fill="#000" stroke="none" />
-  <circle cx="236" cy="228" r="8" fill="#000" stroke="#fff" stroke-width="2" />
+  <!-- Amount -->
+  <rect x="16" y="166" width="358" height="72" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="188" font-size="11" fill="#64748B">Loan Amount</text>
+  <text x="32" y="218" font-size="28" font-weight="800" fill="#1E293B">₹ 50,00,000</text>
+  <rect x="32" y="228" width="322" height="5" rx="2.5" fill="#E0E7FF"/>
+  <rect x="32" y="228" width="200" height="5" rx="2.5" fill="url(#slider)"/>
+  <circle cx="232" cy="230" r="9" fill="#4F46E5" stroke="#FFFFFF" stroke-width="2"/>
 
-  <!-- interest rate field -->
-  <rect x="16" y="244" width="358" height="64" rx="10" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <text x="36" y="268" font-size="11" stroke="none" fill="#666">Interest Rate (%)</text>
-  <rect x="36" y="276" width="36" height="28" rx="6" fill="#e6e6e6" stroke="none" />
-  <text x="54" y="295" font-size="16" text-anchor="middle" stroke="none" fill="#000">−</text>
-  <text x="195" y="296" font-size="20" font-weight="700" text-anchor="middle" stroke="none" fill="#000">8.50</text>
-  <rect x="318" y="276" width="36" height="28" rx="6" fill="#e6e6e6" stroke="none" />
-  <text x="336" y="295" font-size="16" text-anchor="middle" stroke="none" fill="#000">+</text>
+  <!-- Interest rate -->
+  <rect x="16" y="250" width="358" height="64" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="272" font-size="11" fill="#64748B">Interest Rate (%)</text>
+  <rect x="32" y="280" width="36" height="28" rx="8" fill="#EEF2FF"/>
+  <text x="50" y="299" font-size="18" text-anchor="middle" fill="#4F46E5">−</text>
+  <text x="195" y="301" font-size="22" font-weight="800" text-anchor="middle" fill="#1E293B">8.50</text>
+  <rect x="322" y="280" width="36" height="28" rx="8" fill="#EEF2FF"/>
+  <text x="340" y="299" font-size="18" text-anchor="middle" fill="#4F46E5">+</text>
 
-  <!-- tenure field -->
-  <rect x="16" y="320" width="358" height="52" rx="10" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <text x="36" y="344" font-size="11" stroke="none" fill="#666">Tenure</text>
-  <text x="36" y="362" font-size="16" font-weight="600" stroke="none" fill="#000">20 years</text>
-  <text x="280" y="362" font-size="13" stroke="none" fill="#666">(240 months)</text>
+  <!-- Tenure -->
+  <rect x="16" y="326" width="358" height="52" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="348" font-size="11" fill="#64748B">Tenure</text>
+  <text x="32" y="368" font-size="16" font-weight="600" fill="#1E293B">20 years</text>
+  <text x="280" y="368" font-size="13" fill="#64748B">(240 months)</text>
 
-  <!-- ===== INTEREST TYPE SECTION ===== -->
-  <text x="16" y="396" font-size="12" font-weight="700" stroke="none" fill="#666">INTEREST TYPE</text>
+  <!-- INTEREST TYPE SECTION — FOCUS of this screen -->
+  <text x="16" y="400" font-size="11" font-weight="700" fill="#4F46E5">INTEREST TYPE</text>
   <!-- info icon -->
-  <circle cx="160" cy="390" r="8" fill="none" stroke="#aaa" stroke-width="1" />
-  <text x="160" y="394" font-size="10" text-anchor="middle" stroke="none" fill="#aaa">i</text>
+  <circle cx="164" cy="395" r="8" fill="#EEF2FF"/>
+  <text x="164" y="399" font-size="10" text-anchor="middle" fill="#4F46E5">i</text>
 
-  <!-- option A: Reducing Balance (selected) -->
-  <rect x="16" y="404" width="170" height="116" rx="12" fill="#000" stroke="none" />
-  <text x="32" y="428" font-size="13" font-weight="700" stroke="none" fill="#fff">Reducing Balance</text>
-  <text x="32" y="446" font-size="11" stroke="none" fill="#aaa">(Diminishing)</text>
-  <!-- small bar chart showing reducing interest -->
-  <rect x="32" y="456" width="8" height="36" rx="2" fill="#fff" stroke="none" />
-  <rect x="46" y="462" width="8" height="30" rx="2" fill="#aaa" stroke="none" />
-  <rect x="60" y="468" width="8" height="24" rx="2" fill="#aaa" stroke="none" />
-  <rect x="74" y="474" width="8" height="18" rx="2" fill="#aaa" stroke="none" />
-  <rect x="88" y="480" width="8" height="12" rx="2" fill="#aaa" stroke="none" />
-  <text x="32" y="510" font-size="10" stroke="none" fill="#aaa">Interest on outstanding</text>
-  <!-- selected check -->
-  <circle cx="168" cy="416" r="10" fill="#fff" stroke="none" />
-  <text x="168" y="421" font-size="12" text-anchor="middle" stroke="none" fill="#000">✓</text>
+  <!-- Card A: Reducing (SELECTED) -->
+  <rect x="16" y="408" width="172" height="126" rx="16" fill="#4F46E5"/>
+  <!-- selected border glow -->
+  <rect x="14" y="406" width="176" height="130" rx="18" fill="none" stroke="#818CF8" stroke-width="2"/>
+  <text x="32" y="434" font-size="13" font-weight="700" fill="#FFFFFF">Reducing Balance</text>
+  <text x="32" y="452" font-size="11" fill="#A5B4FC">Diminishing / EMI method</text>
+  <!-- interest decay bars -->
+  <rect x="32" y="462" width="10" height="40" rx="2" fill="#FFFFFF" opacity="0.9"/>
+  <rect x="48" y="470" width="10" height="32" rx="2" fill="#A5B4FC"/>
+  <rect x="64" y="478" width="10" height="24" rx="2" fill="#A5B4FC"/>
+  <rect x="80" y="486" width="10" height="16" rx="2" fill="#A5B4FC"/>
+  <rect x="96" y="494" width="10" height="8" rx="2" fill="#A5B4FC"/>
+  <text x="32" y="520" font-size="9" fill="#C7D2FE">Interest reduces monthly</text>
+  <!-- check -->
+  <circle cx="166" cy="420" r="11" fill="#FFFFFF"/>
+  <text x="166" y="425" font-size="12" text-anchor="middle" fill="#4F46E5">✓</text>
 
-  <!-- option B: Flat Rate -->
-  <rect x="204" y="404" width="170" height="116" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <text x="220" y="428" font-size="13" font-weight="700" stroke="none" fill="#000">Flat Rate</text>
-  <text x="220" y="446" font-size="11" stroke="none" fill="#666">Fixed on original</text>
-  <!-- small bar chart showing flat interest -->
-  <rect x="220" y="456" width="8" height="36" rx="2" fill="#e6e6e6" stroke="none" />
-  <rect x="234" y="456" width="8" height="36" rx="2" fill="#e6e6e6" stroke="none" />
-  <rect x="248" y="456" width="8" height="36" rx="2" fill="#e6e6e6" stroke="none" />
-  <rect x="262" y="456" width="8" height="36" rx="2" fill="#e6e6e6" stroke="none" />
-  <rect x="276" y="456" width="8" height="36" rx="2" fill="#e6e6e6" stroke="none" />
-  <text x="220" y="510" font-size="10" stroke="none" fill="#888">Interest on original principal</text>
+  <!-- Card B: Flat Rate -->
+  <rect x="202" y="408" width="172" height="126" rx="16" fill="#FFFFFF"/>
+  <text x="218" y="434" font-size="13" font-weight="700" fill="#1E293B">Flat Rate</text>
+  <text x="218" y="452" font-size="11" fill="#64748B">Fixed on original principal</text>
+  <!-- equal bars -->
+  <rect x="218" y="462" width="10" height="40" rx="2" fill="#E2E8F0"/>
+  <rect x="234" y="462" width="10" height="40" rx="2" fill="#E2E8F0"/>
+  <rect x="250" y="462" width="10" height="40" rx="2" fill="#E2E8F0"/>
+  <rect x="266" y="462" width="10" height="40" rx="2" fill="#E2E8F0"/>
+  <rect x="282" y="462" width="10" height="40" rx="2" fill="#E2E8F0"/>
+  <text x="218" y="520" font-size="9" fill="#94A3B8">Interest fixed throughout</text>
 
-  <!-- comparison info card -->
-  <rect x="16" y="532" width="358" height="64" rx="10" fill="#f8f8f4" stroke="#e5e5e0" stroke-width="1" />
-  <text x="36" y="556" font-size="12" stroke="none" fill="#000">⚠  Same rate, different EMI amounts</text>
-  <text x="36" y="574" font-size="11" stroke="none" fill="#666">Reducing: ₹32,450/mo · Flat: ₹52,083/mo at 8.5%</text>
+  <!-- Comparison info card -->
+  <rect x="16" y="546" width="358" height="68" rx="14" fill="#FFF7ED"/>
+  <rect x="16" y="546" width="4" height="68" rx="2" fill="#D97706"/>
+  <text x="32" y="570" font-size="12" font-weight="700" fill="#D97706">⚠  Same 8.5% rate, different costs</text>
+  <text x="32" y="590" font-size="12" fill="#92400E">Reducing: ₹32,450/mo · Flat: ₹52,083/mo</text>
+  <text x="32" y="606" font-size="11" fill="#B45309">Flat rate = ~1.8× more expensive!</text>
 
-  <!-- live preview -->
-  <rect x="16" y="608" width="358" height="60" rx="10" fill="#e6e6e6" stroke="none" />
-  <text x="36" y="632" font-size="12" stroke="none" fill="#666">Monthly EMI (Reducing Balance)</text>
-  <text x="36" y="658" font-size="24" font-weight="700" stroke="none" fill="#000">₹ 32,450</text>
+  <!-- Live preview -->
+  <rect x="16" y="626" width="358" height="68" rx="14" fill="#1E293B"/>
+  <text x="32" y="650" font-size="12" fill="#94A3B8">Monthly EMI (Reducing Balance)</text>
+  <text x="32" y="682" font-size="26" font-weight="800" fill="#FFFFFF">₹ 32,450</text>
+  <text x="280" y="650" font-size="11" fill="#64748B">Total Interest</text>
+  <text x="280" y="672" font-size="14" font-weight="700" fill="#A5B4FC">₹28,08,093</text>
 
-  <!-- Calculate CTA -->
-  <rect x="16" y="684" width="358" height="56" rx="12" fill="#000" stroke="none" />
-  <text x="195" y="718" font-size="16" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">Calculate</text>
+  <!-- CTA -->
+  <rect x="16" y="706" width="358" height="56" rx="16" fill="#4F46E5"/>
+  <text x="195" y="741" font-size="16" font-weight="700" text-anchor="middle" fill="#FFFFFF">Calculate →</text>
 
-  <!-- bottom nav bar -->
-  <rect x="0" y="796" width="390" height="48" fill="#fff" stroke="none" />
-  <line x1="0" y1="796" x2="390" y2="796" stroke="#e5e5e0" stroke-width="1" />
-  <text x="55" y="826" font-size="11" text-anchor="middle" stroke="none" fill="#666">Dashboard</text>
-  <g transform="translate(183, 808)">
-    <rect x="-24" y="-4" width="48" height="32" rx="8" fill="#000" stroke="none" />
-    <text x="0" y="18" font-size="11" text-anchor="middle" stroke="none" fill="#fff">Calculator</text>
-  </g>
-  <text x="335" y="826" font-size="11" text-anchor="middle" stroke="none" fill="#666">Reminders</text>
+  <!-- bottom nav -->
+  <rect x="0" y="796" width="390" height="48" fill="#FFFFFF"/>
+  <rect x="0" y="796" width="390" height="1" fill="#E2E8F0"/>
+  <text x="66" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Dashboard</text>
+  <rect x="153" y="802" width="84" height="34" rx="17" fill="#EEF2FF"/>
+  <text x="195" y="824" font-size="11" font-weight="700" text-anchor="middle" fill="#4F46E5">Calculator</text>
+  <text x="324" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Reminders</text>
 
   <!-- annotations -->
-  <circle cx="365" cy="332" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="336" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">1</text>
-  <circle cx="195" cy="462" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="195" y="466" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">2</text>
-  <circle cx="365" cy="564" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="568" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">3</text>
-  <circle cx="365" cy="636" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="640" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">4</text>
+  <circle cx="365" cy="330" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="365" y="334" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">1</text>
+  <circle cx="365" cy="471" r="12" fill="#4F46E5" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="365" y="475" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">2</text>
+  <circle cx="365" cy="580" r="12" fill="#FFF7ED" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="365" y="584" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">3</text>
+  <circle cx="365" cy="660" r="12" fill="#1E293B" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="365" y="664" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">4</text>
 </svg>

@@ -1,119 +1,102 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
-     font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
-  <!-- canvas: 390x844 · loan detail screen -->
-
-  <rect width="390" height="844" fill="#f4f4f4" stroke="none" />
-
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#4F46E5"/>
+    </linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="#EEF2FF"/>
   <!-- status bar -->
-  <rect width="390" height="48" fill="#000" stroke="none" />
-  <text x="16" y="32" font-size="12" stroke="none" fill="#aaa">9:41</text>
-  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#666" stroke-width="1.5" />
-  <rect x="342" y="19" width="24" height="10" rx="1" fill="#666" stroke="none" />
+  <rect width="390" height="48" fill="#2563EB"/>
+  <text x="16" y="32" font-size="12" fill="#BFDBFE">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#BFDBFE" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#BFDBFE"/>
+  <!-- header -->
+  <rect x="0" y="48" width="390" height="120" fill="url(#hdr)"/>
+  <text x="20" y="84" font-size="20" fill="#FFFFFF">←</text>
+  <text x="195" y="84" font-size="18" font-weight="700" text-anchor="middle" fill="#FFFFFF">SBI Home Loan</text>
+  <text x="362" y="84" font-size="18" text-anchor="end" fill="#BFDBFE">⋮</text>
+  <!-- loan badge -->
+  <rect x="147" y="96" width="96" height="22" rx="11" fill="#1D4ED8"/>
+  <text x="195" y="111" font-size="11" text-anchor="middle" fill="#BFDBFE">Reducing · 8.5% p.a.</text>
+  <!-- key figure -->
+  <text x="195" y="152" font-size="12" text-anchor="middle" fill="#BFDBFE">Monthly EMI</text>
+  <text x="195" y="156" font-size="0" fill="none"/><!-- spacer -->
 
-  <!-- hero header card (dark, expanded) -->
-  <rect x="0" y="48" width="390" height="220" fill="#000" stroke="none" />
-  <!-- back + menu -->
-  <text x="20" y="84" font-size="20" stroke="none" fill="#fff">←</text>
-  <text x="362" y="84" font-size="20" stroke="none" fill="#fff">⋮</text>
-  <!-- loan label -->
-  <rect x="16" y="96" width="88" height="22" rx="11" fill="#1a1a1a" stroke="#333" stroke-width="1" />
-  <text x="60" y="111" font-size="11" text-anchor="middle" stroke="none" fill="#aaa">🏠  Home</text>
-  <!-- loan name & bank -->
-  <text x="16" y="148" font-size="22" font-weight="700" stroke="none" fill="#fff">SBI Home Loan</text>
-  <text x="16" y="172" font-size="14" stroke="none" fill="#aaa">State Bank of India · Acc **4521</text>
-  <!-- EMI amount -->
-  <text x="16" y="210" font-size="11" stroke="none" fill="#888">Monthly EMI</text>
-  <text x="16" y="236" font-size="28" font-weight="700" stroke="none" fill="#fff">₹ 32,450</text>
-  <!-- next due badge -->
-  <rect x="260" y="216" width="112" height="28" rx="6" fill="#333" stroke="none" />
-  <text x="316" y="234" font-size="12" font-weight="600" text-anchor="middle" stroke="none" fill="#fff">Due in 3 days</text>
+  <!-- hero stat -->
+  <rect x="16" y="164" width="358" height="70" rx="14" fill="#1E293B"/>
+  <text x="32" y="192" font-size="11" fill="#94A3B8">Monthly EMI</text>
+  <text x="32" y="224" font-size="28" font-weight="800" fill="#FFFFFF">₹ 32,450</text>
+  <rect x="248" y="178" width="108" height="36" rx="10" fill="#312E81"/>
+  <text x="260" y="194" font-size="10" fill="#94A3B8">Next Due</text>
+  <text x="260" y="208" font-size="13" font-weight="700" fill="#F87171">5 Jul 2026</text>
 
-  <!-- progress ring + stats -->
-  <rect x="0" y="268" width="390" height="128" fill="#fff" stroke="none" />
-  <line x1="0" y1="396" x2="390" y2="396" stroke="#e5e5e0" stroke-width="1" />
-  <!-- ring (SVG simplified as 3 arcs of circle) -->
-  <circle cx="70" cy="332" r="44" fill="none" stroke="#e6e6e6" stroke-width="10" />
-  <circle cx="70" cy="332" r="44" fill="none" stroke="#000" stroke-width="10"
-          stroke-dasharray="138 138" stroke-dashoffset="0" />
-  <!-- ring label -->
-  <text x="70" y="328" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#000">40%</text>
-  <text x="70" y="344" font-size="10" text-anchor="middle" stroke="none" fill="#666">paid</text>
-  <!-- stats columns -->
-  <line x1="165" y1="280" x2="165" y2="384" stroke="#e5e5e0" stroke-width="1" />
-  <line x1="265" y1="280" x2="265" y2="384" stroke="#e5e5e0" stroke-width="1" />
-  <text x="215" y="308" font-size="11" text-anchor="middle" stroke="none" fill="#666">Principal</text>
-  <text x="215" y="332" font-size="16" font-weight="700" text-anchor="middle" stroke="none" fill="#000">₹50L</text>
-  <text x="215" y="352" font-size="11" text-anchor="middle" stroke="none" fill="#666">@ 8.5% · 20 yr</text>
-  <text x="325" y="308" font-size="11" text-anchor="middle" stroke="none" fill="#666">Total Interest</text>
-  <text x="325" y="332" font-size="16" font-weight="700" text-anchor="middle" stroke="none" fill="#000">₹52.8L</text>
-  <text x="325" y="352" font-size="11" text-anchor="middle" stroke="none" fill="#666">₹20.2L paid</text>
+  <!-- info grid -->
+  <rect x="16" y="246" width="172" height="68" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="270" font-size="11" fill="#64748B">Principal</text>
+  <text x="32" y="300" font-size="17" font-weight="700" fill="#1E293B">₹50,00,000</text>
 
-  <!-- next payment card -->
-  <rect x="16" y="408" width="358" height="72" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <rect x="16" y="408" width="4" height="72" rx="2" fill="#000" stroke="none" />
-  <text x="36" y="432" font-size="12" stroke="none" fill="#666">Next payment — 3 Jul 2026</text>
-  <text x="36" y="456" font-size="18" font-weight="700" stroke="none" fill="#000">₹ 32,450</text>
-  <!-- pay now button inside card -->
-  <rect x="268" y="422" width="90" height="36" rx="8" fill="#000" stroke="none" />
-  <text x="313" y="445" font-size="12" font-weight="600" text-anchor="middle" stroke="none" fill="#fff">Pay Now</text>
+  <rect x="202" y="246" width="172" height="68" rx="14" fill="#FFFFFF"/>
+  <text x="218" y="270" font-size="11" fill="#64748B">Outstanding</text>
+  <text x="218" y="300" font-size="17" font-weight="700" fill="#DC2626">₹38,46,000</text>
 
-  <!-- action buttons row -->
-  <rect x="16" y="496" width="104" height="52" rx="10" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <text x="68" y="518" font-size="18" text-anchor="middle" stroke="none" fill="#000">✏</text>
-  <text x="68" y="538" font-size="11" text-anchor="middle" stroke="none" fill="#000">Edit</text>
-  <rect x="143" y="496" width="104" height="52" rx="10" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <text x="195" y="518" font-size="18" text-anchor="middle" stroke="none" fill="#000">📊</text>
-  <text x="195" y="538" font-size="11" text-anchor="middle" stroke="none" fill="#000">Schedule</text>
-  <rect x="270" y="496" width="104" height="52" rx="10" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <text x="322" y="518" font-size="18" text-anchor="middle" stroke="none" fill="#000">💸</text>
-  <text x="322" y="538" font-size="11" text-anchor="middle" stroke="none" fill="#000">Prepay</text>
+  <rect x="16" y="322" width="172" height="68" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="346" font-size="11" fill="#64748B">Rate of Interest</text>
+  <text x="32" y="376" font-size="17" font-weight="700" fill="#1E293B">8.5% p.a.</text>
 
-  <!-- payment history section -->
-  <text x="16" y="576" font-size="12" font-weight="700" stroke="none" fill="#666">PAYMENT HISTORY</text>
+  <rect x="202" y="322" width="172" height="68" rx="14" fill="#FFFFFF"/>
+  <text x="218" y="346" font-size="11" fill="#64748B">Tenure Remaining</text>
+  <text x="218" y="376" font-size="17" font-weight="700" fill="#1E293B">16 yr 4 mo</text>
 
-  <!-- history row 1 -->
-  <rect x="16" y="584" width="358" height="60" rx="0" fill="#fff" stroke="none" />
-  <line x1="16" y1="644" x2="374" y2="644" stroke="#f0f0f0" stroke-width="1" />
-  <text x="36" y="608" font-size="13" font-weight="600" stroke="none" fill="#000">Jun 2026</text>
-  <text x="36" y="628" font-size="12" stroke="none" fill="#666">Paid on 1 Jun</text>
-  <text x="340" y="608" font-size="13" font-weight="700" text-anchor="end" stroke="none" fill="#000">₹32,450</text>
-  <rect x="320" y="618" width="40" height="18" rx="9" fill="#e6e6e6" stroke="none" />
-  <text x="340" y="631" font-size="10" text-anchor="middle" stroke="none" fill="#000">Paid</text>
+  <!-- progress bar -->
+  <rect x="16" y="402" width="358" height="60" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="424" font-size="11" fill="#64748B">Loan Progress</text>
+  <rect x="32" y="434" width="322" height="8" rx="4" fill="#E0E7FF"/>
+  <rect x="32" y="434" width="120" height="8" rx="4" fill="#2563EB"/>
+  <text x="32" y="454" font-size="10" fill="#64748B">Paid ₹11.5L (23%)</text>
+  <text x="354" y="454" font-size="10" text-anchor="end" fill="#94A3B8">Remaining ₹38.5L</text>
 
-  <!-- history row 2 -->
-  <rect x="16" y="644" width="358" height="60" rx="0" fill="#fff" stroke="none" />
-  <line x1="16" y1="704" x2="374" y2="704" stroke="#f0f0f0" stroke-width="1" />
-  <text x="36" y="668" font-size="13" font-weight="600" stroke="none" fill="#000">May 2026</text>
-  <text x="36" y="688" font-size="12" stroke="none" fill="#666">Paid on 2 May</text>
-  <text x="340" y="668" font-size="13" font-weight="700" text-anchor="end" stroke="none" fill="#000">₹32,450</text>
-  <rect x="320" y="678" width="40" height="18" rx="9" fill="#e6e6e6" stroke="none" />
-  <text x="340" y="691" font-size="10" text-anchor="middle" stroke="none" fill="#000">Paid</text>
+  <!-- EMI history mini -->
+  <rect x="16" y="474" width="358" height="178" rx="16" fill="#FFFFFF"/>
+  <text x="32" y="502" font-size="13" font-weight="700" fill="#1E293B">EMI Payment History</text>
+  <text x="320" y="502" font-size="12" fill="#4F46E5">All →</text>
+  <!-- rows -->
+  <text x="32" y="530" font-size="12" fill="#64748B">Jun 2026</text>
+  <rect x="180" y="520" width="60" height="20" rx="10" fill="#DCFCE7"/>
+  <text x="210" y="534" font-size="11" text-anchor="middle" fill="#059669">Paid ✓</text>
+  <text x="356" y="530" font-size="12" font-weight="600" text-anchor="end" fill="#1E293B">₹32,450</text>
 
-  <!-- history row 3 -->
-  <rect x="16" y="704" width="358" height="60" rx="0" fill="#fff" stroke="none" />
-  <text x="36" y="728" font-size="13" font-weight="600" stroke="none" fill="#000">Apr 2026</text>
-  <text x="36" y="748" font-size="12" stroke="none" fill="#666">Paid on 30 Apr · Late</text>
-  <text x="340" y="728" font-size="13" font-weight="700" text-anchor="end" stroke="none" fill="#000">₹32,450</text>
-  <rect x="308" y="738" width="52" height="18" rx="9" fill="#000" stroke="none" />
-  <text x="334" y="751" font-size="10" text-anchor="middle" stroke="none" fill="#fff">Late</text>
+  <text x="32" y="558" font-size="12" fill="#64748B">May 2026</text>
+  <rect x="180" y="548" width="60" height="20" rx="10" fill="#DCFCE7"/>
+  <text x="210" y="562" font-size="11" text-anchor="middle" fill="#059669">Paid ✓</text>
+  <text x="356" y="558" font-size="12" font-weight="600" text-anchor="end" fill="#1E293B">₹32,450</text>
 
-  <!-- "View full history" -->
-  <text x="195" y="788" font-size="13" text-anchor="middle" stroke="none" fill="#000">View full history →</text>
+  <text x="32" y="586" font-size="12" fill="#64748B">Apr 2026</text>
+  <rect x="180" y="576" width="60" height="20" rx="10" fill="#DCFCE7"/>
+  <text x="210" y="590" font-size="11" text-anchor="middle" fill="#059669">Paid ✓</text>
+  <text x="356" y="586" font-size="12" font-weight="600" text-anchor="end" fill="#1E293B">₹32,450</text>
 
-  <!-- bottom nav bar -->
-  <rect x="0" y="796" width="390" height="48" fill="#fff" stroke="none" />
-  <line x1="0" y1="796" x2="390" y2="796" stroke="#e5e5e0" stroke-width="1" />
-  <text x="55" y="826" font-size="11" text-anchor="middle" stroke="none" fill="#666">Dashboard</text>
-  <text x="195" y="826" font-size="11" text-anchor="middle" stroke="none" fill="#666">Calculator</text>
-  <text x="335" y="826" font-size="11" text-anchor="middle" stroke="none" fill="#666">Reminders</text>
+  <text x="32" y="614" font-size="12" fill="#64748B">Mar 2026</text>
+  <rect x="180" y="604" width="60" height="20" rx="10" fill="#FEE2E2"/>
+  <text x="210" y="618" font-size="11" text-anchor="middle" fill="#DC2626">Late</text>
+  <text x="356" y="614" font-size="12" font-weight="600" text-anchor="end" fill="#DC2626">₹32,450</text>
 
-  <!-- annotations -->
-  <circle cx="364" cy="200" r="12" fill="#000" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="364" y="204" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">1</text>
-  <circle cx="20" cy="332" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="20" y="336" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">2</text>
-  <circle cx="364" cy="444" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="364" y="448" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">3</text>
-  <circle cx="364" cy="614" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="364" y="618" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">4</text>
+  <text x="32" y="642" font-size="12" fill="#64748B">Feb 2026</text>
+  <rect x="180" y="632" width="60" height="20" rx="10" fill="#DCFCE7"/>
+  <text x="210" y="646" font-size="11" text-anchor="middle" fill="#059669">Paid ✓</text>
+  <text x="356" y="642" font-size="12" font-weight="600" text-anchor="end" fill="#1E293B">₹32,450</text>
+
+  <!-- action buttons -->
+  <rect x="16" y="664" width="172" height="48" rx="14" fill="#4F46E5"/>
+  <text x="102" y="694" font-size="13" font-weight="700" text-anchor="middle" fill="#FFFFFF">Amortize</text>
+  <rect x="202" y="664" width="172" height="48" rx="14" fill="#E0E7FF"/>
+  <text x="288" y="694" font-size="13" font-weight="700" text-anchor="middle" fill="#4F46E5">Prepay</text>
+
+  <!-- bottom nav -->
+  <rect x="0" y="796" width="390" height="48" fill="#FFFFFF"/>
+  <rect x="0" y="796" width="390" height="1" fill="#E2E8F0"/>
+  <text x="66" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Dashboard</text>
+  <text x="195" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Calculator</text>
+  <text x="324" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Reminders</text>
 </svg>

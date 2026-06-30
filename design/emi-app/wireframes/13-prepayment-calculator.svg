@@ -1,107 +1,95 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
-     font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
-  <!-- canvas: 390x844 · prepayment / foreclosure calculator -->
-
-  <rect width="390" height="844" fill="#f4f4f4" stroke="none" />
-
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#0891B2"/>
+    </linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="#EEF2FF"/>
   <!-- status bar -->
-  <rect width="390" height="48" fill="#fff" stroke="none" />
-  <text x="16" y="32" font-size="12" stroke="none" fill="#000">9:41</text>
-  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#000" stroke-width="1.5" />
-  <rect x="342" y="19" width="24" height="10" rx="1" fill="#000" stroke="none" />
-
+  <rect width="390" height="48" fill="#059669"/>
+  <text x="16" y="32" font-size="12" fill="#A7F3D0">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#A7F3D0" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#A7F3D0"/>
   <!-- header -->
-  <rect x="0" y="48" width="390" height="56" fill="#fff" stroke="none" />
-  <line x1="0" y1="104" x2="390" y2="104" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="84" font-size="20" stroke="none" fill="#000">←</text>
-  <text x="195" y="84" font-size="17" font-weight="700" text-anchor="middle" stroke="none" fill="#000">Prepayment Calculator</text>
+  <rect x="0" y="48" width="390" height="56" fill="url(#hdr)"/>
+  <text x="20" y="84" font-size="20" fill="#FFFFFF">←</text>
+  <text x="195" y="84" font-size="18" font-weight="700" text-anchor="middle" fill="#FFFFFF">Prepayment Calculator</text>
 
-  <!-- loan selector -->
-  <rect x="16" y="112" width="358" height="52" rx="10" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <text x="36" y="134" font-size="11" stroke="none" fill="#666">Select Loan</text>
-  <text x="36" y="154" font-size="14" font-weight="600" stroke="none" fill="#000">SBI Home Loan  (₹32,450 EMI · 214 EMIs left)</text>
-  <text x="358" y="142" font-size="16" text-anchor="end" stroke="none" fill="#666">▾</text>
+  <!-- current loan summary -->
+  <rect x="16" y="116" width="358" height="68" rx="14" fill="#1E293B"/>
+  <text x="32" y="138" font-size="11" fill="#94A3B8">SBI Home Loan — Current Outstanding</text>
+  <text x="32" y="168" font-size="24" font-weight="800" fill="#FFFFFF">₹ 38,46,000</text>
+  <text x="230" y="148" font-size="11" fill="#64748B">EMI</text>
+  <text x="230" y="168" font-size="16" font-weight="700" fill="#A5B4FC">₹32,450/mo</text>
 
-  <!-- current status bar -->
-  <rect x="16" y="172" width="358" height="60" rx="10" fill="#000" stroke="none" />
-  <text x="36" y="196" font-size="11" stroke="none" fill="#aaa">Outstanding Balance</text>
-  <text x="36" y="218" font-size="20" font-weight="700" stroke="none" fill="#fff">₹ 43,52,148</text>
-  <text x="280" y="196" font-size="11" text-anchor="end" stroke="none" fill="#aaa">Months left</text>
-  <text x="280" y="218" font-size="20" font-weight="700" text-anchor="end" stroke="none" fill="#fff">214</text>
+  <!-- Prepayment amount -->
+  <text x="16" y="208" font-size="11" font-weight="700" fill="#64748B">PREPAYMENT AMOUNT</text>
+  <rect x="16" y="216" width="358" height="64" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="238" font-size="11" fill="#64748B">How much do you want to prepay?</text>
+  <text x="36" y="268" font-size="11" fill="#94A3B8">₹</text>
+  <text x="52" y="268" font-size="24" font-weight="800" fill="#1E293B">5,00,000</text>
+  <rect x="32" y="274" width="200" height="4" rx="2" fill="#E0E7FF"/>
+  <rect x="32" y="274" width="75" height="4" rx="2" fill="#059669"/>
+  <circle cx="107" cy="276" r="8" fill="#059669" stroke="#FFFFFF" stroke-width="2"/>
 
-  <!-- prepayment amount input -->
-  <text x="16" y="258" font-size="12" font-weight="700" stroke="none" fill="#666">PREPAYMENT AMOUNT</text>
-  <rect x="16" y="266" width="358" height="64" rx="10" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <text x="36" y="292" font-size="11" stroke="none" fill="#666">Amount</text>
-  <text x="36" y="320" font-size="26" font-weight="700" stroke="none" fill="#000">₹ 5,00,000</text>
-  <!-- keyboard icon -->
-  <text x="350" y="308" font-size="18" text-anchor="end" stroke="none" fill="#ccc">⌨</text>
+  <!-- Option: reduce EMI or tenure -->
+  <text x="16" y="306" font-size="11" font-weight="700" fill="#64748B">AFTER PREPAYMENT, CHOOSE TO:</text>
+  <rect x="16" y="314" width="172" height="72" rx="14" fill="#059669"/>
+  <text x="32" y="338" font-size="13" font-weight="700" fill="#FFFFFF">Reduce EMI</text>
+  <text x="32" y="356" font-size="11" fill="#A7F3D0">Same tenure</text>
+  <text x="32" y="376" font-size="14" font-weight="700" fill="#FFFFFF">₹28,720/mo</text>
+  <circle cx="168" cy="326" r="10" fill="#FFFFFF"/>
+  <text x="168" y="331" font-size="11" text-anchor="middle" fill="#059669">✓</text>
 
-  <!-- prepayment type -->
-  <text x="16" y="354" font-size="12" font-weight="700" stroke="none" fill="#666">PREPAYMENT TYPE</text>
-  <rect x="16" y="362" width="358" height="44" rx="10" fill="#e6e6e6" stroke="none" />
-  <rect x="18" y="364" width="112" height="40" rx="8" fill="#000" stroke="none" />
-  <text x="74" y="389" font-size="12" font-weight="600" text-anchor="middle" stroke="none" fill="#fff">One-time</text>
-  <text x="195" y="389" font-size="12" text-anchor="middle" stroke="none" fill="#666">Monthly extra</text>
-  <text x="324" y="389" font-size="12" text-anchor="middle" stroke="none" fill="#666">Annual</text>
+  <rect x="202" y="314" width="172" height="72" rx="14" fill="#FFFFFF"/>
+  <text x="218" y="338" font-size="13" font-weight="700" fill="#1E293B">Reduce Tenure</text>
+  <text x="218" y="356" font-size="11" fill="#64748B">Same EMI</text>
+  <text x="218" y="376" font-size="14" font-weight="700" fill="#1E293B">3 yr 2 mo less</text>
 
-  <!-- impact section -->
-  <rect x="16" y="424" width="358" height="152" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <text x="36" y="448" font-size="12" font-weight="700" stroke="none" fill="#666">IMPACT OF ₹5L PREPAYMENT</text>
-  <!-- divider -->
-  <line x1="36" y1="456" x2="362" y2="456" stroke="#f0f0f0" stroke-width="1" />
-  <!-- before / after columns -->
-  <text x="160" y="474" font-size="11" text-anchor="middle" stroke="none" fill="#666">Before</text>
-  <text x="300" y="474" font-size="11" text-anchor="middle" stroke="none" fill="#666">After</text>
-  <line x1="216" y1="462" x2="216" y2="564" stroke="#e5e5e0" stroke-width="1" />
-  <!-- rows -->
-  <text x="36" y="496" font-size="12" stroke="none" fill="#000">Months left</text>
-  <text x="160" y="496" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#666">214</text>
-  <text x="300" y="496" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#000">194</text>
-  <text x="36" y="520" font-size="12" stroke="none" fill="#000">Total Interest</text>
-  <text x="160" y="520" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#666">₹23.6L</text>
-  <text x="300" y="520" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#000">₹17.2L</text>
-  <text x="36" y="544" font-size="12" stroke="none" fill="#000">Tenure ends</text>
-  <text x="160" y="544" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#666">Sep 2043</text>
-  <text x="300" y="544" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#000">Jan 2042</text>
-  <!-- savings row highlighted -->
-  <rect x="16" y="552" width="358" height="24" rx="0" fill="#f0f8f0" stroke="none" />
-  <text x="36" y="568" font-size="12" font-weight="700" stroke="none" fill="#000">Interest saved</text>
-  <rect x="248" y="554" width="112" height="20" rx="4" fill="#000" stroke="none" />
-  <text x="304" y="568" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">₹6.4L saved!</text>
+  <!-- savings summary -->
+  <rect x="16" y="398" width="358" height="90" rx="16" fill="#ECFDF5"/>
+  <text x="32" y="422" font-size="13" font-weight="700" fill="#065F46">Savings from Prepayment</text>
+  <rect x="32" y="434" width="140" height="40" rx="10" fill="#FFFFFF"/>
+  <text x="102" y="450" font-size="10" text-anchor="middle" fill="#64748B">Interest Saved</text>
+  <text x="102" y="466" font-size="15" font-weight="800" text-anchor="middle" fill="#059669">₹9,24,000</text>
+  <rect x="184" y="434" width="168" height="40" rx="10" fill="#FFFFFF"/>
+  <text x="268" y="450" font-size="10" text-anchor="middle" fill="#64748B">New Loan Close Date</text>
+  <text x="268" y="466" font-size="14" font-weight="800" text-anchor="middle" fill="#059669">Oct 2039</text>
 
-  <!-- choose outcome section -->
-  <text x="16" y="604" font-size="12" font-weight="700" stroke="none" fill="#666">WHAT WOULD YOU PREFER?</text>
-  <rect x="16" y="612" width="170" height="64" rx="10" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <rect x="16" y="612" width="4" height="64" rx="2" fill="#000" stroke="none" />
-  <text x="36" y="636" font-size="13" font-weight="700" stroke="none" fill="#000">Reduce Tenure</text>
-  <text x="36" y="656" font-size="11" stroke="none" fill="#666">Same EMI, done 20 months early</text>
-  <rect x="204" y="612" width="170" height="64" rx="10" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <rect x="204" y="612" width="4" height="64" rx="2" fill="#888" stroke="none" />
-  <text x="224" y="636" font-size="13" font-weight="700" stroke="none" fill="#000">Reduce EMI</text>
-  <text x="224" y="656" font-size="11" stroke="none" fill="#666">Same tenure, EMI ↓ by ₹2,180</text>
+  <!-- line chart: balance with/without prepayment -->
+  <rect x="16" y="500" width="358" height="160" rx="16" fill="#FFFFFF"/>
+  <text x="32" y="526" font-size="13" font-weight="700" fill="#1E293B">Outstanding Balance</text>
+  <!-- chart -->
+  <line x1="32" y1="630" x2="362" y2="630" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- without prepay line (higher) -->
+  <path d="M32,545 C100,548 180,570 260,600 C310,620 340,628 362,630"
+        fill="none" stroke="#DC2626" stroke-width="2" stroke-dasharray="6 3"/>
+  <!-- with prepay line (lower) -->
+  <path d="M32,558 C100,556 180,565 240,588 C290,608 330,622 362,630"
+        fill="none" stroke="#059669" stroke-width="2"/>
+  <!-- legend -->
+  <rect x="32" y="638" width="60" height="2" fill="#DC2626"/>
+  <text x="100" y="642" font-size="10" fill="#64748B">Without prepayment</text>
+  <rect x="200" y="638" width="60" height="2" fill="#059669"/>
+  <text x="268" y="642" font-size="10" fill="#64748B">With prepayment</text>
+
+  <!-- recurring prepayment toggle -->
+  <rect x="16" y="672" width="358" height="48" rx="14" fill="#F0FDF4"/>
+  <text x="32" y="700" font-size="13" fill="#1E293B">Set recurring monthly prepayment</text>
+  <rect x="320" y="685" width="44" height="24" rx="12" fill="#E2E8F0"/>
+  <circle cx="332" cy="697" r="10" fill="#FFFFFF"/>
 
   <!-- CTA -->
-  <rect x="16" y="696" width="358" height="52" rx="12" fill="#000" stroke="none" />
-  <text x="195" y="728" font-size="15" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">Apply Prepayment Plan</text>
+  <rect x="16" y="732" width="358" height="48" rx="14" fill="#059669"/>
+  <text x="195" y="762" font-size="15" font-weight="700" text-anchor="middle" fill="#FFFFFF">Apply Prepayment →</text>
 
-  <!-- bottom nav bar -->
-  <rect x="0" y="796" width="390" height="48" fill="#fff" stroke="none" />
-  <line x1="0" y1="796" x2="390" y2="796" stroke="#e5e5e0" stroke-width="1" />
-  <text x="55" y="826" font-size="11" text-anchor="middle" stroke="none" fill="#666">Dashboard</text>
-  <g transform="translate(183, 808)">
-    <rect x="-24" y="-4" width="48" height="32" rx="8" fill="#000" stroke="none" />
-    <text x="0" y="18" font-size="11" text-anchor="middle" stroke="none" fill="#fff">Calculator</text>
-  </g>
-  <text x="335" y="826" font-size="11" text-anchor="middle" stroke="none" fill="#666">Reminders</text>
-
-  <!-- annotations -->
-  <circle cx="365" cy="198" r="12" fill="#000" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="202" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">1</text>
-  <circle cx="365" cy="386" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="390" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">2</text>
-  <circle cx="365" cy="500" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="504" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">3</text>
-  <circle cx="365" cy="644" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="648" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">4</text>
+  <!-- bottom nav -->
+  <rect x="0" y="796" width="390" height="48" fill="#FFFFFF"/>
+  <rect x="0" y="796" width="390" height="1" fill="#E2E8F0"/>
+  <text x="66" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Dashboard</text>
+  <rect x="153" y="802" width="84" height="34" rx="17" fill="#EEF2FF"/>
+  <text x="195" y="824" font-size="11" font-weight="700" text-anchor="middle" fill="#4F46E5">Calculator</text>
+  <text x="324" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Reminders</text>
 </svg>

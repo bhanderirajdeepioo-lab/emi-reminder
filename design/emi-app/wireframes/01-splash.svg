@@ -1,44 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
-     font-family="-apple-system, system-ui, sans-serif" stroke-width="1.5">
-  <!-- canvas: 390x844 · portrait mobile · splash screen -->
-
-  <!-- dark background -->
-  <rect width="390" height="844" fill="#000" stroke="none" />
-
-  <!-- status bar icons (white on dark) -->
-  <text x="16" y="28" font-size="12" stroke="none" fill="#fff">9:41</text>
-  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#fff" stroke-width="1.5" />
-  <rect x="342" y="19" width="24" height="10" rx="1" fill="#fff" stroke="none" />
-  <rect x="378" y="20" width="4" height="6" rx="1" fill="#fff" stroke="none" />
-
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#4C1D95"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#818CF8"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="url(#bg)"/>
+  <!-- ambient blobs -->
+  <circle cx="340" cy="100" r="110" fill="#312E81" opacity="0.55"/>
+  <circle cx="40" cy="720" r="130" fill="#3B0764" opacity="0.4"/>
+  <!-- status bar -->
+  <text x="16" y="32" font-size="12" fill="#a5b4fc">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#818CF8" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#818CF8"/>
+  <!-- glow ring -->
+  <circle cx="195" cy="300" r="80" fill="#4F46E5" opacity="0.12"/>
+  <circle cx="195" cy="300" r="64" fill="none" stroke="url(#ring)" stroke-width="2"/>
   <!-- logo circle -->
-  <circle cx="195" cy="296" r="72" fill="none" stroke="#fff" stroke-width="3" />
-  <!-- ₹ symbol -->
-  <text x="195" y="312" font-size="48" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">₹</text>
-
-  <!-- app name -->
-  <text x="195" y="408" font-size="28" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">EMI Reminder</text>
-  <!-- tagline -->
-  <text x="195" y="440" font-size="14" text-anchor="middle" stroke="none" fill="#aaa">Your Smart Loan Manager</text>
-
+  <circle cx="195" cy="300" r="52" fill="#312E81"/>
+  <text x="195" y="320" font-size="42" text-anchor="middle" fill="#E0E7FF">₹</text>
+  <!-- text -->
+  <text x="195" y="398" font-size="30" font-weight="800" text-anchor="middle" fill="#E0E7FF">EMI Reminder</text>
+  <text x="195" y="426" font-size="15" text-anchor="middle" fill="#818CF8">Your Smart Loan Manager</text>
+  <!-- tagline pills -->
+  <rect x="110" y="444" width="78" height="24" rx="12" fill="#312E81"/>
+  <text x="149" y="460" font-size="11" text-anchor="middle" fill="#a5b4fc">Calculate</text>
+  <rect x="202" y="444" width="78" height="24" rx="12" fill="#312E81"/>
+  <text x="241" y="460" font-size="11" text-anchor="middle" fill="#a5b4fc">Track</text>
   <!-- loading dots -->
-  <circle cx="171" cy="760" r="5" fill="#fff" stroke="none" />
-  <circle cx="195" cy="760" r="5" fill="#444" stroke="none" />
-  <circle cx="219" cy="760" r="5" fill="#444" stroke="none" />
-
-  <!-- version text -->
-  <text x="195" y="800" font-size="12" text-anchor="middle" stroke="none" fill="#555">v1.0.0</text>
-
-  <!-- annotations -->
-  <g data-region="annotations">
-    <!-- 1: logo -->
-    <circle cx="268" cy="240" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-    <text x="268" y="244" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">1</text>
-    <!-- 2: title -->
-    <circle cx="316" cy="408" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-    <text x="316" y="412" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">2</text>
-    <!-- 3: loading -->
-    <circle cx="248" cy="760" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-    <text x="248" y="764" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">3</text>
-  </g>
+  <circle cx="179" cy="760" r="5" fill="#6366F1" opacity="0.5"/>
+  <circle cx="195" cy="760" r="5" fill="#E0E7FF"/>
+  <circle cx="211" cy="760" r="5" fill="#6366F1" opacity="0.5"/>
+  <!-- annotation -->
+  <circle cx="356" cy="300" r="12" fill="#1E1B4B" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="356" y="304" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">1</text>
 </svg>

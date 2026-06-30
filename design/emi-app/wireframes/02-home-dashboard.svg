@@ -1,152 +1,131 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
-     font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
-  <!-- canvas: 390x844 · portrait mobile · home dashboard -->
-
-  <rect width="390" height="844" fill="#f4f4f4" stroke="none" />
-
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="card1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#6366F1"/>
+    </linearGradient>
+    <linearGradient id="card2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0891B2"/>
+      <stop offset="100%" stop-color="#0E7490"/>
+    </linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="#EEF2FF"/>
   <!-- status bar -->
-  <rect width="390" height="48" fill="#fff" stroke="none" />
-  <text x="16" y="32" font-size="12" stroke="none" fill="#000">9:41</text>
-  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#000" stroke-width="1.5" />
-  <rect x="342" y="19" width="24" height="10" rx="1" fill="#000" stroke="none" />
-  <rect x="378" y="20" width="4" height="6" rx="1" fill="#000" stroke="none" />
-
-  <!-- header bar -->
-  <rect x="0" y="48" width="390" height="88" fill="#fff" stroke="none" />
-  <line x1="0" y1="136" x2="390" y2="136" stroke="#e5e5e0" stroke-width="1" />
+  <rect width="390" height="48" fill="#4F46E5"/>
+  <text x="16" y="32" font-size="12" fill="#C7D2FE">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#C7D2FE"/>
+  <!-- header gradient -->
+  <rect x="0" y="48" width="390" height="100" fill="url(#hdr)"/>
   <!-- avatar -->
-  <circle cx="48" cy="88" r="24" fill="#e6e6e6" stroke="#000" />
-  <text x="48" y="93" font-size="12" font-weight="600" text-anchor="middle" stroke="none" fill="#000">RB</text>
+  <circle cx="52" cy="98" r="26" fill="#312E81"/>
+  <text x="52" y="104" font-size="13" font-weight="700" text-anchor="middle" fill="#E0E7FF">RB</text>
   <!-- greeting -->
-  <text x="88" y="80" font-size="12" stroke="none" fill="#666">Good morning,</text>
-  <text x="88" y="100" font-size="20" font-weight="700" stroke="none" fill="#000">Raj Bhanderi</text>
-  <!-- bell icon -->
-  <g transform="translate(336, 72)">
-    <circle cx="16" cy="8" r="12" fill="none" stroke="#000" stroke-width="1.5" />
-    <text x="16" y="13" font-size="14" text-anchor="middle" stroke="none" fill="#000">🔔</text>
-  </g>
+  <text x="92" y="84" font-size="12" fill="#C7D2FE">Good morning,</text>
+  <text x="92" y="106" font-size="20" font-weight="700" fill="#FFFFFF">Raj Bhanderi</text>
+  <!-- bell -->
+  <circle cx="358" cy="98" r="18" fill="#3730A3"/>
+  <text x="358" y="104" font-size="16" text-anchor="middle" fill="#E0E7FF">🔔</text>
+  <!-- small badge on bell -->
+  <circle cx="368" cy="85" r="7" fill="#DC2626"/>
+  <text x="368" y="89" font-size="9" font-weight="700" text-anchor="middle" fill="#fff">2</text>
 
-  <!-- section: summary cards -->
-  <text x="16" y="160" font-size="12" font-weight="700" stroke="none" fill="#666">LOAN SUMMARY</text>
+  <!-- LOAN SUMMARY section -->
+  <text x="16" y="170" font-size="11" font-weight="700" fill="#64748B">LOAN SUMMARY</text>
 
-  <!-- card 1: Total Active Loans -->
-  <g transform="translate(16, 168)">
-    <rect width="172" height="88" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-    <text x="16" y="28" font-size="11" stroke="none" fill="#666">Total Active Loans</text>
-    <text x="16" y="60" font-size="28" font-weight="700" stroke="none" fill="#000">3</text>
-    <text x="16" y="80" font-size="11" stroke="none" fill="#666">Home · Car · Personal</text>
-  </g>
+  <!-- card: Total Active Loans -->
+  <rect x="16" y="178" width="172" height="90" rx="14" fill="url(#card1)"/>
+  <text x="32" y="204" font-size="11" fill="#C7D2FE">Total Active Loans</text>
+  <text x="32" y="240" font-size="30" font-weight="800" fill="#FFFFFF">3</text>
+  <text x="32" y="260" font-size="11" fill="#A5B4FC">Home · Car · Personal</text>
 
-  <!-- card 2: Next Due Date -->
-  <g transform="translate(202, 168)">
-    <rect width="172" height="88" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-    <text x="16" y="28" font-size="11" stroke="none" fill="#666">Next Due Date</text>
-    <text x="16" y="60" font-size="28" font-weight="700" stroke="none" fill="#000">3</text>
-    <text x="16" y="80" font-size="11" stroke="none" fill="#000">days remaining</text>
-  </g>
+  <!-- card: Next Due -->
+  <rect x="202" y="178" width="172" height="90" rx="14" fill="url(#card2)"/>
+  <text x="218" y="204" font-size="11" fill="#BAE6FD">Next Due Date</text>
+  <text x="218" y="240" font-size="30" font-weight="800" fill="#FFFFFF">3</text>
+  <text x="218" y="260" font-size="11" fill="#E0F2FE">days remaining</text>
 
-  <!-- card 3: Monthly EMI total (full width) -->
-  <g transform="translate(16, 264)">
-    <rect width="358" height="72" rx="12" fill="#000" stroke="none" />
-    <text x="16" y="28" font-size="11" stroke="none" fill="#aaa">Total EMI / Month</text>
-    <text x="16" y="56" font-size="24" font-weight="700" stroke="none" fill="#fff">₹ 43,391</text>
-    <!-- mini bar graph on right -->
-    <rect x="272" y="16" width="8" height="40" rx="2" fill="#555" stroke="none" />
-    <rect x="288" y="24" width="8" height="32" rx="2" fill="#555" stroke="none" />
-    <rect x="304" y="8" width="8" height="48" rx="2" fill="#888" stroke="none" />
-    <rect x="320" y="20" width="8" height="36" rx="2" fill="#555" stroke="none" />
-    <rect x="336" y="12" width="8" height="44" rx="2" fill="#aaa" stroke="none" />
-  </g>
+  <!-- card: Monthly EMI total -->
+  <rect x="16" y="276" width="358" height="76" rx="14" fill="#1E293B"/>
+  <text x="32" y="300" font-size="11" fill="#94A3B8">Total EMI / Month</text>
+  <text x="32" y="334" font-size="26" font-weight="800" fill="#FFFFFF">₹ 43,391</text>
+  <!-- mini bars -->
+  <rect x="276" y="286" width="9" height="40" rx="3" fill="#4F46E5"/>
+  <rect x="292" y="294" width="9" height="32" rx="3" fill="#6366F1"/>
+  <rect x="308" y="280" width="9" height="48" rx="3" fill="#818CF8"/>
+  <rect x="324" y="290" width="9" height="38" rx="3" fill="#6366F1"/>
+  <rect x="340" y="284" width="9" height="44" rx="3" fill="#A5B4FC"/>
+  <!-- trend label -->
+  <text x="356" y="344" font-size="10" text-anchor="end" fill="#4F46E5">↑ 2.1%</text>
 
-  <!-- quick actions section -->
-  <text x="16" y="368" font-size="12" font-weight="700" stroke="none" fill="#666">QUICK ACTIONS</text>
+  <!-- QUICK ACTIONS -->
+  <text x="16" y="376" font-size="11" font-weight="700" fill="#64748B">QUICK ACTIONS</text>
+  <!-- tile 1 -->
+  <rect x="16" y="384" width="108" height="92" rx="14" fill="#FFFFFF"/>
+  <rect x="50" y="396" width="40" height="40" rx="10" fill="#EEF2FF"/>
+  <text x="70" y="422" font-size="22" text-anchor="middle" fill="#4F46E5">⚡</text>
+  <text x="70" y="466" font-size="11" text-anchor="middle" fill="#1E293B">Calculator</text>
+  <!-- tile 2 -->
+  <rect x="141" y="384" width="108" height="92" rx="14" fill="#FFFFFF"/>
+  <rect x="175" y="396" width="40" height="40" rx="10" fill="#F0FDF4"/>
+  <text x="195" y="422" font-size="22" text-anchor="middle" fill="#059669">+</text>
+  <text x="195" y="466" font-size="11" text-anchor="middle" fill="#1E293B">Add Loan</text>
+  <!-- tile 3 -->
+  <rect x="266" y="384" width="108" height="92" rx="14" fill="#FFFFFF"/>
+  <rect x="300" y="396" width="40" height="40" rx="10" fill="#FFF7ED"/>
+  <text x="320" y="422" font-size="20" text-anchor="middle" fill="#D97706">📊</text>
+  <text x="320" y="466" font-size="11" text-anchor="middle" fill="#1E293B">Analytics</text>
 
-  <!-- action card 1: Calculator -->
-  <g transform="translate(16, 376)">
-    <rect width="104" height="88" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-    <rect x="32" y="12" width="40" height="40" rx="8" fill="#e6e6e6" stroke="none" />
-    <text x="52" y="37" font-size="18" text-anchor="middle" stroke="none" fill="#000">=</text>
-    <text x="52" y="76" font-size="11" text-anchor="middle" stroke="none" fill="#000">Calculator</text>
-  </g>
+  <!-- RECENT REMINDERS -->
+  <text x="16" y="502" font-size="11" font-weight="700" fill="#64748B">UPCOMING EMIs</text>
+  <text x="320" y="502" font-size="12" fill="#4F46E5">See all →</text>
 
-  <!-- action card 2: Add Reminder -->
-  <g transform="translate(143, 376)">
-    <rect width="104" height="88" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-    <rect x="32" y="12" width="40" height="40" rx="8" fill="#e6e6e6" stroke="none" />
-    <text x="52" y="38" font-size="22" text-anchor="middle" stroke="none" fill="#000">+</text>
-    <text x="52" y="76" font-size="11" text-anchor="middle" stroke="none" fill="#000">Add Reminder</text>
-  </g>
+  <!-- Reminder card 1 — urgent (red) -->
+  <rect x="16" y="510" width="358" height="80" rx="14" fill="#FFFFFF"/>
+  <rect x="16" y="510" width="5" height="80" rx="2.5" fill="#DC2626"/>
+  <!-- icon -->
+  <rect x="28" y="526" width="40" height="40" rx="10" fill="#FEF2F2"/>
+  <text x="48" y="551" font-size="20" text-anchor="middle">🏠</text>
+  <!-- text -->
+  <text x="80" y="540" font-size="14" font-weight="600" fill="#1E293B">SBI Home Loan</text>
+  <text x="80" y="558" font-size="12" fill="#64748B">State Bank of India</text>
+  <!-- right side -->
+  <text x="356" y="538" font-size="14" font-weight="700" text-anchor="end" fill="#1E293B">₹32,450</text>
+  <rect x="296" y="548" width="60" height="22" rx="11" fill="#DC2626"/>
+  <text x="326" y="563" font-size="11" font-weight="600" text-anchor="middle" fill="#fff">Due in 3d ⚠</text>
 
-  <!-- action card 3: View All -->
-  <g transform="translate(270, 376)">
-    <rect width="104" height="88" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-    <rect x="32" y="12" width="40" height="40" rx="8" fill="#e6e6e6" stroke="none" />
-    <text x="52" y="37" font-size="16" text-anchor="middle" stroke="none" fill="#000">≡</text>
-    <text x="52" y="76" font-size="11" text-anchor="middle" stroke="none" fill="#000">View All</text>
-  </g>
+  <!-- Reminder card 2 — normal (blue) -->
+  <rect x="16" y="604" width="358" height="80" rx="14" fill="#FFFFFF"/>
+  <rect x="16" y="604" width="5" height="80" rx="2.5" fill="#4F46E5"/>
+  <rect x="28" y="620" width="40" height="40" rx="10" fill="#EEF2FF"/>
+  <text x="48" y="645" font-size="20" text-anchor="middle">🚗</text>
+  <text x="80" y="634" font-size="14" font-weight="600" fill="#1E293B">HDFC Car Loan</text>
+  <text x="80" y="652" font-size="12" fill="#64748B">HDFC Bank</text>
+  <text x="356" y="632" font-size="14" font-weight="700" text-anchor="end" fill="#1E293B">₹10,941</text>
+  <rect x="286" y="642" width="70" height="22" rx="11" fill="#EEF2FF"/>
+  <text x="321" y="657" font-size="11" font-weight="600" text-anchor="middle" fill="#4F46E5">Due in 12d</text>
 
-  <!-- recent reminders section -->
-  <text x="16" y="496" font-size="12" font-weight="700" stroke="none" fill="#666">RECENT REMINDERS</text>
-  <text x="318" y="496" font-size="12" stroke="none" fill="#000">See all →</text>
-
-  <!-- reminder card 1 -->
-  <g transform="translate(16, 504)">
-    <rect width="358" height="80" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-    <!-- left accent bar -->
-    <rect width="4" height="80" rx="2" fill="#000" stroke="none" />
-    <!-- icon -->
-    <rect x="16" y="20" width="40" height="40" rx="8" fill="#e6e6e6" stroke="none" />
-    <text x="36" y="45" font-size="16" text-anchor="middle" stroke="none" fill="#000">🏠</text>
-    <!-- text -->
-    <text x="72" y="32" font-size="14" font-weight="600" stroke="none" fill="#000">SBI Home Loan</text>
-    <text x="72" y="52" font-size="12" stroke="none" fill="#666">State Bank of India</text>
-    <!-- amount -->
-    <text x="290" y="30" font-size="14" font-weight="700" stroke="none" fill="#000">₹32,450</text>
-    <!-- due chip -->
-    <rect x="274" y="48" width="72" height="22" rx="11" fill="#000" stroke="none" />
-    <text x="310" y="63" font-size="11" text-anchor="middle" stroke="none" fill="#fff">Due in 3d</text>
-  </g>
-
-  <!-- reminder card 2 -->
-  <g transform="translate(16, 600)">
-    <rect width="358" height="80" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-    <!-- left accent bar (dashed = different style) -->
-    <rect width="4" height="80" rx="2" fill="#666" stroke="none" />
-    <!-- icon -->
-    <rect x="16" y="20" width="40" height="40" rx="8" fill="#e6e6e6" stroke="none" />
-    <text x="36" y="45" font-size="16" text-anchor="middle" stroke="none" fill="#000">🚗</text>
-    <!-- text -->
-    <text x="72" y="32" font-size="14" font-weight="600" stroke="none" fill="#000">HDFC Car Loan</text>
-    <text x="72" y="52" font-size="12" stroke="none" fill="#666">HDFC Bank</text>
-    <!-- amount -->
-    <text x="282" y="30" font-size="14" font-weight="700" stroke="none" fill="#000">₹10,941</text>
-    <!-- due chip -->
-    <rect x="266" y="48" width="80" height="22" rx="11" fill="#e6e6e6" stroke="none" />
-    <text x="306" y="63" font-size="11" text-anchor="middle" stroke="none" fill="#000">Due in 12d</text>
-  </g>
-
-  <!-- bottom navigation bar -->
-  <rect x="0" y="796" width="390" height="48" fill="#fff" stroke="none" />
-  <line x1="0" y1="796" x2="390" y2="796" stroke="#e5e5e0" stroke-width="1" />
-  <!-- active: home icon -->
-  <g transform="translate(55, 808)">
-    <rect x="-24" y="-4" width="48" height="32" rx="8" fill="#000" stroke="none" />
-    <text x="0" y="18" font-size="11" text-anchor="middle" stroke="none" fill="#fff">Dashboard</text>
-  </g>
-  <!-- inactive: calculator icon -->
-  <text x="195" y="828" font-size="11" text-anchor="middle" stroke="none" fill="#666">Calculator</text>
-  <!-- inactive: reminders -->
-  <text x="335" y="828" font-size="11" text-anchor="middle" stroke="none" fill="#666">Reminders</text>
+  <!-- bottom nav -->
+  <rect x="0" y="796" width="390" height="48" fill="#FFFFFF"/>
+  <rect x="0" y="796" width="390" height="1" fill="#E2E8F0"/>
+  <!-- active pill -->
+  <rect x="24" y="802" width="84" height="34" rx="17" fill="#EEF2FF"/>
+  <text x="66" y="824" font-size="11" font-weight="700" text-anchor="middle" fill="#4F46E5">Dashboard</text>
+  <text x="195" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Calculator</text>
+  <text x="324" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Reminders</text>
 
   <!-- annotations -->
-  <g data-region="annotations">
-    <circle cx="50" cy="156" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-    <text x="50" y="160" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">1</text>
-    <circle cx="355" cy="256" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-    <text x="355" y="260" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">2</text>
-    <circle cx="355" cy="464" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-    <text x="355" y="468" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">3</text>
-    <circle cx="355" cy="550" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-    <text x="355" y="554" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">4</text>
-  </g>
+  <circle cx="356" cy="230" r="12" fill="#EEF2FF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="356" y="234" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">1</text>
+  <circle cx="356" cy="316" r="12" fill="#1E293B" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="356" y="320" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">2</text>
+  <circle cx="356" cy="430" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="356" y="434" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">3</text>
+  <circle cx="356" cy="550" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="356" y="554" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">4</text>
 </svg>

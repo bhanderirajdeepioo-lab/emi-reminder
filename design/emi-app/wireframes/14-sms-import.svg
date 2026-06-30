@@ -1,95 +1,83 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
-     font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
-  <!-- canvas: 390x844 · SMS auto-detect / import bottom sheet (over reminders list) -->
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <!-- background — reminders list dimmed -->
+  <rect width="390" height="844" fill="#EEF2FF"/>
+  <rect width="390" height="48" fill="#4F46E5"/>
+  <text x="16" y="32" font-size="12" fill="#C7D2FE">9:41</text>
+  <rect x="0" y="48" width="390" height="56" fill="url(#hdr)" opacity="0.5"/>
+  <text x="195" y="84" font-size="18" font-weight="700" text-anchor="middle" fill="#FFFFFF" opacity="0.6">Reminders</text>
+  <!-- scrim -->
+  <rect width="390" height="844" fill="#0F172A" opacity="0.6"/>
 
-  <rect width="390" height="844" fill="#f4f4f4" stroke="none" />
-
-  <!-- ---- blurred / dimmed background (reminders list) ---- -->
-  <!-- status bar -->
-  <rect width="390" height="48" fill="#f0f0f0" stroke="none" />
-  <text x="16" y="32" font-size="12" stroke="none" fill="#999">9:41</text>
-  <!-- header ghost -->
-  <rect x="0" y="48" width="390" height="56" fill="#f8f8f8" stroke="none" />
-  <line x1="0" y1="104" x2="390" y2="104" stroke="#ddd" stroke-width="1" />
-  <text x="195" y="82" font-size="17" font-weight="700" text-anchor="middle" stroke="none" fill="#ccc">Loan Reminders</text>
-  <!-- dim overlay -->
-  <rect width="390" height="844" fill="rgba(0,0,0,0.6)" stroke="none" />
-
-  <!-- ---- bottom sheet ---- -->
-  <rect x="0" y="280" width="390" height="564" rx="20" fill="#fff" stroke="none" />
+  <!-- bottom sheet -->
+  <rect x="0" y="200" width="390" height="644" rx="24" fill="#FFFFFF"/>
   <!-- drag handle -->
-  <rect x="168" y="296" width="54" height="4" rx="2" fill="#ccc" stroke="none" />
+  <rect x="171" y="212" width="48" height="4" rx="2" fill="#CBD5E1"/>
 
-  <!-- sheet header -->
-  <text x="195" y="336" font-size="18" font-weight="700" text-anchor="middle" stroke="none" fill="#000">SMS Auto-Import</text>
-  <text x="195" y="358" font-size="13" text-anchor="middle" stroke="none" fill="#666">We found 3 loan EMIs in your messages</text>
+  <!-- title -->
+  <rect x="24" y="232" width="44" height="44" rx="12" fill="#EEF2FF"/>
+  <text x="46" y="259" font-size="24" text-anchor="middle">💬</text>
+  <text x="80" y="248" font-size="17" font-weight="700" fill="#1E293B">SMS Auto-Import</text>
+  <text x="80" y="268" font-size="12" fill="#64748B">3 EMI transactions detected</text>
+  <circle cx="358" cy="248" r="16" fill="#EEF2FF"/>
+  <text x="358" y="253" font-size="14" text-anchor="middle" fill="#64748B">✕</text>
 
-  <!-- selection control -->
-  <text x="24" y="388" font-size="13" stroke="none" fill="#000">Select all</text>
-  <rect x="340" y="374" width="24" height="24" rx="4" fill="#000" stroke="none" />
-  <text x="352" y="391" font-size="14" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">✓</text>
+  <!-- SMS card 1 — matched -->
+  <rect x="16" y="284" width="358" height="100" rx="14" fill="#EEF2FF"/>
+  <rect x="16" y="284" width="5" height="100" rx="2.5" fill="#4F46E5"/>
+  <text x="32" y="308" font-size="11" font-weight="600" fill="#4F46E5">HDFC BANK · 28 Jun</text>
+  <text x="32" y="328" font-size="12" fill="#1E293B" font-style="italic">"Your EMI of Rs.10,941 for Loan</text>
+  <text x="32" y="346" font-size="12" fill="#1E293B" font-style="italic">A/C XXXXXX4821 has been debited"</text>
+  <!-- extracted fields -->
+  <rect x="32" y="360" width="80" height="20" rx="10" fill="#E0E7FF"/>
+  <text x="72" y="374" font-size="11" text-anchor="middle" fill="#4F46E5">₹10,941</text>
+  <rect x="120" y="360" width="100" height="20" rx="10" fill="#E0E7FF"/>
+  <text x="170" y="374" font-size="11" text-anchor="middle" fill="#4F46E5">Car Loan</text>
+  <rect x="230" y="360" width="120" height="20" rx="10" fill="#E0E7FF"/>
+  <text x="290" y="374" font-size="11" text-anchor="middle" fill="#4F46E5">XXXXXX4821</text>
+  <!-- import toggle -->
+  <rect x="324" y="290" width="44" height="24" rx="12" fill="#4F46E5"/>
+  <circle cx="358" cy="302" r="10" fill="#FFFFFF"/>
 
-  <!-- SMS detected loan 1 -->
-  <rect x="16" y="400" width="358" height="80" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <!-- check on left -->
-  <rect x="28" y="420" width="24" height="24" rx="4" fill="#000" stroke="none" />
-  <text x="40" y="437" font-size="14" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">✓</text>
-  <!-- icon -->
-  <rect x="64" y="412" width="40" height="40" rx="8" fill="#e6e6e6" stroke="none" />
-  <text x="84" y="436" font-size="16" text-anchor="middle" stroke="none" fill="#000">🏠</text>
-  <!-- info -->
-  <text x="116" y="428" font-size="13" font-weight="600" stroke="none" fill="#000">SBI Home Loan</text>
-  <text x="116" y="448" font-size="11" stroke="none" fill="#666">SMS: "EMI of Rs.32450 debited…"</text>
-  <!-- amount on right -->
-  <text x="362" y="428" font-size="14" font-weight="700" text-anchor="end" stroke="none" fill="#000">₹32,450</text>
-  <text x="362" y="448" font-size="11" text-anchor="end" stroke="none" fill="#666">1st of month</text>
-  <!-- SMS badge -->
-  <rect x="28" y="456" width="52" height="16" rx="8" fill="#e6e6e6" stroke="none" />
-  <text x="54" y="468" font-size="10" text-anchor="middle" stroke="none" fill="#666">SMS</text>
+  <!-- SMS card 2 — matched -->
+  <rect x="16" y="396" width="358" height="100" rx="14" fill="#EEF2FF"/>
+  <rect x="16" y="396" width="5" height="100" rx="2.5" fill="#059669"/>
+  <text x="32" y="420" font-size="11" font-weight="600" fill="#059669">SBI BANK · 25 Jun</text>
+  <text x="32" y="440" font-size="12" fill="#1E293B" font-style="italic">"Dear Customer, your Home Loan EMI</text>
+  <text x="32" y="458" font-size="12" fill="#1E293B" font-style="italic">of Rs.32,450 is debited on 25/06"</text>
+  <rect x="32" y="472" width="80" height="20" rx="10" fill="#DCFCE7"/>
+  <text x="72" y="486" font-size="11" text-anchor="middle" fill="#059669">₹32,450</text>
+  <rect x="120" y="472" width="100" height="20" rx="10" fill="#DCFCE7"/>
+  <text x="170" y="486" font-size="11" text-anchor="middle" fill="#059669">Home Loan</text>
+  <rect x="324" y="402" width="44" height="24" rx="12" fill="#059669"/>
+  <circle cx="358" cy="414" r="10" fill="#FFFFFF"/>
 
-  <!-- SMS detected loan 2 -->
-  <rect x="16" y="492" width="358" height="80" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <rect x="28" y="512" width="24" height="24" rx="4" fill="#000" stroke="none" />
-  <text x="40" y="529" font-size="14" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">✓</text>
-  <rect x="64" y="504" width="40" height="40" rx="8" fill="#e6e6e6" stroke="none" />
-  <text x="84" y="528" font-size="16" text-anchor="middle" stroke="none" fill="#000">🚗</text>
-  <text x="116" y="520" font-size="13" font-weight="600" stroke="none" fill="#000">HDFC Car Loan</text>
-  <text x="116" y="540" font-size="11" stroke="none" fill="#666">SMS: "EMI of Rs.10941 auto-debit…"</text>
-  <text x="362" y="520" font-size="14" font-weight="700" text-anchor="end" stroke="none" fill="#000">₹10,941</text>
-  <text x="362" y="540" font-size="11" text-anchor="end" stroke="none" fill="#666">5th of month</text>
-  <rect x="28" y="548" width="52" height="16" rx="8" fill="#e6e6e6" stroke="none" />
-  <text x="54" y="560" font-size="10" text-anchor="middle" stroke="none" fill="#666">SMS</text>
+  <!-- SMS card 3 — uncertain -->
+  <rect x="16" y="508" width="358" height="100" rx="14" fill="#FFFBEB"/>
+  <rect x="16" y="508" width="5" height="100" rx="2.5" fill="#D97706"/>
+  <text x="32" y="532" font-size="11" font-weight="600" fill="#D97706">ICICI BANK · 20 Jun ⚠ uncertain</text>
+  <text x="32" y="552" font-size="12" fill="#1E293B" font-style="italic">"Rs.8500 debited from a/c towards</text>
+  <text x="32" y="570" font-size="12" fill="#1E293B" font-style="italic">loan repayment ref XXXX3210"</text>
+  <rect x="32" y="584" width="80" height="20" rx="10" fill="#FEF3C7"/>
+  <text x="72" y="598" font-size="11" text-anchor="middle" fill="#D97706">₹8,500</text>
+  <rect x="120" y="584" width="120" height="20" rx="10" fill="#FEF3C7"/>
+  <text x="180" y="598" font-size="11" text-anchor="middle" fill="#D97706">Confirm type ›</text>
+  <rect x="324" y="514" width="44" height="24" rx="12" fill="#E2E8F0"/>
+  <circle cx="336" cy="526" r="10" fill="#FFFFFF"/>
 
-  <!-- SMS detected loan 3 (unchecked) -->
-  <rect x="16" y="584" width="358" height="80" rx="12" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
-  <!-- unchecked box -->
-  <rect x="28" y="604" width="24" height="24" rx="4" fill="none" stroke="#ccc" stroke-width="1.5" />
-  <rect x="64" y="596" width="40" height="40" rx="8" fill="#e6e6e6" stroke="none" />
-  <text x="84" y="620" font-size="16" text-anchor="middle" stroke="none" fill="#000">💳</text>
-  <text x="116" y="612" font-size="13" font-weight="600" stroke="none" fill="#000">Axis CC EMI</text>
-  <text x="116" y="632" font-size="11" stroke="none" fill="#666">SMS: "CC EMI of Rs.4200 due…"</text>
-  <text x="362" y="612" font-size="14" font-weight="700" text-anchor="end" stroke="none" fill="#666">₹4,200</text>
-  <text x="362" y="632" font-size="11" text-anchor="end" stroke="none" fill="#666">12th of month</text>
-  <rect x="28" y="640" width="52" height="16" rx="8" fill="#e6e6e6" stroke="none" />
-  <text x="54" y="652" font-size="10" text-anchor="middle" stroke="none" fill="#666">SMS</text>
+  <!-- action row -->
+  <rect x="16" y="620" width="172" height="48" rx="14" fill="#EEF2FF"/>
+  <text x="102" y="650" font-size="13" font-weight="700" text-anchor="middle" fill="#4F46E5">Skip</text>
+  <rect x="202" y="620" width="172" height="48" rx="14" fill="#4F46E5"/>
+  <text x="288" y="650" font-size="13" font-weight="700" text-anchor="middle" fill="#FFFFFF">Import Selected (2)</text>
 
-  <!-- note about SMS -->
-  <text x="195" y="688" font-size="12" text-anchor="middle" stroke="none" fill="#aaa">Detected from 30 days of messages. SMS not stored.</text>
-
-  <!-- import button -->
-  <rect x="16" y="700" width="358" height="52" rx="12" fill="#000" stroke="none" />
-  <text x="195" y="732" font-size="15" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">Import 2 Selected Loans</text>
-
-  <!-- cancel -->
-  <text x="195" y="776" font-size="13" text-anchor="middle" stroke="none" fill="#666">Cancel</text>
-
-  <!-- annotations -->
-  <circle cx="365" cy="388" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="392" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">1</text>
-  <circle cx="365" cy="440" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="444" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">2</text>
-  <circle cx="365" cy="624" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="628" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">3</text>
-  <circle cx="365" cy="716" r="12" fill="#000" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="720" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">4</text>
+  <!-- info text -->
+  <text x="195" y="690" font-size="11" text-anchor="middle" fill="#94A3B8">Imported EMIs are saved as paid reminders</text>
+  <text x="195" y="708" font-size="11" text-anchor="middle" fill="#94A3B8">SMS data never leaves your device</text>
 </svg>

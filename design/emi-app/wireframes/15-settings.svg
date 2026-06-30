@@ -1,100 +1,152 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
-     font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
-  <!-- canvas: 390x844 · settings screen -->
-
-  <rect width="390" height="844" fill="#f4f4f4" stroke="none" />
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="profGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="#EEF2FF"/>
 
   <!-- status bar -->
-  <rect width="390" height="48" fill="#fff" stroke="none" />
-  <text x="16" y="32" font-size="12" stroke="none" fill="#000">9:41</text>
-  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#000" stroke-width="1.5" />
-  <rect x="342" y="19" width="24" height="10" rx="1" fill="#000" stroke="none" />
+  <rect width="390" height="48" fill="#4F46E5"/>
+  <text x="16" y="32" font-size="12" fill="#C7D2FE">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#C7D2FE"/>
 
   <!-- header -->
-  <rect x="0" y="48" width="390" height="56" fill="#fff" stroke="none" />
-  <line x1="0" y1="104" x2="390" y2="104" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="84" font-size="20" stroke="none" fill="#000">←</text>
-  <text x="195" y="84" font-size="18" font-weight="700" text-anchor="middle" stroke="none" fill="#000">Settings</text>
+  <rect x="0" y="48" width="390" height="56" fill="#4F46E5"/>
+  <text x="20" y="84" font-size="20" fill="#FFFFFF">←</text>
+  <text x="195" y="84" font-size="18" font-weight="700" text-anchor="middle" fill="#FFFFFF">Settings</text>
 
-  <!-- ---- Section: Notifications ---- -->
-  <text x="20" y="128" font-size="11" font-weight="700" stroke="none" fill="#888">NOTIFICATIONS</text>
-  <rect x="0" y="136" width="390" height="188" fill="#fff" stroke="none" />
-  <!-- row 1 -->
-  <line x1="20" y1="136" x2="390" y2="136" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="162" font-size="14" stroke="none" fill="#000">EMI Reminders</text>
-  <text x="20" y="182" font-size="12" stroke="none" fill="#888">Notify before each EMI due date</text>
-  <rect x="330" y="152" width="40" height="22" rx="11" fill="#000" stroke="none" />
-  <circle cx="360" cy="163" r="9" fill="#fff" stroke="none" />
-  <!-- row 2 -->
-  <line x1="20" y1="196" x2="390" y2="196" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="222" font-size="14" stroke="none" fill="#000">Advance reminder</text>
-  <text x="20" y="242" font-size="12" stroke="none" fill="#888">How many days before due date</text>
-  <text x="358" y="230" font-size="14" text-anchor="end" stroke="none" fill="#000">3 days  ›</text>
-  <!-- row 3 -->
-  <line x1="20" y1="256" x2="390" y2="256" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="282" font-size="14" stroke="none" fill="#000">Reminder time</text>
-  <text x="20" y="302" font-size="12" stroke="none" fill="#888">Time of day for notification</text>
-  <text x="358" y="290" font-size="14" text-anchor="end" stroke="none" fill="#000">9:00 AM  ›</text>
-  <!-- row 4 -->
-  <line x1="20" y1="316" x2="390" y2="316" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="342" font-size="14" stroke="none" fill="#000">Overdue alerts</text>
-  <rect x="330" y="328" width="40" height="22" rx="11" fill="#000" stroke="none" />
-  <circle cx="360" cy="339" r="9" fill="#fff" stroke="none" />
-  <line x1="0" y1="360" x2="390" y2="360" stroke="#e5e5e0" stroke-width="1" />
+  <!-- profile card -->
+  <rect x="16" y="116" width="358" height="92" rx="16" fill="url(#profGrad)"/>
+  <!-- avatar -->
+  <circle cx="64" cy="162" r="30" fill="#312E81"/>
+  <text x="64" y="169" font-size="16" font-weight="700" text-anchor="middle" fill="#E0E7FF">RB</text>
+  <!-- name + email -->
+  <text x="108" y="152" font-size="17" font-weight="700" fill="#FFFFFF">Raj Bhanderi</text>
+  <text x="108" y="172" font-size="13" fill="#C7D2FE">raj@example.com</text>
+  <text x="108" y="192" font-size="11" fill="#A5B4FC">3 active loans · Member since 2024</text>
+  <!-- edit icon -->
+  <circle cx="352" cy="162" r="16" fill="#312E81"/>
+  <text x="352" y="167" font-size="14" text-anchor="middle" fill="#E0E7FF">✏</text>
 
-  <!-- ---- Section: Appearance ---- -->
-  <text x="20" y="380" font-size="11" font-weight="700" stroke="none" fill="#888">APPEARANCE</text>
-  <rect x="0" y="388" width="390" height="128" fill="#fff" stroke="none" />
-  <line x1="0" y1="388" x2="390" y2="388" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="414" font-size="14" stroke="none" fill="#000">Theme</text>
-  <text x="358" y="414" font-size="14" text-anchor="end" stroke="none" fill="#000">System  ›</text>
-  <line x1="20" y1="428" x2="390" y2="428" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="454" font-size="14" stroke="none" fill="#000">Currency symbol</text>
-  <text x="358" y="454" font-size="14" text-anchor="end" stroke="none" fill="#000">₹ INR  ›</text>
-  <line x1="20" y1="468" x2="390" y2="468" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="494" font-size="14" stroke="none" fill="#000">Language</text>
-  <text x="358" y="494" font-size="14" text-anchor="end" stroke="none" fill="#000">English  ›</text>
-  <line x1="0" y1="508" x2="390" y2="508" stroke="#e5e5e0" stroke-width="1" />
+  <!-- ── NOTIFICATIONS SECTION ── -->
+  <text x="20" y="232" font-size="11" font-weight="700" fill="#4F46E5">NOTIFICATIONS</text>
+  <rect x="0" y="240" width="390" height="200" fill="#FFFFFF"/>
+  <rect x="0" y="240" width="390" height="1" fill="#E2E8F0"/>
 
-  <!-- ---- Section: Data ---- -->
-  <text x="20" y="528" font-size="11" font-weight="700" stroke="none" fill="#888">DATA</text>
-  <rect x="0" y="536" width="390" height="128" fill="#fff" stroke="none" />
-  <line x1="0" y1="536" x2="390" y2="536" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="562" font-size="14" stroke="none" fill="#000">Export data (CSV)</text>
-  <text x="358" y="562" font-size="18" text-anchor="end" stroke="none" fill="#ccc">›</text>
-  <line x1="20" y1="576" x2="390" y2="576" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="602" font-size="14" stroke="none" fill="#000">Backup to Google Drive</text>
-  <text x="358" y="602" font-size="18" text-anchor="end" stroke="none" fill="#ccc">›</text>
-  <line x1="20" y1="616" x2="390" y2="616" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="642" font-size="14" stroke="none" fill="#000">Restore from backup</text>
-  <text x="358" y="642" font-size="18" text-anchor="end" stroke="none" fill="#ccc">›</text>
-  <line x1="0" y1="656" x2="390" y2="656" stroke="#e5e5e0" stroke-width="1" />
+  <!-- row: EMI Reminders -->
+  <circle cx="44" cy="270" r="16" fill="#EEF2FF"/>
+  <text x="44" y="275" font-size="16" text-anchor="middle">🔔</text>
+  <text x="72" y="264" font-size="14" font-weight="600" fill="#1E293B">EMI Reminders</text>
+  <text x="72" y="282" font-size="12" fill="#64748B">Notify before EMI due date</text>
+  <rect x="322" y="256" width="44" height="24" rx="12" fill="#4F46E5"/>
+  <circle cx="356" cy="268" r="10" fill="#FFFFFF"/>
+  <rect x="0" y="294" width="390" height="1" fill="#F1F5F9"/>
 
-  <!-- ---- Section: About ---- -->
-  <text x="20" y="676" font-size="11" font-weight="700" stroke="none" fill="#888">ABOUT</text>
-  <rect x="0" y="684" width="390" height="88" fill="#fff" stroke="none" />
-  <line x1="0" y1="684" x2="390" y2="684" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="710" font-size="14" stroke="none" fill="#000">App Version</text>
-  <text x="358" y="710" font-size="14" text-anchor="end" stroke="none" fill="#888">2.1.0</text>
-  <line x1="20" y1="724" x2="390" y2="724" stroke="#e5e5e0" stroke-width="1" />
-  <text x="20" y="750" font-size="14" stroke="none" fill="#000">Privacy Policy</text>
-  <text x="358" y="750" font-size="18" text-anchor="end" stroke="none" fill="#ccc">›</text>
-  <line x1="0" y1="764" x2="390" y2="764" stroke="#e5e5e0" stroke-width="1" />
+  <!-- row: Advance Reminder -->
+  <circle cx="44" cy="322" r="16" fill="#F0FDF4"/>
+  <text x="44" y="327" font-size="16" text-anchor="middle">📅</text>
+  <text x="72" y="316" font-size="14" font-weight="600" fill="#1E293B">Advance Reminder</text>
+  <text x="72" y="334" font-size="12" fill="#64748B">Days before due date</text>
+  <rect x="292" y="310" width="64" height="24" rx="8" fill="#EEF2FF"/>
+  <text x="324" y="326" font-size="13" font-weight="700" text-anchor="middle" fill="#4F46E5">3 days ›</text>
+  <rect x="0" y="346" width="390" height="1" fill="#F1F5F9"/>
 
-  <!-- bottom nav bar -->
-  <rect x="0" y="796" width="390" height="48" fill="#fff" stroke="none" />
-  <line x1="0" y1="796" x2="390" y2="796" stroke="#e5e5e0" stroke-width="1" />
-  <text x="55" y="826" font-size="11" text-anchor="middle" stroke="none" fill="#666">Dashboard</text>
-  <text x="195" y="826" font-size="11" text-anchor="middle" stroke="none" fill="#666">Calculator</text>
-  <text x="335" y="826" font-size="11" text-anchor="middle" stroke="none" fill="#666">Reminders</text>
+  <!-- row: Reminder Time -->
+  <circle cx="44" cy="374" r="16" fill="#FFF7ED"/>
+  <text x="44" y="379" font-size="16" text-anchor="middle">⏰</text>
+  <text x="72" y="368" font-size="14" font-weight="600" fill="#1E293B">Reminder Time</text>
+  <text x="72" y="386" font-size="12" fill="#64748B">When to send notification</text>
+  <rect x="280" y="362" width="80" height="24" rx="8" fill="#EEF2FF"/>
+  <text x="320" y="378" font-size="13" font-weight="700" text-anchor="middle" fill="#4F46E5">9:00 AM ›</text>
+  <rect x="0" y="398" width="390" height="1" fill="#F1F5F9"/>
+
+  <!-- row: Overdue Alerts -->
+  <circle cx="44" cy="426" r="16" fill="#FEF2F2"/>
+  <text x="44" y="431" font-size="16" text-anchor="middle">🚨</text>
+  <text x="72" y="420" font-size="14" font-weight="600" fill="#1E293B">Overdue Alerts</text>
+  <text x="72" y="438" font-size="12" fill="#64748B">Alert if payment missed</text>
+  <rect x="322" y="414" width="44" height="24" rx="12" fill="#4F46E5"/>
+  <circle cx="356" cy="426" r="10" fill="#FFFFFF"/>
+  <rect x="0" y="440" width="390" height="1" fill="#E2E8F0"/>
+
+  <!-- ── APPEARANCE SECTION ── -->
+  <text x="20" y="460" font-size="11" font-weight="700" fill="#4F46E5">APPEARANCE</text>
+  <rect x="0" y="468" width="390" height="152" fill="#FFFFFF"/>
+  <rect x="0" y="468" width="390" height="1" fill="#E2E8F0"/>
+
+  <!-- row: Theme -->
+  <circle cx="44" cy="496" r="16" fill="#F3E8FF"/>
+  <text x="44" y="501" font-size="16" text-anchor="middle">🎨</text>
+  <text x="72" y="490" font-size="14" font-weight="600" fill="#1E293B">Theme</text>
+  <text x="72" y="508" font-size="12" fill="#64748B">Colour scheme</text>
+  <rect x="280" y="484" width="80" height="24" rx="8" fill="#F3E8FF"/>
+  <text x="320" y="500" font-size="12" font-weight="700" text-anchor="middle" fill="#7C3AED">System ›</text>
+  <rect x="0" y="518" width="390" height="1" fill="#F1F5F9"/>
+
+  <!-- row: Currency -->
+  <circle cx="44" cy="546" r="16" fill="#F0FDF4"/>
+  <text x="44" y="551" font-size="16" text-anchor="middle">💰</text>
+  <text x="72" y="540" font-size="14" font-weight="600" fill="#1E293B">Currency</text>
+  <text x="72" y="558" font-size="12" fill="#64748B">Symbol shown in amounts</text>
+  <rect x="284" y="534" width="76" height="24" rx="8" fill="#F0FDF4"/>
+  <text x="322" y="550" font-size="12" font-weight="700" text-anchor="middle" fill="#059669">₹ INR ›</text>
+  <rect x="0" y="568" width="390" height="1" fill="#F1F5F9"/>
+
+  <!-- row: Language -->
+  <circle cx="44" cy="596" r="16" fill="#EFF6FF"/>
+  <text x="44" y="601" font-size="16" text-anchor="middle">🌐</text>
+  <text x="72" y="590" font-size="14" font-weight="600" fill="#1E293B">Language</text>
+  <text x="72" y="608" font-size="12" fill="#64748B">App display language</text>
+  <rect x="274" y="584" width="86" height="24" rx="8" fill="#EFF6FF"/>
+  <text x="317" y="600" font-size="12" font-weight="700" text-anchor="middle" fill="#2563EB">English ›</text>
+  <rect x="0" y="620" width="390" height="1" fill="#E2E8F0"/>
+
+  <!-- ── DATA SECTION ── -->
+  <text x="20" y="640" font-size="11" font-weight="700" fill="#4F46E5">DATA &amp; BACKUP</text>
+  <rect x="0" y="648" width="390" height="100" fill="#FFFFFF"/>
+  <rect x="0" y="648" width="390" height="1" fill="#E2E8F0"/>
+
+  <!-- row: Export CSV -->
+  <circle cx="44" cy="676" r="16" fill="#EFF6FF"/>
+  <text x="44" y="681" font-size="16" text-anchor="middle">📤</text>
+  <text x="72" y="670" font-size="14" font-weight="600" fill="#1E293B">Export data (CSV)</text>
+  <text x="72" y="688" font-size="12" fill="#64748B">Download all loan data</text>
+  <text x="362" y="679" font-size="18" text-anchor="end" fill="#CBD5E1">›</text>
+  <rect x="0" y="698" width="390" height="1" fill="#F1F5F9"/>
+
+  <!-- row: Google Drive backup -->
+  <circle cx="44" cy="726" r="16" fill="#F0FDF4"/>
+  <text x="44" y="731" font-size="16" text-anchor="middle">☁</text>
+  <text x="72" y="720" font-size="14" font-weight="600" fill="#1E293B">Backup to Google Drive</text>
+  <text x="72" y="738" font-size="12" fill="#64748B">Last backup: 2 days ago</text>
+  <rect x="310" y="716" width="56" height="24" rx="8" fill="#F0FDF4"/>
+  <text x="338" y="732" font-size="11" font-weight="700" text-anchor="middle" fill="#059669">Backup ›</text>
+  <rect x="0" y="748" width="390" height="1" fill="#E2E8F0"/>
+
+  <!-- About / version -->
+  <rect x="0" y="748" width="390" height="48" fill="#FFFFFF"/>
+  <text x="20" y="776" font-size="13" fill="#94A3B8">App Version</text>
+  <text x="362" y="776" font-size="13" text-anchor="end" fill="#CBD5E1">2.1.0</text>
+
+  <!-- bottom nav -->
+  <rect x="0" y="796" width="390" height="48" fill="#FFFFFF"/>
+  <rect x="0" y="796" width="390" height="1" fill="#E2E8F0"/>
+  <text x="66" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Dashboard</text>
+  <text x="195" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Calculator</text>
+  <text x="324" y="824" font-size="11" text-anchor="middle" fill="#94A3B8">Reminders</text>
 
   <!-- annotations -->
-  <circle cx="365" cy="165" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="169" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">1</text>
-  <circle cx="365" cy="283" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="287" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">2</text>
-  <circle cx="365" cy="494" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="498" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">3</text>
-  <circle cx="365" cy="602" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
-  <text x="365" y="606" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">4</text>
+  <circle cx="356" cy="162" r="0"/><!-- placeholder -->
+  <circle cx="14" cy="268" r="12" fill="#EEF2FF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="14" y="272" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">1</text>
+  <circle cx="14" cy="374" r="12" fill="#EEF2FF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="14" y="378" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">2</text>
+  <circle cx="14" cy="496" r="12" fill="#EEF2FF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="14" y="500" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">3</text>
+  <circle cx="14" cy="676" r="12" fill="#EEF2FF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="14" y="680" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">4</text>
 </svg>
