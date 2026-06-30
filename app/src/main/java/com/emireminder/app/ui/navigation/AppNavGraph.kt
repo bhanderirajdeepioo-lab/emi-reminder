@@ -20,8 +20,6 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -77,12 +75,11 @@ fun AppNavGraph() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val context = LocalContext.current
-    // Async read so SharedPreferences disk access doesn't block the first composition frame.
-    // The IO read completes in < 1ms — long before the 850ms splash animation ends.
-    var firstLaunch by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        firstLaunch = withContext(Dispatchers.IO) { isFirstLaunch(context) }
-    }
+    // Synchronous read is safe: SharedPreferences is memory-cached after first load (< 1ms).
+    // The real ANR risk (Room cold-start) is pre-warmed in EmiApp.warmupDatabase().
+    // Async read introduced a race: firstLaunch started false so first-time users
+    // saw HOME instead of Onboarding when SplashScreen fired before the IO result.
+    val firstLaunch = remember { isFirstLaunch(context) }
     val showBottomBar = currentRoute in bottomNavRoutes
 
     Scaffold(
@@ -92,11 +89,12 @@ fun AppNavGraph() {
                     currentRoute = currentRoute,
                     onNavigate = { route ->
                         navController.navigate(route) {
-                            popUpTo(NavRoutes.HOME) {
-                                saveState = route != NavRoutes.REMINDERS
-                            }
+                            // Never save or restore sub-nav state when switching tabs.
+                            // saveState=true caused Finance→ToolsHub→Comparison to be
+                            // restored when tapping Finance tab again (HEL-115).
+                            popUpTo(NavRoutes.HOME) { saveState = false }
                             launchSingleTop = true
-                            restoreState = route != NavRoutes.REMINDERS
+                            restoreState = false
                         }
                     }
                 )
