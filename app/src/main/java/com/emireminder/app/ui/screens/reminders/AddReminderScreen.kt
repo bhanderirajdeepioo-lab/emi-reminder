@@ -1,5 +1,6 @@
 package com.emireminder.app.ui.screens.reminders
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,7 +44,9 @@ fun AddReminderScreen(
     var loanDropdownOpen by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
     val handleDismiss = { viewModel.resetForm(); onBack() }
-    val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+    val fmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+
+    BackHandler(onBack = handleDismiss)
 
     // Update selectedLoan when loans load
     LaunchedEffect(loans) {

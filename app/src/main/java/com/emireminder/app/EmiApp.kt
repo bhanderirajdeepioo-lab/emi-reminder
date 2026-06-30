@@ -6,7 +6,12 @@ import android.app.NotificationManager
 import android.os.Build
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.emireminder.app.data.db.AppDatabase
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -14,6 +19,15 @@ class EmiApp : Application(), Configuration.Provider {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
+
+    // Injecting the DB here forces Room to open the file on Dispatchers.IO during
+    // Application.onCreate(), before the user can reach the Reminders tab. Without
+    // this, Room opens on the first ViewModel query which can hit the main thread
+    // and produce "Skipped N frames" / ANR on cold first-launch.
+    @Inject
+    lateinit var database: AppDatabase
+
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -23,6 +37,15 @@ class EmiApp : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannels()
+        warmupDatabase()
+    }
+
+    private fun warmupDatabase() {
+        appScope.launch {
+            // Touch the DB on IO so Room creates the file and runs schema setup
+            // before the first user interaction.
+            database.openHelper.writableDatabase
+        }
     }
 
     private fun createNotificationChannels() {

@@ -64,7 +64,7 @@ private val pages = listOf(
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun OnboardingScreen(onComplete: () -> Unit) {
-    var page by remember { mutableIntStateOf(0) }
+    var page by rememberSaveable { mutableIntStateOf(0) }
     val smsPermission = rememberPermissionState(android.Manifest.permission.READ_SMS)
     val notifPermission = if (android.os.Build.VERSION.SDK_INT >= 33) {
         rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -210,17 +210,14 @@ fun OnboardingScreen(onComplete: () -> Unit) {
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = onComplete) { Text("Skip for now", color = Color(0xFFB0AEC0)) }
         } else {
+            // Only page 0 reaches this branch — always move forward, never call onComplete()
             Button(
-                onClick = { if (page < pages.lastIndex) page++ else onComplete() },
+                onClick = { page = page + 1 },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
             ) {
-                Text(
-                    if (page < pages.lastIndex) "Next" else "Get Started",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
+                Text("Next", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
         }
 
