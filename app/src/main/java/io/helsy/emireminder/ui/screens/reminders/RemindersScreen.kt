@@ -37,14 +37,16 @@ fun RemindersScreen(
     viewModel: RemindersViewModel = hiltViewModel(),
 ) {
     val reminders by viewModel.reminders.collectAsState()
-    val today = LocalDate.now()
+    val today = remember { LocalDate.now() }
     val todayDay = today.dayOfMonth
 
-    val upcoming = reminders.filter { it.isActive && it.dueDayOfMonth >= todayDay }
-        .sortedBy { it.dueDayOfMonth }
-    val overdue = reminders.filter { it.isActive && it.dueDayOfMonth < todayDay }
-        .sortedBy { it.dueDayOfMonth }
-    val done = reminders.filter { !it.isActive }
+    val upcoming = remember(reminders, todayDay) {
+        reminders.filter { it.isActive && it.dueDayOfMonth >= todayDay }.sortedBy { it.dueDayOfMonth }
+    }
+    val overdue = remember(reminders, todayDay) {
+        reminders.filter { it.isActive && it.dueDayOfMonth < todayDay }.sortedBy { it.dueDayOfMonth }
+    }
+    val done = remember(reminders) { reminders.filter { !it.isActive } }
 
     Scaffold(
         topBar = {
@@ -88,7 +90,7 @@ fun RemindersScreen(
                             color = UrgentRed,
                         )
                     }
-                    items(overdue) { r ->
+                    items(overdue, key = { it.id }) { r ->
                         ReminderCard(
                             reminder = r,
                             daysText = "Overdue by ${todayDay - r.dueDayOfMonth}d",
@@ -107,7 +109,7 @@ fun RemindersScreen(
                             color = SafeGreen,
                         )
                     }
-                    items(upcoming) { r ->
+                    items(upcoming, key = { it.id }) { r ->
                         val daysLeft = r.dueDayOfMonth - todayDay
                         ReminderCard(
                             reminder = r,
@@ -127,7 +129,7 @@ fun RemindersScreen(
                             color = Color(0xFF94A3B8),
                         )
                     }
-                    items(done) { r ->
+                    items(done, key = { it.id }) { r ->
                         ReminderCard(
                             reminder = r,
                             daysText = "Paid",
@@ -173,7 +175,7 @@ private fun ReminderCard(
     onClick: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+    val fmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
 
     Card(
         modifier = Modifier

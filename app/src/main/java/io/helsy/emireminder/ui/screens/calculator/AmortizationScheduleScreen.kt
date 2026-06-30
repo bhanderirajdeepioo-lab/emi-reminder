@@ -40,7 +40,7 @@ fun AmortizationScheduleScreen(
                 }
                 Divider()
             }
-            itemsIndexed(schedule) { _, row ->
+            itemsIndexed(schedule, key = { index, _ -> index }) { _, row ->
                 Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                     Text("${row.first}", modifier = Modifier.weight(1f))
                     Text("₹%.0f".format(row.second), modifier = Modifier.weight(2f))

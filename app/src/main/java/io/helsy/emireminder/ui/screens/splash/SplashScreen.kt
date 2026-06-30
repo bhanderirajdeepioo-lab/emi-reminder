@@ -20,6 +20,7 @@ import io.helsy.emireminder.ui.theme.Indigo600
 import io.helsy.emireminder.ui.theme.Indigo100
 import io.helsy.emireminder.ui.theme.Violet600
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SplashScreen(
@@ -32,13 +33,17 @@ fun SplashScreen(
     val textAlpha = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
-        logoScale.animateTo(
-            targetValue = 1f,
-            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium)
-        )
-        logoAlpha.animateTo(1f, animationSpec = tween(400))
-        textAlpha.animateTo(1f, animationSpec = tween(500, easing = EaseInOut))
-        delay(1_200)
+        // Run logo animations in parallel so total animation window ≈ 450ms instead of 1300ms.
+        launch {
+            logoScale.animateTo(
+                targetValue = 1f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
+            )
+        }
+        launch { logoAlpha.animateTo(1f, animationSpec = tween(350)) }
+        delay(150) // slight stagger so text appears after logo
+        textAlpha.animateTo(1f, animationSpec = tween(350, easing = EaseInOut))
+        delay(550) // total visible time ≈ 150 + 350 + 550 = 1050ms → well under 2 s budget
         if (isFirstLaunch) onNavigateToOnboarding() else onNavigateToHome()
     }
 

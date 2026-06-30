@@ -104,7 +104,7 @@ fun HomeScreen(
                         )
                     }
                 }
-                items(loans.take(5)) { loan ->
+                items(loans.take(5), key = { it.id }) { loan ->
                     LoanReminderCard(loan = loan, onClick = { onNavigateToLoanDetail(loan.id) })
                 }
             }
@@ -116,8 +116,9 @@ fun HomeScreen(
 
 @Composable
 private fun DashboardHeader(onNavigateToSettings: () -> Unit) {
-    val today = LocalDate.now()
-    val dateText = today.format(DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.ENGLISH))
+    val dateText = remember {
+        LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.ENGLISH))
+    }
 
     Box(
         modifier = Modifier
@@ -330,8 +331,8 @@ private fun EmptyState(
 
 @Composable
 private fun LoanSummarySection(loans: List<Loan>) {
-    val totalEmi = loans.sumOf { it.emiAmount }
-    val currencyFmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+    val totalEmi = remember(loans) { loans.sumOf { it.emiAmount } }
+    val currencyFmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Spacer(Modifier.height(16.dp))
@@ -352,8 +353,11 @@ private fun LoanSummarySection(loans: List<Loan>) {
                     Text("Total Active Loans", fontSize = 11.sp, color = Color(0xFFC7D2FE))
                     Spacer(Modifier.height(8.dp))
                     Text("${loans.size}", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                    val loanTypesSummary = remember(loans) {
+                        loans.take(3).joinToString(" · ") { it.type.lowercase().replaceFirstChar { c -> c.uppercase() } }
+                    }
                     Text(
-                        loans.take(3).joinToString(" · ") { it.type.lowercase().replaceFirstChar { c -> c.uppercase() } },
+                        loanTypesSummary,
                         fontSize = 11.sp,
                         color = Color(0xFFA5B4FC),
                     )
@@ -474,6 +478,8 @@ private fun QuickActionTile(
 
 // ── EMI reminder card ─────────────────────────────────────────────────────────
 
+private val loanAmountFmt = NumberFormat.getNumberInstance(Locale("en", "IN"))
+
 @Composable
 private fun LoanReminderCard(loan: Loan, onClick: () -> Unit) {
     val urgentColor = UrgentRed
@@ -531,7 +537,7 @@ private fun LoanReminderCard(loan: Loan, onClick: () -> Unit) {
 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        "₹${NumberFormat.getNumberInstance(Locale("en", "IN")).format(loan.emiAmount.toLong())}",
+                        "₹${loanAmountFmt.format(loan.emiAmount.toLong())}",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Slate800,
