@@ -22,12 +22,12 @@
   <rect x="342" y="19" width="24" height="10" rx="1" fill="#C7D2FE"/>
   <!-- header gradient -->
   <rect x="0" y="48" width="390" height="100" fill="url(#hdr)"/>
-  <!-- avatar -->
-  <circle cx="52" cy="98" r="26" fill="#312E81"/>
-  <text x="52" y="104" font-size="13" font-weight="700" text-anchor="middle" fill="#E0E7FF">RB</text>
-  <!-- greeting -->
-  <text x="92" y="84" font-size="12" fill="#C7D2FE">Good morning,</text>
-  <text x="92" y="106" font-size="20" font-weight="700" fill="#FFFFFF">Raj Bhanderi</text>
+  <!-- app logo circle -->
+  <circle cx="48" cy="98" r="22" fill="#312E81"/>
+  <text x="48" y="106" font-size="20" text-anchor="middle" fill="#E0E7FF">₹</text>
+  <!-- app name + date (no user name) -->
+  <text x="82" y="84" font-size="14" font-weight="800" fill="#FFFFFF">EMI Reminder &amp; Calculator</text>
+  <text x="82" y="106" font-size="12" fill="#C7D2FE">Mon, 30 Jun 2026</text>
   <!-- bell -->
   <circle cx="358" cy="98" r="18" fill="#3730A3"/>
   <text x="358" y="104" font-size="16" text-anchor="middle" fill="#E0E7FF">🔔</text>

@@ -21,13 +21,13 @@
 
   <!-- profile card -->
   <rect x="16" y="116" width="358" height="92" rx="16" fill="url(#profGrad)"/>
-  <!-- avatar -->
+  <!-- avatar — generic (no initials) -->
   <circle cx="64" cy="162" r="30" fill="#312E81"/>
-  <text x="64" y="169" font-size="16" font-weight="700" text-anchor="middle" fill="#E0E7FF">RB</text>
-  <!-- name + email -->
-  <text x="108" y="152" font-size="17" font-weight="700" fill="#FFFFFF">Raj Bhanderi</text>
-  <text x="108" y="172" font-size="13" fill="#C7D2FE">raj@example.com</text>
-  <text x="108" y="192" font-size="11" fill="#A5B4FC">3 active loans · Member since 2024</text>
+  <text x="64" y="169" font-size="22" text-anchor="middle" fill="#A5B4FC">👤</text>
+  <!-- profile prompt (no hardcoded name) -->
+  <text x="108" y="152" font-size="17" font-weight="700" fill="#FFFFFF">Your Profile</text>
+  <text x="108" y="172" font-size="13" fill="#C7D2FE">Tap to set up name &amp; photo</text>
+  <text x="108" y="192" font-size="11" fill="#A5B4FC">3 active loans · EMI Reminder App</text>
   <!-- edit icon -->
   <circle cx="352" cy="162" r="16" fill="#312E81"/>
   <text x="352" y="167" font-size="14" text-anchor="middle" fill="#E0E7FF">✏</text>
