@@ -235,7 +235,7 @@ fun SettingsScreen(
                                 testSent = true
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            enabled = !testSent,
+                            enabled = !testSent && (notifPermission == null || notifPermission.status.isGranted),
                             colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
                         ) {
                             Icon(Icons.Default.Notifications, null)
