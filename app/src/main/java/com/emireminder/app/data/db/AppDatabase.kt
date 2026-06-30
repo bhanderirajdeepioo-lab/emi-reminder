@@ -11,7 +11,7 @@ import com.emireminder.app.data.db.entity.SMSImport
 
 @Database(
     entities = [Loan::class, Reminder::class, SMSImport::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

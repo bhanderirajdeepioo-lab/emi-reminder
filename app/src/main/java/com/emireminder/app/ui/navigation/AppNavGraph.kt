@@ -132,9 +132,9 @@ fun AppNavGraph() {
                     onNavigateToAnalytics   = { navController.navigate(NavRoutes.LOAN_ANALYTICS) },
                     onNavigateToReminders   = {
                         navController.navigate(NavRoutes.REMINDERS) {
-                            popUpTo(NavRoutes.HOME) { saveState = true }
+                            popUpTo(NavRoutes.HOME) { saveState = false }
                             launchSingleTop = true
-                            restoreState = true
+                            restoreState = false
                         }
                     },
                     onNavigateToSmsImport   = { navController.navigate(NavRoutes.SMS_IMPORT) },

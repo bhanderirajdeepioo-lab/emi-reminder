@@ -13,19 +13,21 @@ import androidx.room.PrimaryKey
             entity = Loan::class,
             parentColumns = ["id"],
             childColumns = ["loanId"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.SET_NULL
         )
     ]
 )
 data class Reminder(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val loanId: Int,
+    val loanId: Int? = null,
     val loanName: String,
+    val bankName: String = "",
     val emiAmount: Double,
     val dueDayOfMonth: Int,      // 1–31
     val frequency: String = "MONTHLY",
     val isActive: Boolean = true,
+    val notificationEnabled: Boolean = true,
     val notes: String = "",
     val lastTriggeredAt: Long? = null,
 )
