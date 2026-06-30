@@ -54,8 +54,8 @@
             android:name=".receiver.NotificationActionReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="io.helsy.emireminder.ACTION_MARK_PAID" />
-                <action android:name="io.helsy.emireminder.ACTION_SNOOZE" />
+                <action android:name="com.emireminder.app.ACTION_MARK_PAID" />
+                <action android:name="com.emireminder.app.ACTION_SNOOZE" />
             </intent-filter>
         </receiver>
 

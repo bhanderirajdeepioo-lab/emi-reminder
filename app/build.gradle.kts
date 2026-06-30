@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "io.helsy.emireminder"
+    namespace = "com.emireminder.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "io.helsy.emireminder"
+        applicationId = "com.emireminder.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
