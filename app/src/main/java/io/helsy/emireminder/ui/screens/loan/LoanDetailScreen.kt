@@ -133,8 +133,6 @@ private fun LoanDetailContent(
                     )
                 }
             }
-
-            Spacer(Modifier.height(20.dp))
         }
 
         // EMI spotlight
@@ -147,11 +145,12 @@ private fun LoanDetailContent(
             Row(
                 modifier = Modifier.fillMaxWidth().padding(20.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 EmiStatColumn("Monthly EMI", fmt.format(loan.emiAmount), Indigo600)
-                Divider(modifier = Modifier.width(1.dp).height(48.dp))
+                Box(modifier = Modifier.width(1.dp).height(48.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)))
                 EmiStatColumn("Rate", "%.1f%%".format(loan.interestRate), Color(0xFF0891B2))
-                Divider(modifier = Modifier.width(1.dp).height(48.dp))
+                Box(modifier = Modifier.width(1.dp).height(48.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)))
                 EmiStatColumn("Tenure", "${loan.tenureMonths} mo", SafeGreen)
             }
         }
