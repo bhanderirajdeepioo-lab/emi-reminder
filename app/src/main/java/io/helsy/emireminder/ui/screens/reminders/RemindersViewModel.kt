@@ -15,7 +15,7 @@ class RemindersViewModel @Inject constructor(
     private val reminderRepository: ReminderRepository,
 ) : ViewModel() {
 
-    val reminders = reminderRepository.getActiveReminders()
+    val reminders = reminderRepository.getAllReminders()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList<Reminder>())
 
     fun deleteReminder(reminder: Reminder) = viewModelScope.launch {

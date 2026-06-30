@@ -9,6 +9,7 @@ import io.helsy.emireminder.data.repository.LoanRepository
 import io.helsy.emireminder.data.repository.ReminderRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.util.Calendar
 import javax.inject.Inject
@@ -36,15 +37,17 @@ class FinanceViewModel @Inject constructor(
     private val reminderRepository: ReminderRepository,
 ) : ViewModel() {
 
-    val activeLoans = loanRepository.getActiveLoans()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList<Loan>())
-
     val calendarState = combine(
         loanRepository.getActiveLoans(),
         reminderRepository.getActiveReminders(),
     ) { loans, reminders ->
         buildMonthState(Calendar.getInstance(), reminders, loans)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), buildEmptyMonth())
+
+    // Derived from calendarState — avoids a second Room subscription for the same query.
+    val activeLoans = calendarState
+        .map { it.loans }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private fun buildMonthState(cal: Calendar, reminders: List<Reminder>, loans: List<Loan>): MonthlyCalendarState {
         val year = cal.get(Calendar.YEAR)

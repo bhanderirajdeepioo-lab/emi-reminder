@@ -64,16 +64,16 @@ fun FinanceMonthlyEMIScreen(
     var selectedFilter by remember { mutableStateOf(EmiFilter.ALL) }
 
     val todayDay = remember { today.get(Calendar.DAY_OF_MONTH) }
-    val isCurrentMonth = remember(selectedMonth, selectedYear) {
-        selectedMonth == today.get(Calendar.MONTH) && selectedYear == today.get(Calendar.YEAR)
-    }
-    val isPastMonth = remember(selectedMonth, selectedYear) {
-        selectedYear < today.get(Calendar.YEAR) ||
-                (selectedYear == today.get(Calendar.YEAR) && selectedMonth < today.get(Calendar.MONTH))
-    }
+    val todayMonth = remember { today.get(Calendar.MONTH) }
+    val todayYear = remember { today.get(Calendar.YEAR) }
 
-    val emiItems by remember(activeLoans, selectedMonth, selectedYear) {
+    // Inline month comparisons inside derivedStateOf so state reads on selectedMonth/selectedYear
+    // are tracked directly — avoids plain-Boolean intermediates that derivedStateOf can't track.
+    val emiItems by remember {
         derivedStateOf {
+            val isCurrentMonth = selectedMonth == todayMonth && selectedYear == todayYear
+            val isPastMonth = selectedYear < todayYear ||
+                    (selectedYear == todayYear && selectedMonth < todayMonth)
             activeLoans.map { loan ->
                 val dueDay = loan.toDueDay()
                 val overdue = when {
@@ -97,7 +97,7 @@ fun FinanceMonthlyEMIScreen(
         }
     }
 
-    val filteredItems by remember(emiItems, selectedFilter) {
+    val filteredItems by remember {
         derivedStateOf {
             when (selectedFilter) {
                 EmiFilter.ALL -> emiItems
@@ -107,9 +107,9 @@ fun FinanceMonthlyEMIScreen(
         }
     }
 
-    val totalEmi by remember(emiItems) { derivedStateOf { emiItems.sumOf { it.loan.emiAmount } } }
-    val paidEmi by remember(emiItems) { derivedStateOf { emiItems.filter { it.isPaid }.sumOf { it.loan.emiAmount } } }
-    val paidPercent by remember(totalEmi, paidEmi) { derivedStateOf { if (totalEmi > 0) (paidEmi / totalEmi * 100).toInt() else 0 } }
+    val totalEmi by remember { derivedStateOf { emiItems.sumOf { it.loan.emiAmount } } }
+    val paidEmi by remember { derivedStateOf { emiItems.filter { it.isPaid }.sumOf { it.loan.emiAmount } } }
+    val paidPercent by remember { derivedStateOf { if (totalEmi > 0) (paidEmi / totalEmi * 100).toInt() else 0 } }
 
     Scaffold(
         topBar = {
@@ -391,7 +391,12 @@ private fun EmiRow(item: LoanEmiItem, selectedMonth: Int, selectedYear: Int, onC
                     if (item.loan.bankName.isNotBlank()) {
                         Text(item.loan.bankName, fontSize = 12.sp, color = Color(0xFF64748B))
                     }
-                    val emiNum = 1
+                    val emiNum = run {
+                        val startCal = Calendar.getInstance().apply { timeInMillis = item.loan.startDate }
+                        val startYear = startCal.get(Calendar.YEAR)
+                        val startMonth = startCal.get(Calendar.MONTH)
+                        (selectedYear - startYear) * 12 + (selectedMonth - startMonth) + 1
+                    }.coerceIn(1, item.loan.tenureMonths)
                     Text("EMI #$emiNum of ${item.loan.tenureMonths}", fontSize = 11.sp, color = Color(0xFF64748B))
                 }
                 Column(horizontalAlignment = Alignment.End) {

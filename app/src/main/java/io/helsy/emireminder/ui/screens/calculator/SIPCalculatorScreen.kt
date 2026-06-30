@@ -61,11 +61,8 @@ private fun calcStepUpSIPCorpus(monthly: Double, annualRate: Double, years: Int,
     return total
 }
 
-private fun fmtSip(amount: Double): String {
-    val nf = NumberFormat.getNumberInstance(Locale("en", "IN"))
-    nf.maximumFractionDigits = 0
-    return "₹${nf.format(amount.roundToLong())}"
-}
+private val _sipFmt = NumberFormat.getNumberInstance(Locale("en", "IN")).also { it.maximumFractionDigits = 0 }
+private fun fmtSip(amount: Double): String = "₹${_sipFmt.format(amount.roundToLong())}"
 
 private fun fmtCr(amount: Double): String {
     return when {

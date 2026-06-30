@@ -478,10 +478,9 @@ private fun QuickActionTile(
 
 // ── EMI reminder card ─────────────────────────────────────────────────────────
 
-private val loanAmountFmt = NumberFormat.getNumberInstance(Locale("en", "IN"))
-
 @Composable
 private fun LoanReminderCard(loan: Loan, onClick: () -> Unit) {
+    val loanAmountFmt = remember { NumberFormat.getNumberInstance(Locale("en", "IN")) }
     val urgentColor = UrgentRed
     val normalColor = Indigo600
     val isUrgent = false // placeholder — connect to real due-date logic when available

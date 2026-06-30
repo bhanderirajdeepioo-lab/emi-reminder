@@ -296,6 +296,40 @@ fun SettingsScreen(
                 }
             }
 
+            // SMS IMPORT section
+            SettingsSectionHeader("SMS IMPORT")
+            Surface(color = MaterialTheme.colorScheme.surface) {
+                Column {
+                    val smsPermission = rememberPermissionState(android.Manifest.permission.READ_SMS)
+                    ToggleSettingRow(
+                        icon = Icons.Default.Message,
+                        iconBg = Color(0xFFF0FDF4),
+                        iconTint = SafeGreen,
+                        label = "Auto-import from SMS",
+                        subtitle = if (smsPermission.status.isGranted)
+                            "Permission granted — detects bank EMI SMSes"
+                        else
+                            "Off by default — grant permission to enable",
+                        checked = prefs.smsImportEnabled && smsPermission.status.isGranted,
+                        onCheckedChange = { wantEnabled ->
+                            if (wantEnabled && !smsPermission.status.isGranted) {
+                                smsPermission.launchPermissionRequest()
+                            } else {
+                                viewModel.setSmsImportEnabled(wantEnabled)
+                            }
+                        },
+                    )
+                    if (prefs.smsImportEnabled && !smsPermission.status.isGranted) {
+                        Text(
+                            "READ_SMS permission not granted. Tap the toggle to request it.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        )
+                    }
+                }
+            }
+
             // DATA & BACKUP section
             SettingsSectionHeader("DATA & BACKUP")
             Surface(color = MaterialTheme.colorScheme.surface) {

@@ -1,9 +1,12 @@
 package io.helsy.emireminder.ui.screens.onboarding
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -89,34 +92,38 @@ fun OnboardingScreen(onComplete: () -> Unit) {
 
         Spacer(Modifier.weight(1f))
 
-        AnimatedVisibility(
-            visible = true,
-            enter = fadeIn(tween(400)) + slideInHorizontally(tween(400)) { it / 4 },
-        ) {
+        AnimatedContent(
+            targetState = current,
+            transitionSpec = {
+                (fadeIn(tween(400)) + slideInHorizontally(tween(400)) { it / 4 })
+                    .togetherWith(fadeOut(tween(200)) + slideOutHorizontally(tween(400)) { -it / 4 })
+            },
+            label = "onboarding_page",
+        ) { pageData ->
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 // Icon illustration
                 Box(
                     modifier = Modifier
                         .size(160.dp)
                         .clip(CircleShape)
-                        .background(Brush.linearGradient(listOf(current.iconBg.copy(alpha = 0.15f), Indigo100))),
+                        .background(Brush.linearGradient(listOf(pageData.iconBg.copy(alpha = 0.15f), Indigo100))),
                     contentAlignment = Alignment.Center,
                 ) {
                     Box(
                         modifier = Modifier
                             .size(100.dp)
                             .clip(CircleShape)
-                            .background(current.iconBg),
+                            .background(pageData.iconBg),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(current.icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(48.dp))
+                        Icon(pageData.icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(48.dp))
                     }
                 }
 
                 Spacer(Modifier.height(40.dp))
 
                 Text(
-                    current.title,
+                    pageData.title,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = MaterialTheme.colorScheme.onBackground,
@@ -126,7 +133,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                 Spacer(Modifier.height(12.dp))
 
                 Text(
-                    current.body,
+                    pageData.body,
                     fontSize = 15.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,

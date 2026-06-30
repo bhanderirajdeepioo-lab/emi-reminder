@@ -62,11 +62,8 @@ private fun calcRD(monthly: Double, ratePercent: Double, tenureYears: Double, fr
     return maturity
 }
 
-private fun fmt(amount: Double): String {
-    val nf = NumberFormat.getNumberInstance(Locale("en", "IN"))
-    nf.maximumFractionDigits = 0
-    return "₹${nf.format(amount.roundToLong())}"
-}
+private val _fdFmt = NumberFormat.getNumberInstance(Locale("en", "IN")).also { it.maximumFractionDigits = 0 }
+private fun fmt(amount: Double): String = "₹${_fdFmt.format(amount.roundToLong())}"
 
 @Composable
 fun FDRDCalculatorScreen(onBack: () -> Unit) {

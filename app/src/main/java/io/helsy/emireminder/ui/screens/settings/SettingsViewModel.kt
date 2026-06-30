@@ -49,4 +49,8 @@ class SettingsViewModel @Inject constructor(
     fun setLanguage(language: String) = viewModelScope.launch {
         prefsRepository.setLanguage(language)
     }
+
+    fun setSmsImportEnabled(enabled: Boolean) = viewModelScope.launch {
+        prefsRepository.setSmsImportEnabled(enabled)
+    }
 }

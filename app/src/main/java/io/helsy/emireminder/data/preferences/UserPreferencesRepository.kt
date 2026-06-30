@@ -21,6 +21,7 @@ data class UserPreferences(
     val theme: String = "System",
     val currency: String = "INR",
     val language: String = "English",
+    val smsImportEnabled: Boolean = false,
 )
 
 @Singleton
@@ -36,6 +37,7 @@ class UserPreferencesRepository @Inject constructor(
         val THEME                  = stringPreferencesKey("theme")
         val CURRENCY               = stringPreferencesKey("currency")
         val LANGUAGE               = stringPreferencesKey("language")
+        val SMS_IMPORT_ENABLED     = booleanPreferencesKey("sms_import_enabled")
     }
 
     val userPreferences: Flow<UserPreferences> = context.dataStore.data
@@ -50,6 +52,7 @@ class UserPreferencesRepository @Inject constructor(
                 theme                = prefs[Keys.THEME]                  ?: "System",
                 currency             = prefs[Keys.CURRENCY]               ?: "INR",
                 language             = prefs[Keys.LANGUAGE]               ?: "English",
+                smsImportEnabled     = prefs[Keys.SMS_IMPORT_ENABLED]     ?: false,
             )
         }
 
@@ -76,4 +79,7 @@ class UserPreferencesRepository @Inject constructor(
 
     suspend fun setLanguage(language: String) =
         context.dataStore.edit { it[Keys.LANGUAGE] = language }
+
+    suspend fun setSmsImportEnabled(enabled: Boolean) =
+        context.dataStore.edit { it[Keys.SMS_IMPORT_ENABLED] = enabled }
 }
