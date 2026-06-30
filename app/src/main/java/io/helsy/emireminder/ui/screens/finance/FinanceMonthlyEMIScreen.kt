@@ -441,9 +441,9 @@ private fun YearlyBarChart(selectedMonth: Int, monthlyTotal: Double, modifier: M
 
         for (i in 0 until barCount) {
             val x = i * spacing + (spacing - barWidth) / 2
-            val barH = if (i < selectedMonth) maxH * 0.75f
-            else if (i == selectedMonth) maxH
-            else maxH * 0.7f
+            // All months carry the same fixed EMI total; use uniform height with the
+            // selected month standing taller so it reads as the active period.
+            val barH = if (i == selectedMonth) maxH else maxH * 0.75f
             val color = if (i == selectedMonth) indigo else if (i < selectedMonth) indigoLight else Color(0xFFE0E7FF)
             drawRoundRect(
                 color = color,

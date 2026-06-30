@@ -7,7 +7,13 @@ import android.content.Intent
 import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.helsy.emireminder.data.db.entity.Reminder
+import io.helsy.emireminder.data.preferences.UserPreferences
+import io.helsy.emireminder.data.preferences.UserPreferencesRepository
 import io.helsy.emireminder.receiver.ReminderReceiver
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,11 +21,17 @@ import javax.inject.Singleton
 @Singleton
 class NotificationScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
+    prefsRepository: UserPreferencesRepository,
 ) {
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
+    // Cache latest prefs on the IO thread so scheduleReminder() can read them synchronously.
+    private val cachedPrefs = prefsRepository.userPreferences
+        .stateIn(CoroutineScope(Dispatchers.IO), SharingStarted.Eagerly, UserPreferences())
+
     fun scheduleReminder(reminder: Reminder) {
-        val triggerAt = nextAlarmMillis(reminder.dueDayOfMonth)
+        val prefs = cachedPrefs.value
+        val triggerAt = nextAlarmMillis(reminder.dueDayOfMonth, prefs.reminderTimeHour, prefs.reminderTimeMinute)
         setAlarm(reminder.id, buildIntent(reminder), triggerAt)
     }
 
@@ -66,7 +78,6 @@ class NotificationScheduler @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-            // Graceful degradation: doze-safe but imprecise
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pending)
         } else {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pending)
@@ -87,12 +98,12 @@ class NotificationScheduler @Inject constructor(
         const val EXTRA_DUE_DAY     = "due_day"
         const val TEST_NOTIFICATION_ID = Int.MAX_VALUE
 
-        fun nextAlarmMillis(dueDayOfMonth: Int): Long {
+        fun nextAlarmMillis(dueDayOfMonth: Int, hour: Int = 9, minute: Int = 0): Long {
             val now = Calendar.getInstance()
             val target = now.clone() as Calendar
             target.apply {
-                set(Calendar.HOUR_OF_DAY, 9)
-                set(Calendar.MINUTE, 0)
+                set(Calendar.HOUR_OF_DAY, hour)
+                set(Calendar.MINUTE, minute)
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
                 set(Calendar.DAY_OF_MONTH, minOf(dueDayOfMonth, getActualMaximum(Calendar.DAY_OF_MONTH)))
