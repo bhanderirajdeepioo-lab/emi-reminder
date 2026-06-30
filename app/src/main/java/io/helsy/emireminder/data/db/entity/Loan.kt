@@ -1,8 +1,10 @@
 package io.helsy.emireminder.data.db.entity
 
+import androidx.compose.runtime.Immutable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+@Immutable
 @Entity(tableName = "loans")
 data class Loan(
     @PrimaryKey(autoGenerate = true)

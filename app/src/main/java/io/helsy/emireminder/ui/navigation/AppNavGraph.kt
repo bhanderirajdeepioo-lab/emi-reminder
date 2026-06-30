@@ -1,6 +1,9 @@
 package io.helsy.emireminder.ui.navigation
 
 import android.content.Context
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -92,7 +95,11 @@ fun AppNavGraph() {
         NavHost(
             navController = navController,
             startDestination = NavRoutes.SPLASH,
-            modifier = if (showBottomBar) Modifier.padding(innerPadding) else Modifier
+            modifier = if (showBottomBar) Modifier.padding(innerPadding) else Modifier,
+            enterTransition = { slideInHorizontally(tween(280)) { it } },
+            exitTransition = { slideOutHorizontally(tween(280)) { -it } },
+            popEnterTransition = { slideInHorizontally(tween(280)) { -it } },
+            popExitTransition = { slideOutHorizontally(tween(280)) { it } },
         ) {
             // 1 — Splash
             composable(NavRoutes.SPLASH) {
