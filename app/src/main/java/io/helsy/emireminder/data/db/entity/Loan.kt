@@ -1,0 +1,21 @@
+package io.helsy.emireminder.data.db.entity
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "loans")
+data class Loan(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val name: String,
+    val type: String,         // HOME, CAR, PERSONAL, EDUCATION, OTHER
+    val principalAmount: Double,
+    val interestRate: Double,
+    val tenureMonths: Int,
+    val emiAmount: Double,
+    val startDate: Long = System.currentTimeMillis(),
+    val isActive: Boolean = true,
+    val notes: String = "",
+    val bankName: String = "",
+    val accountNumber: String = "",
+)

@@ -1,0 +1,42 @@
+package io.helsy.emireminder.di
+
+import android.content.Context
+import androidx.room.Room
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import io.helsy.emireminder.data.db.AppDatabase
+import io.helsy.emireminder.data.db.dao.LoanDao
+import io.helsy.emireminder.data.db.dao.ReminderDao
+import io.helsy.emireminder.data.db.dao.SMSImportDao
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseModule {
+
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
+        Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "emi_reminder.db"
+        )
+        .fallbackToDestructiveMigration()
+        .build()
+
+    @Provides
+    @Singleton
+    fun provideLoanDao(db: AppDatabase): LoanDao = db.loanDao()
+
+    @Provides
+    @Singleton
+    fun provideReminderDao(db: AppDatabase): ReminderDao = db.reminderDao()
+
+    @Provides
+    @Singleton
+    fun provideSmsImportDao(db: AppDatabase): SMSImportDao = db.smsImportDao()
+}
