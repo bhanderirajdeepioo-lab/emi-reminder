@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EMI Reminder — Full App Mockup · HEL-17</title>
+<style>
+  :root {
+    --bg: #fafaf8;
+    --panel: #ffffff;
+    --ink: #111111;
+    --muted: #666666;
+    --line: #e5e5e0;
+    --accent: #d33;
+    --maxw: 1200px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 15px/1.55 -apple-system, system-ui, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+
+  .shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+  .toc {
+    position: sticky; top: 0; align-self: start;
+    height: 100vh; overflow: auto;
+    padding: 24px 16px 24px 24px;
+    border-right: 1px solid var(--line);
+    background: var(--panel);
+    font-size: 13px;
+    z-index: 20;
+  }
+  .toc h1 { font-size: 14px; margin: 0 0 4px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+  .toc h2 { font-size: 11px; margin: 20px 0 5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .toc a { display: block; text-decoration: none; padding: 5px 8px; margin-left: -8px; border-radius: 4px; color: var(--ink); }
+  .toc a:hover { background: var(--bg); }
+  .toc .num { display: inline-block; width: 24px; color: var(--muted); font-size: 11px; }
+  .toc .badge { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #000; color: #fff; margin-left: 4px; vertical-align: middle; }
+  .toc .badge.new { background: #1a7a3c; }
+  .toc .toc-summary { display: none; }
+  .toc .toc-body { display: block; }
+
+  main { padding: 48px 56px 96px; max-width: 1300px; min-width: 0; }
+
+  header.hero { max-width: var(--maxw); margin-bottom: 64px; }
+  header.hero .crumb { color: var(--muted); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+  header.hero h1 { font-size: 36px; line-height: 1.15; margin: 8px 0 16px; }
+  header.hero p { color: var(--muted); max-width: 720px; font-size: 16px; }
+  header.hero .pills { margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap; }
+  header.hero .pill { font-size: 12px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--muted); }
+  header.hero .pill.dark { background: #000; color: #fff; border-color: #000; }
+
+  section { scroll-margin-top: 24px; max-width: var(--maxw); margin-bottom: 96px; }
+  section .lede { color: var(--muted); margin: 0 0 12px; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 700; }
+  section h2 { font-size: 28px; line-height: 1.2; margin: 0 0 8px; }
+  section h2 .step-num { display: inline-block; width: 44px; color: var(--muted); }
+  section h3 { font-size: 16px; margin: 24px 0 8px; }
+  section .desc { color: var(--muted); margin: 0 0 24px; max-width: 760px; }
+
+  .grid {
+    display: grid; gap: 24px;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .wire {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: zoom-in;
+    transition: transform 80ms ease, box-shadow 80ms ease;
+  }
+  .wire:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+  .wire .label {
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .wire img { display: block; width: 100%; height: auto; background: #fff; }
+  .wire.phone-wire { max-width: 240px; }
+
+  .notes-col { }
+  .notes ul { padding-left: 20px; margin: 8px 0; }
+  .notes li { margin-bottom: 8px; }
+  .notes .why {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--ink);
+    padding: 14px 18px;
+    border-radius: 4px;
+    margin-top: 12px;
+    font-size: 14px;
+  }
+  .notes .new-badge {
+    display: inline-block; font-size: 10px; padding: 2px 7px;
+    border-radius: 4px; background: #1a7a3c; color: #fff;
+    margin-left: 6px; vertical-align: middle;
+  }
+  .notes .token-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+  .notes .token-table th { text-align: left; padding: 6px 8px; background: var(--bg); font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--muted); }
+  .notes .token-table td { padding: 6px 8px; border-top: 1px solid var(--line); }
+
+  .flow-section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 32px; margin-bottom: 64px; max-width: var(--maxw); }
+  .flow-section h2 { margin-top: 0; }
+
+  .token-section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 32px; margin-bottom: 64px; max-width: var(--maxw); }
+  .token-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; margin-top: 16px; }
+  .token-swatch { border-radius: 8px; overflow: hidden; }
+  .token-swatch .swatch-color { height: 56px; }
+  .token-swatch .swatch-label { padding: 8px 10px; font-size: 12px; border: 1px solid var(--line); border-top: none; border-radius: 0 0 8px 8px; }
+  .token-swatch .swatch-label strong { display: block; font-size: 13px; }
+
+  /* lightbox */
+  .lightbox {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.86);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 100;
+    cursor: zoom-out;
+    padding: 32px;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 100%; max-height: 100%; background: #fff; box-shadow: 0 30px 80px rgba(0,0,0,0.4); border-radius: 4px; }
+  .lightbox .close { position: absolute; top: 16px; right: 24px; font-size: 28px; color: #fff; cursor: pointer; }
+  .lightbox .caption { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 13px; opacity: 0.9; }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    .toc {
+      position: sticky; top: 0;
+      height: auto; max-height: 60vh;
+      padding: 12px 16px;
+      border-right: none;
+      border-bottom: 1px solid var(--line);
+    }
+    .toc .toc-summary { display: flex; justify-content: space-between; align-items: center; cursor: pointer; list-style: none; padding: 4px 0; }
+    .toc .toc-summary::-webkit-details-marker { display: none; }
+    .toc .toc-summary .title { font-size: 13px; font-weight: 600; }
+    .toc .toc-summary .crumb { font-size: 11px; color: var(--muted); }
+    .toc .toc-summary .chevron { width: 10px; height: 10px; border-right: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); transform: rotate(45deg); }
+    .toc[open] .toc-summary .chevron { transform: rotate(225deg) translate(-2px,-2px); }
+    .toc .toc-body { display: none; padding-top: 8px; border-top: 1px solid var(--line); margin-top: 8px; }
+    .toc[open] .toc-body { display: block; }
+    main { padding: 24px 20px 64px; }
+    header.hero { margin-bottom: 40px; }
+    header.hero h1 { font-size: 28px; }
+    section { margin-bottom: 64px; scroll-margin-top: 80px; }
+    .grid { grid-template-columns: 1fr; }
+    .wire.phone-wire { max-width: 280px; }
+    .token-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  }
+
+  .footer { color: var(--muted); font-size: 12px; max-width: var(--maxw); border-top: 1px solid var(--line); padding-top: 24px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <details class="toc">
+    <summary class="toc-summary">
+      <span>
+        <span class="crumb">HEL-17 · Full App Mockup</span><br>
+        <span class="title">Jump to a screen</span>
+      </span>
+      <span class="chevron" aria-hidden="true"></span>
+    </summary>
+    <nav class="toc-body" aria-label="Section navigation">
+      <h1>HEL-17</h1>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">EMI Reminder — Full App Mockup · 17 screens</div>
+
+      <h2>Foundation</h2>
+      <a href="#tokens"><span class="num">◈</span>Design tokens</a>
+      <a href="#flow"><span class="num">⤳</span>App flow diagram</a>
+
+      <h2>Onboarding</h2>
+      <a href="#s8"><span class="num">8</span>Permissions setup <span class="badge new">NEW</span></a>
+
+      <h2>Core screens</h2>
+      <a href="#s1"><span class="num">1</span>Splash Screen</a>
+      <a href="#s2"><span class="num">2</span>Home Dashboard</a>
+      <a href="#s16"><span class="num">16</span>Empty state <span class="badge new">NEW</span></a>
+
+      <h2>Calculator</h2>
+      <a href="#s3"><span class="num">3</span>EMI Calculator</a>
+      <a href="#s17"><span class="num">17</span>Interest type <span class="badge new">NEW</span></a>
+      <a href="#s4"><span class="num">4</span>Calculator Results</a>
+      <a href="#s11"><span class="num">11</span>Amortization table <span class="badge new">NEW</span></a>
+      <a href="#s12"><span class="num">12</span>Loan comparison <span class="badge new">NEW</span></a>
+      <a href="#s13"><span class="num">13</span>Prepayment calc <span class="badge new">NEW</span></a>
+
+      <h2>Reminders</h2>
+      <a href="#s5"><span class="num">5</span>Reminders list</a>
+      <a href="#s6"><span class="num">6</span>Add reminder</a>
+      <a href="#s14"><span class="num">14</span>SMS import <span class="badge new">NEW</span></a>
+
+      <h2>Portfolio</h2>
+      <a href="#s9"><span class="num">9</span>Loan analytics <span class="badge new">NEW</span></a>
+      <a href="#s10"><span class="num">10</span>Loan detail <span class="badge new">NEW</span></a>
+
+      <h2>System</h2>
+      <a href="#s7"><span class="num">7</span>Notifications</a>
+      <a href="#s15"><span class="num">15</span>Settings <span class="badge new">NEW</span></a>
+
+      <h2>Open questions</h2>
+      <a href="#open"><span class="num">?</span>For reviewer</a>
+    </nav>
+  </details>
+
+  <main>
+    <header class="hero">
+      <div class="crumb">HEL-17 · Full App Mockup · v2</div>
+      <h1>EMI Reminder — Full App Design</h1>
+      <p>Complete wireframe specification for all 17 screens of the Android EMI Calculator &amp; Loan Reminder app. Covers the full user journey from first launch through advanced features: loan comparison, prepayment calculator, amortization schedule, portfolio analytics, and SMS auto-import.</p>
+      <div class="pills">
+        <span class="pill dark">17 screens total</span>
+        <span class="pill dark">10 new screens (HEL-17)</span>
+        <span class="pill">390×844 · portrait mobile</span>
+        <span class="pill">Material Design 3</span>
+        <span class="pill">Lo-fi · monochrome</span>
+        <span class="pill">Click any wireframe to zoom</span>
+      </div>
+    </header>
+
+    <!-- ========== Design Tokens ========== -->
+    <section id="tokens" class="token-section">
+      <div class="lede">Foundation</div>
+      <h2>Design Tokens</h2>
+      <p class="desc">All values below should be defined as Material 3 tokens in the Figma file before any component work begins. Use these token names in all annotations.</p>
+
+      <h3>Color palette</h3>
+      <div class="token-grid">
+        <div class="token-swatch">
+          <div class="swatch-color" style="background:#111111"></div>
+          <div class="swatch-label"><strong>color/primary</strong>#111111</div>
+        </div>
+        <div class="token-swatch">
+          <div class="swatch-color" style="background:#ffffff;border:1px solid #e5e5e0"></div>
+          <div class="swatch-label"><strong>color/surface</strong>#FFFFFF</div>
+        </div>
+        <div class="token-swatch">
+          <div class="swatch-color" style="background:#f4f4f4"></div>
+          <div class="swatch-label"><strong>color/background</strong>#F4F4F4</div>
+        </div>
+        <div class="token-swatch">
+          <div class="swatch-color" style="background:#e5e5e0"></div>
+          <div class="swatch-label"><strong>color/outline</strong>#E5E5E0</div>
+        </div>
+        <div class="token-swatch">
+          <div class="swatch-color" style="background:#666666"></div>
+          <div class="swatch-label"><strong>color/on-surface-variant</strong>#666666</div>
+        </div>
+        <div class="token-swatch">
+          <div class="swatch-color" style="background:#1a7a3c"></div>
+          <div class="swatch-label"><strong>color/success</strong>#1A7A3C</div>
+        </div>
+        <div class="token-swatch">
+          <div class="swatch-color" style="background:#c73030"></div>
+          <div class="swatch-label"><strong>color/error</strong>#C73030</div>
+        </div>
+        <div class="token-swatch">
+          <div class="swatch-color" style="background:#d97706"></div>
+          <div class="swatch-label"><strong>color/warning</strong>#D97706</div>
+        </div>
+      </div>
+
+      <h3>Type scale</h3>
+      <table class="token-table">
+        <thead><tr><th>Token</th><th>Size</th><th>Weight</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td>text/display-large</td><td>36sp</td><td>700</td><td>EMI amount hero</td></tr>
+          <tr><td>text/headline-medium</td><td>24sp</td><td>700</td><td>Screen titles, section heroes</td></tr>
+          <tr><td>text/title-large</td><td>20sp</td><td>700</td><td>Card headers, loan names</td></tr>
+          <tr><td>text/body-large</td><td>16sp</td><td>400</td><td>Primary body, CTA labels</td></tr>
+          <tr><td>text/body-medium</td><td>14sp</td><td>400 / 600</td><td>Card secondary, list items</td></tr>
+          <tr><td>text/label-medium</td><td>12sp</td><td>500</td><td>Chips, badges, secondary info</td></tr>
+          <tr><td>text/label-small</td><td>11sp</td><td>400</td><td>Table values, annotations</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Spacing scale (8dp grid)</h3>
+      <table class="token-table">
+        <thead><tr><th>Token</th><th>Value</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td>spacing/xs</td><td>4dp</td><td>Icon padding, chip internal</td></tr>
+          <tr><td>spacing/sm</td><td>8dp</td><td>Card internal gap</td></tr>
+          <tr><td>spacing/md</td><td>16dp</td><td>Screen margin, card padding</td></tr>
+          <tr><td>spacing/lg</td><td>24dp</td><td>Section gaps</td></tr>
+          <tr><td>spacing/xl</td><td>32dp</td><td>Header internal, hero spacing</td></tr>
+          <tr><td>spacing/2xl</td><td>48dp</td><td>Between sections</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Radius scale</h3>
+      <table class="token-table">
+        <thead><tr><th>Token</th><th>Value</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td>radius/sm</td><td>6dp</td><td>Input fields, small chips</td></tr>
+          <tr><td>radius/md</td><td>10dp</td><td>Cards, action buttons</td></tr>
+          <tr><td>radius/lg</td><td>12dp</td><td>Hero cards, bottom sheet corners</td></tr>
+          <tr><td>radius/xl</td><td>20dp</td><td>Bottom sheet, modal containers</td></tr>
+          <tr><td>radius/pill</td><td>999dp</td><td>Chips, badges, toggles</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ========== Flow diagram ========== -->
+    <section id="flow" class="flow-section">
+      <div class="lede">Navigation</div>
+      <h2>App navigation flow</h2>
+      <p class="desc">Solid arrows = primary path. Dashed arrows = optional flows. Five main journeys: (A) First launch → onboarding, (B) Calculate EMI, (C) Manage reminders, (D) Portfolio analytics, (E) WorkManager notification.</p>
+      <div class="wire" data-zoom data-caption="App flow diagram">
+        <div class="label"><span>flow.svg</span><span>1440×400 · landscape</span></div>
+        <img src="wireframes/flow.svg" alt="App flow diagram" />
+      </div>
+    </section>
+
+    <!-- ========== Screen 8: Onboarding ========== -->
+    <section id="s8">
+      <div class="lede">Onboarding · First launch <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">8.</span>Permissions Setup</h2>
+      <p class="desc">First-run screen after app install. Three permission cards: Notifications (required), Read SMS (optional, enables auto-import), Exact Alarms (required for precise WorkManager firing on Android 12+). Progress dots indicate step 2 of a 3-step onboarding.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="08 · Permissions Setup">
+          <div class="label"><span>08-onboarding.svg</span><span>390×844</span></div>
+          <img src="wireframes/08-onboarding.svg" alt="Onboarding permissions wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Notifications toggle (ON by default). Tapping calls <code>NotificationManagerCompat.requestPermission()</code> on Android 13+. Badge: "Required".</li>
+              <li><b>2</b> — SMS toggle (OFF by default). Tapping shows rationale and calls <code>READ_SMS</code> permission request. Badge: "Optional". If denied, SMS import in Reminders shows a locked state with "Enable in Settings" shortcut.</li>
+              <li><b>3</b> — Exact Alarms toggle (ON). Android 12+ requires <code>SCHEDULE_EXACT_ALARM</code>. Toggling opens system settings deep-link if not granted.</li>
+              <li><b>4</b> — "Continue" CTA navigates to Home Dashboard. "Skip for now" grants no optional permissions and also navigates home — no blocking.</li>
+            </ul>
+            <div class="why"><b>Why dark background:</b> Consistent with Splash Screen brand moment. Permission requests feel less clinical when framed as part of a deliberate setup flow rather than system dialogs.</div>
+            <div class="why"><b>Design lens — Ethics:</b> SMS toggle is OFF by default (data minimization). Clear "Optional" label. Rationale shown before request. No dark pattern of pre-checking privacy-sensitive permissions.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 1: Splash ========== -->
+    <section id="s1">
+      <div class="lede">Entry point · Launch</div>
+      <h2><span class="step-num">1.</span>Splash Screen</h2>
+      <p class="desc">Cold launch screen. App logo, name, tagline and loading indicator while Hilt DI and Room initialise. On first launch flows to Onboarding (Screen 8). On subsequent launches checks for notification permission and flows to Home Dashboard.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="01 · Splash Screen">
+          <div class="label"><span>01-splash.svg</span><span>390×844</span></div>
+          <img src="wireframes/01-splash.svg" alt="Splash screen wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Logo: circle with ₹ rupee symbol, centred at 35% screen height. Token: <code>color/primary</code> (white on black).</li>
+              <li><b>2</b> — App name "EMI Reminder" at <code>text/headline-medium</code> + tagline at <code>text/body-medium</code>.</li>
+              <li><b>3</b> — 3-dot loading indicator at 90% height. Animates left-to-right. Hides once Room DB initialised.</li>
+            </ul>
+            <div class="why"><b>Why dark background:</b> Prevents flash of white during Android window background before Compose renders. Standard Material 3 splash pattern.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 2: Home Dashboard ========== -->
+    <section id="s2">
+      <div class="lede">Core · Primary screen</div>
+      <h2><span class="step-num">2.</span>Home Dashboard</h2>
+      <p class="desc">Portfolio-at-a-glance. Active loan count, next due date, total monthly outflow with mini trend chart, quick action shortcuts, and 2 most urgent reminders. Tapping a reminder opens Loan Detail (Screen 10).</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="02 · Home Dashboard">
+          <div class="label"><span>02-home-dashboard.svg</span><span>390×844</span></div>
+          <img src="wireframes/02-home-dashboard.svg" alt="Home dashboard wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Greeting header with avatar initials, personalised name, and bell notification icon. Bell badge shows unread notification count.</li>
+              <li><b>2</b> — Summary cards: 2×half-width (Total Loans, Next Due) + 1×full-width dark card (Total EMI/Month + mini bar chart). Design lens: <i>Von Restorff</i> — dark card draws attention to the primary metric.</li>
+              <li><b>3</b> — Quick Actions row: Calculator, Add Reminder, View All. Design lens: <i>Fitts's Law</i> — 48×48dp minimum tap targets. <i>Recognition over Recall</i> — labelled icons not bare glyphs.</li>
+              <li><b>4</b> — Recent Reminders: 2 cards with left-border urgency encoding. Black border = due ≤7d, grey = ≤14d, dimmed = paused. "See all →" navigates to Reminders list.</li>
+            </ul>
+            <div class="why"><b>Why dashboard first:</b> Reference app has no summary view — lands on Calculator. Users with multiple loans need a portfolio view for orientation. Design lens: <i>Mental Models</i> (banking app conventions), <i>Goal-Gradient</i> (next due creates urgency).</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 16: Empty State ========== -->
+    <section id="s16">
+      <div class="lede">State · First-time <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">16.</span>Empty State — Dashboard</h2>
+      <p class="desc">First-time user sees this instead of the normal dashboard. Illustration + dual CTAs to guide them to either add a loan manually or calculate an EMI first. SMS import shortcut surfaces the auto-import path without friction.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="16 · Empty State Dashboard">
+          <div class="label"><span>16-empty-state-dashboard.svg</span><span>390×844</span></div>
+          <img src="wireframes/16-empty-state-dashboard.svg" alt="Empty state dashboard wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Geometric illustration using the ₹ brand mark. No copyrighted images. Uses only <code>color/outline</code> and <code>color/primary</code> tokens — renders correctly in dark mode.</li>
+              <li><b>2</b> — Primary CTA "Add Your First Loan" — direct path to Add Reminder bottom sheet. Full-width, black fill (<code>color/primary</code>).</li>
+              <li><b>3</b> — Secondary CTA "Calculate EMI First" — for users who want to explore before committing. Outlined style.</li>
+              <li><b>4</b> — SMS import hint card. Surfaces only if READ_SMS permission was granted during onboarding. Hidden otherwise — no hollow offers.</li>
+            </ul>
+            <div class="why"><b>Design lens — Progressive Disclosure:</b> Empty state shows only 2 primary actions, not the full app surface. Reduces cognitive load (Miller's Law) for first-time users who haven't formed a mental model yet.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 3: EMI Calculator ========== -->
+    <section id="s3">
+      <div class="lede">Feature · Calculator</div>
+      <h2><span class="step-num">3.</span>EMI Calculator</h2>
+      <p class="desc">Loan-type tabs, large styled inputs with sliders, steppers for interest rate, and a live preview of the estimated EMI. Feeds into Results (Screen 4). Now includes Interest Type selector (Screen 17).</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="03 · EMI Calculator">
+          <div class="label"><span>03-emi-calculator.svg</span><span>390×844</span></div>
+          <img src="wireframes/03-emi-calculator.svg" alt="EMI Calculator wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Segmented pill tabs (Home / Car / Personal). Pill vs. underline — tighter on narrow screens. Design lens: <i>Chunking</i> (groups related loan types).</li>
+              <li><b>2</b> — Loan Amount: 28sp bold number + ₹ prefix. Slider range: ₹1L–₹2Cr for Home, ₹50k–₹30L for Car, ₹10k–₹10L for Personal. Range adapts to selected tab.</li>
+              <li><b>3</b> — Interest Rate: − / + stepper at 0.1% increments. Typed value supported. Min 1%, max 36%.</li>
+              <li><b>4</b> — Tenure with Years/Months toggle. Shows both units simultaneously (e.g., "20 years · 240 months").</li>
+              <li><b>5</b> — Live preview card updates at 300ms debounce. Design lens: <i>Doherty Threshold</i> — feedback under 400ms feels instant.</li>
+            </ul>
+            <div class="why"><b>Why live preview:</b> Reference app requires explicit Calculate tap. Running estimate makes sliders interactive and reduces "did it do something?" anxiety. Debounced 300ms to avoid calculation jitter during dragging.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 17: Interest Type ========== -->
+    <section id="s17">
+      <div class="lede">Feature · Calculator advanced <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">17.</span>Interest Type Selector</h2>
+      <p class="desc">Flat Rate vs. Reducing Balance selector within the Calculator screen. Visual mini-charts inside each option card show how principal/interest behaves differently. Inline comparison warning surfaces the EMI difference to prevent user confusion.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="17 · Interest Type Selector">
+          <div class="label"><span>17-interest-type-selector.svg</span><span>390×844</span></div>
+          <img src="wireframes/17-interest-type-selector.svg" alt="Interest type selector wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Default is <b>Reducing Balance</b> (most common Indian home loan method). Pre-selected with filled card + checkmark. Design lens: <i>Defaults / Behavioral Science</i>.</li>
+              <li><b>2</b> — Option cards with inline mini bar charts. Reducing = bars decrease (interest portion shrinks). Flat = uniform bars. Visual metaphor encodes the mathematical concept without text. Design lens: <i>Recognition over Recall</i>.</li>
+              <li><b>3</b> — Inline comparison warning: "Same rate, different EMI amounts: Reducing ₹32,450 · Flat ₹52,083". Prevents confusion when users switch type and see a 60% EMI jump. Design lens: <i>Norman's principle of feedback</i>.</li>
+              <li><b>4</b> — Live preview updates immediately on type change. No extra tap needed.</li>
+            </ul>
+            <div class="why"><b>Why this matters:</b> Reference app doesn't expose interest type. Many personal loan and vehicle loan tiers quote "flat rate" which looks lower but costs ~60–80% more. This transparency is a competitive differentiator and an ethical design requirement.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 4: Calculator Results ========== -->
+    <section id="s4">
+      <div class="lede">Feature · Results</div>
+      <h2><span class="step-num">4.</span>Calculator Results</h2>
+      <p class="desc">Dedicated results screen with EMI hero card, donut chart (principal vs. interest split), 3-metric summary, and collapsible amortization preview. "View Full Schedule" navigates to Screen 11. "Set Reminder" pre-fills the Add Reminder sheet with these values.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="04 · Calculator Results">
+          <div class="label"><span>04-calculator-results.svg</span><span>390×844</span></div>
+          <img src="wireframes/04-calculator-results.svg" alt="Calculator results wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Hero EMI card: <code>color/primary</code> background, <code>text/display-large</code> (36sp) for the EMI amount. All input params shown in small text underneath — no hidden information.</li>
+              <li><b>2</b> — Donut chart: black arc = principal %, grey arc = interest %. Centre total. Design lens: <i>Gestalt figure/ground</i>.</li>
+              <li><b>3</b> — 3-column summary inside white card: Total Payment | Total Interest | Principal. Column dividers for visual separation.</li>
+              <li><b>4</b> — "View Full Schedule" → Screen 11. "Set Reminder" → pre-fills Add Reminder bottom sheet with calculated EMI amount + loan type. Reduces re-entry friction (Tesler's Law).</li>
+            </ul>
+            <div class="why"><b>Why a separate results screen:</b> Reference app shows results inline. Dedicated screen with visual hierarchy makes the output feel as premium as a fintech app and allows sharing via native share sheet.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 11: Amortization Schedule ========== -->
+    <section id="s11">
+      <div class="lede">Feature · Advanced calculator <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">11.</span>Amortization Schedule</h2>
+      <p class="desc">Full month-by-month amortization table. Current month highlighted with left-border accent. Year jump filter for fast navigation across 20-year loan tenures. Yearly summary card after each year's rows. Export to CSV/PDF.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="11 · Amortization Schedule">
+          <div class="label"><span>11-amortization-schedule.svg</span><span>390×844</span></div>
+          <img src="wireframes/11-amortization-schedule.svg" alt="Amortization schedule wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Loan summary bar (black, full-width) at top. Always visible — no need to scroll back to remember which loan you're viewing.</li>
+              <li><b>2</b> — Current month row: highlighted with <code>color/background</code> tint + left-border accent + "Month 1 of 240" sub-label. <i>Serial Position</i> — current position grounded.</li>
+              <li><b>3</b> — Yearly total card summarises all 12 months in one collapsed card. Reduces cognitive load for users scanning long-term interest costs.</li>
+              <li><b>4</b> — Export button: triggers <code>FileProvider</code> share sheet with CSV or PDF generated via iText on-device. No server calls required.</li>
+            </ul>
+            <div class="why"><b>Design decision on layout:</b> Horizontal scrolling table (common pattern) was rejected — too many horizontal swipe conflicts with system back gesture. 4-column compact layout with right-aligned numbers (easier to scan vertically) chosen instead.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 12: Comparison Calculator ========== -->
+    <section id="s12">
+      <div class="lede">Feature · Advanced calculator <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">12.</span>Loan Comparison Calculator</h2>
+      <p class="desc">Side-by-side comparison of two loan options. Each panel has independent Amount, Rate, and Tenure inputs. Results table shows Monthly EMI, Total Payment, Total Interest, and Duration for both. Recommendation card highlights the financially better option.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="12 · Loan Comparison Calculator">
+          <div class="label"><span>12-comparison-calculator.svg</span><span>390×844</span></div>
+          <img src="wireframes/12-comparison-calculator.svg" alt="Comparison calculator wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Two input panels side-by-side. Option A (dark header) vs. Option B (grey header). Both panels are independent — changing one does not affect the other. Swap icon (⇄) between panels lets user copy Option A values to Option B as a baseline.</li>
+              <li><b>2</b> — "Compare Results" CTA triggers calculation for both options simultaneously. Results appear below.</li>
+              <li><b>3</b> — Comparison table with divider. "Better" badge appears on the winner column for each row independently (EMI winner may differ from Total Interest winner).</li>
+              <li><b>4</b> — Recommendation card (black): plain-language explanation of the tradeoff — higher EMI vs. lower total interest. Design lens: <i>Plain Language / Inverted Pyramid</i>.</li>
+            </ul>
+            <div class="why"><b>Why this matters:</b> Users comparing fixed vs. floating rate offers from multiple banks currently use a spreadsheet or mental math. This calculator is the key competitive differentiator absent in the reference app.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 13: Prepayment Calculator ========== -->
+    <section id="s13">
+      <div class="lede">Feature · Advanced calculator <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">13.</span>Prepayment Calculator</h2>
+      <p class="desc">What-if analysis for extra loan payments. Shows months saved and interest saved from a one-time, monthly extra, or annual prepayment. Two outcome options: reduce tenure (same EMI, done earlier) or reduce EMI (same tenure, lower monthly).</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="13 · Prepayment Calculator">
+          <div class="label"><span>13-prepayment-calculator.svg</span><span>390×844</span></div>
+          <img src="wireframes/13-prepayment-calculator.svg" alt="Prepayment calculator wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Current status bar (black, full-width): shows outstanding balance + months left at a glance. Grounding context before the what-if input. Design lens: <i>Anchoring</i> — sets reference point for the impact comparison.</li>
+              <li><b>2</b> — Prepayment type: One-time / Monthly extra / Annual. One-time is default — most common prepayment scenario.</li>
+              <li><b>3</b> — Before / After comparison table with "Interest saved" highlighted row (coloured background). Design lens: <i>Von Restorff</i> — savings stands out.</li>
+              <li><b>4</b> — Two outcome choice cards: Reduce Tenure (same EMI, earlier end) vs. Reduce EMI (same tenure, lower monthly). Card selection drives the amortization recalculation. Design lens: <i>Commitment &amp; Consistency</i>.</li>
+            </ul>
+            <div class="why"><b>Why this is valuable:</b> Most Indian home loan borrowers don't realise a single large prepayment early in the tenure can save lakhs in interest. This screen makes the saving visceral and actionable — core to the "smart" positioning.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 5: Loan Reminders List ========== -->
+    <section id="s5">
+      <div class="lede">Feature · Reminders</div>
+      <h2><span class="step-num">5.</span>Loan Reminders List</h2>
+      <p class="desc">Full list of all loan reminders. Search bar, urgency filter chips, colour-coded left-border cards, per-card enable/disable toggles. FAB triggers Add Reminder bottom sheet. SMS import button in toolbar for first-time setup.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="05 · Loan Reminders List">
+          <div class="label"><span>05-reminders-list.svg</span><span>390×844</span></div>
+          <img src="wireframes/05-reminders-list.svg" alt="Reminders list wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Urgent card: black left-border + black "Due in 3d ⚠" chip. Draws the eye immediately — <i>Von Restorff</i> effect.</li>
+              <li><b>2</b> — Standard card: grey left-border + grey chip. Lower urgency, quieter.</li>
+              <li><b>3</b> — Paused card: light grey border, all text dimmed. State is clear without removing the entry.</li>
+              <li><b>4</b> — FAB (+): Material 3 extended FAB pattern. Sticky at bottom-right. Opens Screen 6 bottom sheet.</li>
+            </ul>
+            <div class="why"><b>Urgency encoding:</b> Black border = due ≤3d; dark grey = ≤7d; light grey = ≤14d; no accent = normal; dimmed = paused. Token-driven — easily adjustable for user-defined urgency thresholds in Settings.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 6: Add Reminder ========== -->
+    <section id="s6">
+      <div class="lede">Feature · Create / Edit</div>
+      <h2><span class="step-num">6.</span>Add / Edit Reminder</h2>
+      <p class="desc">Bottom sheet modal. Chip-based loan type and frequency selectors. Large EMI amount input. Monthly due date with calendar picker. "Save Reminder" triggers WorkManager scheduling.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="06 · Add Reminder Bottom Sheet">
+          <div class="label"><span>06-add-reminder.svg</span><span>390×844</span></div>
+          <img src="wireframes/06-add-reminder.svg" alt="Add reminder bottom sheet wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Loan name free-text, auto-capitalised. Shows example placeholder text.</li>
+              <li><b>2</b> — Loan type chips (Home / Car / Personal / Other). Only 4 options → chips, not dropdown. Filled black = selected.</li>
+              <li><b>3</b> — EMI Amount: 28sp bold with ₹ prefix. Numeric keyboard on tap.</li>
+              <li><b>4</b> — Due date: "1st of every month" + calendar icon. Tapping opens DatePickerDialog for day-of-month.</li>
+              <li><b>5</b> — Frequency chips (Daily/Weekly/Monthly). Monthly default. Drives WorkManager PeriodicWorkRequest period.</li>
+            </ul>
+            <div class="why"><b>Why bottom sheet:</b> More vertical space than dialog on small phones. Swipeable to dismiss. Native feel — Google Maps, Gmail use the same pattern. Keyboard push-up handled by adjustResize window mode.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 14: SMS Import ========== -->
+    <section id="s14">
+      <div class="lede">Feature · Import <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">14.</span>SMS Auto-Import Sheet</h2>
+      <p class="desc">Bottom sheet triggered from Reminders → import icon. Parses last 30 days of bank SMS messages for EMI patterns. Shows detected loans as checkable cards. Import selected. Privacy-respecting: SMS parsed on-device, never uploaded.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="14 · SMS Auto-Import">
+          <div class="label"><span>14-sms-import.svg</span><span>390×844</span></div>
+          <img src="wireframes/14-sms-import.svg" alt="SMS auto-import wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — "Select all" checkbox with count. Defaults to all checked. Design lens: <i>Defaults</i> — user more likely to import all than select individually.</li>
+              <li><b>2</b> — Detected loan card: shows parsed bank name, EMI amount, and inferred due date. SMS snippet shown verbatim so user can verify the source. "SMS" badge distinguishes auto-detected from manual.</li>
+              <li><b>3</b> — Unchecked card: Axis CC EMI deselected because it's a credit card EMI (different financial product). User may choose to exclude.</li>
+              <li><b>4</b> — "Import 2 Selected Loans" CTA. Count updates dynamically with checkbox changes. No data leaves the device — SMSReceiver reads locally, inserts to Room, SMS raw content not stored.</li>
+            </ul>
+            <div class="why"><b>Ethics / Privacy:</b> SMS not stored persistently — only parsed metadata (amount, date, bank). "SMS not stored" note on-screen. Only available when READ_SMS was explicitly granted. Pattern follows Google Messages design conventions.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 9: Loan Analytics ========== -->
+    <section id="s9">
+      <div class="lede">Feature · Portfolio <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">9.</span>Portfolio Analytics</h2>
+      <p class="desc">EMI trend bar chart (3/6/12 month or all-time), donut breakdown by loan type, 3-month summary metrics, and an insight card with proactive recommendations. Accessible from Home Dashboard → Analytics or from Loan Detail.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="09 · Portfolio Analytics">
+          <div class="label"><span>09-loan-analytics.svg</span><span>390×844</span></div>
+          <img src="wireframes/09-loan-analytics.svg" alt="Portfolio analytics wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Bar chart with time period selector. Monthly totals per bar. Value labels above bars. Design lens: <i>Information Scent</i> — bars grow visibly over time (loan additions).</li>
+              <li><b>2</b> — Donut chart by loan type. Colour-coded slices: black (Home), dark grey (Car), light grey (Personal). Legend shows amount + percentage. Tapping a slice navigates to that loan's detail.</li>
+              <li><b>3</b> — Summary metrics: Total Paid, Interest Paid, Principal Paid for the selected period. Helps users understand how much of their payments are going to interest.</li>
+              <li><b>4</b> — Insight card (black): proactive AI-style recommendation. "Home Loan has 214 EMIs left. Foreclosure today saves ₹18.4L." Links to Prepayment Calculator (Screen 13).</li>
+            </ul>
+            <div class="why"><b>Design lens — Goal-Gradient:</b> Showing EMIs remaining + foreclosure savings creates urgency to act. Trust signal: the saving figure is derived from on-device amortization — no external API needed, builds user trust in the number.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 10: Loan Detail ========== -->
+    <section id="s10">
+      <div class="lede">Feature · Portfolio <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">10.</span>Loan Detail</h2>
+      <p class="desc">Individual loan deep-dive. Dark header card with loan name, bank, EMI amount, and next due badge. Progress ring (% paid). Next payment card with inline Pay Now button. Action buttons (Edit, Amortization Schedule, Prepay). Payment history list with paid/late status.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="10 · Loan Detail">
+          <div class="label"><span>10-loan-detail.svg</span><span>390×844</span></div>
+          <img src="wireframes/10-loan-detail.svg" alt="Loan detail wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Dark header: loan name, bank + masked account, EMI, next due badge. Expands the brand/trust moment from Splash into individual loan context. Design lens: <i>Visceral trust</i> (Norman level 1).</li>
+              <li><b>2</b> — Progress ring at 40%: shows how far along the loan is. Centre: "40% paid". Right panels: Principal | Total Interest + amount paid so far. Design lens: <i>Goal-Gradient</i>.</li>
+              <li><b>3</b> — Next payment card: date, amount, inline "Pay Now" button. "Pay Now" opens bank UPI deep-link or payment reminder. Reduces friction — user doesn't need to leave the app.</li>
+              <li><b>4</b> — Payment history: chronological list with "Paid" (grey chip) and "Late" (black chip) status. Provides accountability and helps user identify recurring late payment patterns.</li>
+            </ul>
+            <div class="why"><b>Why payment history matters:</b> Reference app has no payment history. Tracking late payments helps users improve their repayment habit (Commitment &amp; Consistency) and may be useful for credit score monitoring integrations in future.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 7: Notification ========== -->
+    <section id="s7">
+      <div class="lede">System · Notifications</div>
+      <h2><span class="step-num">7.</span>Notification Preview</h2>
+      <p class="desc">Lock screen notification from WorkManager. App icon, title with loan name, body with amount + date. Two quick-reply action buttons: Pay Now (PendingIntent → UPI) and Remind Later (snoozes 24h via one-shot WorkManager request).</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="07 · Lock Screen Notification">
+          <div class="label"><span>07-notification.svg</span><span>390×844</span></div>
+          <img src="wireframes/07-notification.svg" alt="Notification lock screen wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Frosted-glass notification card. Android 12+ system standard. App icon (₹ box) + app name + relative time. Not customisable beyond icon/content.</li>
+              <li><b>2</b> — Notification title: loan name truncated to 1 line.</li>
+              <li><b>3</b> — Action buttons: "Pay Now" → PendingIntent → bank UPI intent. "Remind Later" → PendingIntent → OneTimeWorkRequest with 24h delay.</li>
+              <li><b>4</b> — Stacked secondary notifications for other pending loans. InboxStyle grouping in NotificationCompat.</li>
+            </ul>
+            <div class="why"><b>Why action buttons:</b> Reference app shows notification with no actions. Adding "Remind Later" PendingIntent significantly reduces friction for users managing multiple loans — no unlock required.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 15: Settings ========== -->
+    <section id="s15">
+      <div class="lede">System · Settings <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">15.</span>Settings</h2>
+      <p class="desc">Grouped settings screen: Notifications (reminder toggle, advance days, reminder time, overdue alerts), Appearance (theme, currency, language), Data (CSV export, Google Drive backup/restore), and About. All rows are tappable; toggles are inline.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="15 · Settings">
+          <div class="label"><span>15-settings.svg</span><span>390×844</span></div>
+          <img src="wireframes/15-settings.svg" alt="Settings wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Notifications section: master toggle + sub-settings for advance days, reminder time, and overdue alerts. Sub-settings visually de-emphasised when master toggle is OFF (greyed out).</li>
+              <li><b>2</b> — Advance reminder: "3 days" (default). Tapping opens a NumberPicker dialog (1–30 days). Design lens: <i>Defaults</i> — 3 days pre-selected based on typical EMI processing time.</li>
+              <li><b>3</b> — Appearance: Theme (System/Light/Dark), Currency (₹ INR default), Language. Theme picker → Material 3 dynamic colour theming. Currency changes the ₹ symbol app-wide via DataStore.</li>
+              <li><b>4</b> — Data / Export: CSV triggers FileProvider share sheet. Google Drive backup uses Drive Backup API — does not require user to sign in separately if Google account is on device.</li>
+            </ul>
+            <div class="why"><b>Design lens — Shneiderman's 8 Golden Rules:</b> Settings groups by function (not alphabetical). Most dangerous action (data wipe) absent from this screen — not surfaced here, requires separate confirmation flow if ever added.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Open Questions ========== -->
+    <section id="open">
+      <div class="lede">For reviewer</div>
+      <h2>Open questions</h2>
+      <div class="notes">
+        <ul>
+          <li><b>Navigation structure</b> — Current design uses Bottom Nav with 3 tabs (Dashboard | Calculator | Reminders) + Analytics accessible from Dashboard. Alternative: 4-tab nav (Dashboard | Calculator | Reminders | Portfolio). Which reflects usage frequency in the dev team's testing?</li>
+          <li><b>Urgency colour encoding</b> — Wireframes use monochrome (black/grey/dim). High-fidelity: should urgency use colour semantics (red &lt;3d, amber &lt;7d, green = normal) or keep monochrome for consistency with Material You dynamic theming? Colour adds urgency but may fail for colorblind users unless icon + label also change.</li>
+          <li><b>Loan type taxonomy</b> — Current chips: Home / Car / Personal / Other. Should "Business Loan" and "Education Loan" be first-class types (common in India)? Adding them means 6 chips — may need to wrap to 2 rows.</li>
+          <li><b>SMS auto-detect scope</b> — Current design scans last 30 days. Longer window (90 days) catches more historical EMIs but risks finding repaid loans. Should the scanner filter by "recurring" pattern (same amount, same sender, monthly interval)?</li>
+          <li><b>Pay Now integration</b> — "Pay Now" button on Loan Detail and Notification. UPI deep-link requires user to have a UPI app installed. Fallback if no UPI app: copy VPA to clipboard + open bank website. Is UPI the right default or should we show a generic "Marked as Paid" option first?</li>
+          <li><b>Dark mode</b> — Splash and Onboarding already dark. Full dark mode: dynamic <code>colorScheme</code> via Material You on Android 12+ (adaptive surface colours), manual toggle in Settings for older OS. Implementation cost: Dev to confirm Room + ViewModel layer is display-mode agnostic (should be).</li>
+          <li><b>Amortization export format</b> — CSV vs. PDF vs. both. CSV is simpler (no iText dependency). PDF looks more professional for user sharing with financial advisor. Both: adds ~1.2MB to APK size.</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="footer">
+      HEL-17 · Full App Mockup · v2 · 17 screens (10 new) · Designed by Iris (Figma App Designer) · helsy.ioo<br>
+      Wireframes follow house style: black on white, 1.5pt strokes, 8dp grid, type scale 11/12/14/20/28sp. Red dashed callouts are annotation layer only. Reference app analysed: EMI Calculator &amp; Loan Reminder (Play Store).
+    </div>
+  </main>
+</div>
+
+<div class="lightbox" id="lb" aria-hidden="true">
+  <span class="close" id="lbClose">×</span>
+  <img id="lbImg" alt="" />
+  <div class="caption" id="lbCap"></div>
+</div>
+
+<script>
+  const lb = document.getElementById('lb');
+  const lbImg = document.getElementById('lbImg');
+  const lbCap = document.getElementById('lbCap');
+  const lbClose = document.getElementById('lbClose');
+
+  document.querySelectorAll('[data-zoom]').forEach((el) => {
+    el.addEventListener('click', () => {
+      const target = el.tagName === 'IMG' ? el : el.querySelector('img');
+      if (!target) return;
+      lbImg.src = target.src;
+      lbImg.alt = target.alt;
+      lbCap.textContent = el.dataset.caption || target.alt || '';
+      lb.classList.add('open');
+      lb.removeAttribute('aria-hidden');
+    });
+  });
+
+  function closeLb() { lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); }
+  lb.addEventListener('click', (e) => { if (e.target === lb || e.target === lbClose) closeLb(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLb(); });
+
+  const toc = document.querySelector('details.toc');
+  if (toc) {
+    const mq = window.matchMedia('(max-width: 900px)');
+    const apply = () => { toc.open = !mq.matches; };
+    apply();
+    mq.addEventListener('change', apply);
+    toc.querySelectorAll('.toc-body a').forEach((a) => {
+      a.addEventListener('click', () => { if (mq.matches) toc.open = false; });
+    });
+  }
+</script>
+</body>
+</html>

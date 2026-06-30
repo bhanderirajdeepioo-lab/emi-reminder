@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
+     font-family="-apple-system, system-ui, sans-serif" fill="#fff" stroke="#000" stroke-width="1.5">
+  <!-- canvas: 390x844 · empty state — first-time dashboard -->
+
+  <rect width="390" height="844" fill="#f4f4f4" stroke="none" />
+
+  <!-- status bar -->
+  <rect width="390" height="48" fill="#fff" stroke="none" />
+  <text x="16" y="32" font-size="12" stroke="none" fill="#000">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#000" stroke-width="1.5" />
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#000" stroke="none" />
+
+  <!-- header bar -->
+  <rect x="0" y="48" width="390" height="88" fill="#fff" stroke="none" />
+  <line x1="0" y1="136" x2="390" y2="136" stroke="#e5e5e0" stroke-width="1" />
+  <circle cx="48" cy="88" r="24" fill="#e6e6e6" stroke="#000" />
+  <text x="48" y="93" font-size="12" font-weight="600" text-anchor="middle" stroke="none" fill="#000">RB</text>
+  <text x="88" y="80" font-size="12" stroke="none" fill="#666">Welcome,</text>
+  <text x="88" y="100" font-size="20" font-weight="700" stroke="none" fill="#000">Raj Bhanderi</text>
+  <g transform="translate(336, 72)">
+    <circle cx="16" cy="8" r="12" fill="none" stroke="#000" stroke-width="1.5" />
+    <text x="16" y="13" font-size="14" text-anchor="middle" stroke="none" fill="#000">🔔</text>
+  </g>
+
+  <!-- illustration area -->
+  <!-- bank / loan illustration (simplified geometric) -->
+  <g transform="translate(120, 180)">
+    <!-- building columns -->
+    <rect x="10" y="60" width="14" height="70" rx="2" fill="#e6e6e6" stroke="#ccc" stroke-width="1" />
+    <rect x="38" y="60" width="14" height="70" rx="2" fill="#e6e6e6" stroke="#ccc" stroke-width="1" />
+    <rect x="66" y="60" width="14" height="70" rx="2" fill="#e6e6e6" stroke="#ccc" stroke-width="1" />
+    <rect x="94" y="60" width="14" height="70" rx="2" fill="#e6e6e6" stroke="#ccc" stroke-width="1" />
+    <!-- roof -->
+    <polygon points="0,58 60,12 120,58" fill="#ccc" stroke="none" />
+    <!-- base -->
+    <rect x="0" y="130" width="120" height="8" rx="2" fill="#ccc" stroke="none" />
+    <!-- rupee sign overlay -->
+    <circle cx="60" cy="160" r="36" fill="#000" stroke="none" />
+    <text x="60" y="175" font-size="28" text-anchor="middle" stroke="none" fill="#fff">₹</text>
+  </g>
+
+  <!-- empty state text -->
+  <text x="195" y="390" font-size="20" font-weight="700" text-anchor="middle" stroke="none" fill="#000">No loans tracked yet</text>
+  <text x="195" y="414" font-size="14" text-anchor="middle" stroke="none" fill="#888">Add your first loan to start tracking</text>
+  <text x="195" y="434" font-size="14" text-anchor="middle" stroke="none" fill="#888">your EMIs and get reminders.</text>
+
+  <!-- primary CTA -->
+  <rect x="32" y="460" width="326" height="56" rx="14" fill="#000" stroke="none" />
+  <text x="195" y="494" font-size="16" font-weight="700" text-anchor="middle" stroke="none" fill="#fff">+ Add Your First Loan</text>
+
+  <!-- secondary CTA -->
+  <rect x="32" y="532" width="326" height="56" rx="14" fill="#fff" stroke="#000" stroke-width="1.5" />
+  <text x="195" y="566" font-size="16" font-weight="700" text-anchor="middle" stroke="none" fill="#000">Calculate EMI First</text>
+
+  <!-- or divider -->
+  <line x1="80" y1="508" x2="148" y2="508" stroke="none" />
+
+  <!-- import hint -->
+  <rect x="16" y="612" width="358" height="56" rx="10" fill="#fff" stroke="#e5e5e0" stroke-width="1" />
+  <text x="36" y="636" font-size="13" stroke="none" fill="#000">💬  Have bank SMS? We can auto-import</text>
+  <text x="36" y="656" font-size="12" stroke="none" fill="#888">   your loans from your messages.</text>
+  <text x="362" y="644" font-size="14" text-anchor="end" stroke="none" fill="#000">›</text>
+
+  <!-- help card -->
+  <rect x="16" y="684" width="358" height="56" rx="10" fill="#f8f8f8" stroke="#e5e5e0" stroke-width="1" />
+  <text x="36" y="708" font-size="13" stroke="none" fill="#888">❓  How does EMI reminder work?</text>
+  <text x="36" y="728" font-size="12" stroke="none" fill="#bbb">   Tap to watch a 30-second overview.</text>
+
+  <!-- bottom navigation bar -->
+  <rect x="0" y="796" width="390" height="48" fill="#fff" stroke="none" />
+  <line x1="0" y1="796" x2="390" y2="796" stroke="#e5e5e0" stroke-width="1" />
+  <g transform="translate(43, 808)">
+    <rect x="-24" y="-4" width="48" height="32" rx="8" fill="#000" stroke="none" />
+    <text x="0" y="18" font-size="11" text-anchor="middle" stroke="none" fill="#fff">Dashboard</text>
+  </g>
+  <text x="195" y="826" font-size="11" text-anchor="middle" stroke="none" fill="#666">Calculator</text>
+  <text x="335" y="826" font-size="11" text-anchor="middle" stroke="none" fill="#666">Reminders</text>
+
+  <!-- annotations -->
+  <circle cx="365" cy="330" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
+  <text x="365" y="334" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">1</text>
+  <circle cx="365" cy="490" r="12" fill="#000" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
+  <text x="365" y="494" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">2</text>
+  <circle cx="365" cy="560" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
+  <text x="365" y="564" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">3</text>
+  <circle cx="365" cy="640" r="12" fill="#fff" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5" />
+  <text x="365" y="644" font-size="12" font-weight="700" text-anchor="middle" stroke="none" fill="#d33">4</text>
+</svg>
