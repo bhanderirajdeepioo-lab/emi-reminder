@@ -119,9 +119,9 @@ fun ComparisonCalculatorScreen(
                                 Text("Loan B", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, color = Color(0xFF0891B2), fontSize = 13.sp)
                             }
                             Divider()
-                            CompareRow3("Monthly EMI", fmt.format(emi1), fmt.format(emi2), good1 = emi1 < emi2, good2 = emi1 > emi2)
-                            CompareRow3("Total Interest", fmt.format(interest1), fmt.format(interest2), good1 = interest1 < interest2, good2 = interest1 > interest2)
-                            CompareRow3("Total Payment", fmt.format(total1), fmt.format(total2), good1 = total1 < total2, good2 = total1 > total2)
+                            CompareRow3("Monthly EMI", fmt.format(emi1), fmt.format(emi2), good1 = (emi1 ?: Double.MAX_VALUE) < (emi2 ?: Double.MAX_VALUE), good2 = (emi1 ?: 0.0) > (emi2 ?: 0.0))
+                            CompareRow3("Total Interest", fmt.format(interest1), fmt.format(interest2), good1 = (interest1 ?: Double.MAX_VALUE) < (interest2 ?: Double.MAX_VALUE), good2 = (interest1 ?: 0.0) > (interest2 ?: 0.0))
+                            CompareRow3("Total Payment", fmt.format(total1), fmt.format(total2), good1 = (total1 ?: Double.MAX_VALUE) < (total2 ?: Double.MAX_VALUE), good2 = (total1 ?: 0.0) > (total2 ?: 0.0))
                         }
                     }
 
