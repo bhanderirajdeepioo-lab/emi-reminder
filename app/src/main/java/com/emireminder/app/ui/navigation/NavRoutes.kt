@@ -8,7 +8,7 @@ object NavRoutes {
     // --- Bottom nav roots ---
     const val HOME               = "home"
     const val REMINDERS          = "reminders"
-    const val FINANCE_TOOLS_HUB  = "finance_tools_hub"   // Calculator tab
+    const val FINANCE_TOOLS_HUB  = "finance_tools_hub"   // reachable from Finance tab toolbar
     const val FINANCE            = "finance"              // Finance tab
 
     // --- Home sub-screens ---
@@ -32,7 +32,6 @@ object NavRoutes {
     const val LOAN_CATEGORIES    = "loan_categories"
     const val FD_RD_CALCULATOR   = "fd_rd_calculator"
     const val SIP_CALCULATOR     = "sip_calculator"
-    const val FINANCE_MONTHLY_EMI = "finance_monthly_emi"
 
     // --- Reminder sub-screens ---
     const val ADD_REMINDER = "add_reminder/{loanId}"

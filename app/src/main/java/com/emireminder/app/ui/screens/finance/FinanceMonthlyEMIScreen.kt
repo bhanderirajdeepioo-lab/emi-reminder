@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -55,6 +57,7 @@ private val MONTHS = listOf("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep
 @Composable
 fun FinanceMonthlyEMIScreen(
     onNavigateToLoanDetail: (Int) -> Unit,
+    onNavigateToFinanceToolsHub: () -> Unit = {},
     viewModel: FinanceViewModel = hiltViewModel(),
 ) {
     val activeLoans by viewModel.activeLoans.collectAsState()
@@ -118,7 +121,13 @@ fun FinanceMonthlyEMIScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Indigo600,
                     titleContentColor = Color.White,
+                    actionIconContentColor = Color.White,
                 ),
+                actions = {
+                    IconButton(onClick = onNavigateToFinanceToolsHub) {
+                        Icon(Icons.Filled.Calculate, contentDescription = "Finance Tools")
+                    }
+                },
             )
         },
         containerColor = Indigo50,

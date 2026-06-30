@@ -26,17 +26,46 @@ import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.roundToInt
 
+private enum class LoanTab(val label: String) {
+    HOME("Home"),
+    CAR("Car"),
+    PERSONAL("Personal"),
+}
+
+private data class LoanTabConfig(
+    val defaultPrincipal: Double,
+    val minPrincipal: Double,
+    val maxPrincipal: Double,
+    val minLabel: String,
+    val maxLabel: String,
+)
+
+private val loanTabConfigs = mapOf(
+    LoanTab.HOME     to LoanTabConfig(5_000_000.0,  100_000.0,  20_000_000.0, "₹1L",  "₹2Cr"),
+    LoanTab.CAR      to LoanTabConfig(  800_000.0,   50_000.0,   3_000_000.0, "₹50K", "₹30L"),
+    LoanTab.PERSONAL to LoanTabConfig(  200_000.0,   10_000.0,   1_000_000.0, "₹10K", "₹10L"),
+)
+
 @Composable
 fun EMICalculatorScreen(
     onBack: () -> Unit,
     onShowResults: (Double, Double, Int) -> Unit,
     onInterestTypeSelector: (Double, Double, Int, String) -> Unit,
+    showBackButton: Boolean = true,
     viewModel: CalculatorViewModel = hiltViewModel(),
 ) {
-    var principal by remember { mutableStateOf(1_000_000.0) }
+    var selectedTab by remember { mutableStateOf(LoanTab.HOME) }
+    val config = loanTabConfigs[selectedTab]!!
+
+    var principal by remember { mutableStateOf(config.defaultPrincipal) }
     var rate by remember { mutableStateOf(10.0) }
     var tenure by remember { mutableStateOf(60) }
     val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+
+    // Reset principal when tab changes
+    LaunchedEffect(selectedTab) {
+        principal = loanTabConfigs[selectedTab]!!.defaultPrincipal
+    }
 
     val emi = remember(principal, rate, tenure) {
         viewModel.calculateEmi(principal, rate, tenure)
@@ -46,8 +75,16 @@ fun EMICalculatorScreen(
         topBar = {
             TopAppBar(
                 title = { Text("EMI Calculator", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Indigo600, titleContentColor = Color.White, navigationIconContentColor = Color.White),
+                navigationIcon = {
+                    if (showBackButton) {
+                        IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Indigo600,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                ),
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -82,21 +119,61 @@ fun EMICalculatorScreen(
                 }
             }
 
+            // Loan-type segmented tabs
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                LoanTab.values().forEach { tab ->
+                    val isSelected = tab == selectedTab
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(if (isSelected) Indigo600 else Indigo50),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        TextButton(
+                            onClick = { selectedTab = tab },
+                            contentPadding = PaddingValues(vertical = 8.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(
+                                tab.label,
+                                fontSize = 13.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isSelected) Color.White else Indigo600,
+                            )
+                        }
+                    }
+                }
+            }
+
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
-                // Loan Amount slider
+                // Loan Amount slider — range adapts to selected loan type
+                val principalSlider = ((principal - config.minPrincipal) / (config.maxPrincipal - config.minPrincipal)).toFloat().coerceIn(0f, 1f)
                 SliderField(
                     label = "Loan Amount",
                     displayValue = fmt.format(principal),
-                    sliderValue = (principal / 10_000_000f).toFloat(),
-                    onSliderChange = { principal = (it * 10_000_000).roundToInt().toDouble().coerceIn(10_000.0, 10_000_000.0) },
+                    sliderValue = principalSlider,
+                    onSliderChange = {
+                        principal = (it * (config.maxPrincipal - config.minPrincipal) + config.minPrincipal)
+                            .roundToInt().toDouble().coerceIn(config.minPrincipal, config.maxPrincipal)
+                    },
                     inputValue = if (principal == principal.toLong().toDouble()) principal.toLong().toString() else principal.toString(),
-                    onInputChange = { v -> v.toDoubleOrNull()?.let { if (it in 1_000.0..100_000_000.0) principal = it } },
+                    onInputChange = { v ->
+                        v.toDoubleOrNull()?.let {
+                            if (it in config.minPrincipal..config.maxPrincipal) principal = it
+                        }
+                    },
                     valueRange = 0f..1f,
-                    minLabel = "₹10K",
-                    maxLabel = "₹1Cr",
+                    minLabel = config.minLabel,
+                    maxLabel = config.maxLabel,
                     accentColor = Indigo600,
                 )
 
@@ -166,7 +243,10 @@ fun EMICalculatorScreen(
 
                 OutlinedButton(
                     onClick = { onInterestTypeSelector(principal, rate, tenure, "REDUCING") },
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .padding(bottom = 8.dp),
                     shape = RoundedCornerShape(14.dp),
                 ) {
                     Text("Change Interest Type (Flat / Reducing)", fontSize = 14.sp)

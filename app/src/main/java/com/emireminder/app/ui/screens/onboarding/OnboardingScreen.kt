@@ -75,7 +75,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(DarkBg)
             .statusBarsPadding()
             .navigationBarsPadding()
             .padding(24.dp),
@@ -85,7 +85,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             if (page < pages.lastIndex) {
                 TextButton(onClick = onComplete) {
-                    Text("Skip", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("Skip", color = Color(0xFFB0AEC0))
                 }
             }
         }
@@ -126,7 +126,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                     pageData.title,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = Color.White,
                     textAlign = TextAlign.Center,
                 )
 
@@ -135,7 +135,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                 Text(
                     pageData.body,
                     fontSize = 15.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = Color(0xFFB0AEC0),
                     textAlign = TextAlign.Center,
                     lineHeight = 23.sp,
                 )
@@ -173,7 +173,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
             ) { Text(current.permissionLabel, fontSize = 16.sp, fontWeight = FontWeight.SemiBold) }
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = { page++ }) { Text("Skip for now", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            TextButton(onClick = { page++ }) { Text("Skip for now", color = Color(0xFFB0AEC0)) }
         } else if (current.permissionLabel != null && page == 2) {
             Button(
                 onClick = {
@@ -185,7 +185,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
             ) { Text(current.permissionLabel, fontSize = 16.sp, fontWeight = FontWeight.SemiBold) }
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = onComplete) { Text("Skip for now", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            TextButton(onClick = onComplete) { Text("Skip for now", color = Color(0xFFB0AEC0)) }
         } else {
             Button(
                 onClick = { if (page < pages.lastIndex) page++ else onComplete() },

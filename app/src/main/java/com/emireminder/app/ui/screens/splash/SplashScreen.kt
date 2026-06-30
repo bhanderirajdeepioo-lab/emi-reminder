@@ -11,14 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.emireminder.app.ui.theme.Indigo600
+import com.emireminder.app.ui.theme.DarkBg
 import com.emireminder.app.ui.theme.Indigo100
-import com.emireminder.app.ui.theme.Violet600
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -50,7 +48,7 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.linearGradient(listOf(Indigo600, Violet600))),
+            .background(DarkBg),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
