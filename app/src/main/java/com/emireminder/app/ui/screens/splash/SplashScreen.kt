@@ -94,7 +94,7 @@ fun SplashScreen(
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    text = "Smart EMI tracking for India",
+                    text = "Your Smart Loan Manager",
                     color = Color.White.copy(alpha = 0.65f),
                     fontSize = 13.sp,
                 )

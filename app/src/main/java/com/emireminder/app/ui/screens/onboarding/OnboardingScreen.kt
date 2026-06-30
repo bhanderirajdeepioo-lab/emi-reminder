@@ -69,6 +69,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
     val notifPermission = if (android.os.Build.VERSION.SDK_INT >= 33) {
         rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
     } else null
+    var smsToggleState by remember { mutableStateOf(false) }
 
     val current = pages[page]
 
@@ -163,15 +164,37 @@ fun OnboardingScreen(onComplete: () -> Unit) {
 
         // Permission or next button
         if (current.permissionLabel != null && page == 1) {
-            Button(
-                onClick = {
-                    smsPermission.launchPermissionRequest()
-                    page++
-                },
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
-            ) { Text(current.permissionLabel, fontSize = 16.sp, fontWeight = FontWeight.SemiBold) }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF312E81).copy(alpha = 0.8f)),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("SMS Permission", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color(0xFFE0E7FF))
+                        Text("Auto-detect EMI from bank SMS", fontSize = 12.sp, color = Color(0xFF818CF8))
+                    }
+                    Switch(
+                        checked = smsToggleState,
+                        onCheckedChange = { on ->
+                            if (on) {
+                                smsToggleState = true
+                                smsPermission.launchPermissionRequest()
+                                page++
+                            }
+                        },
+                        colors = SwitchDefaults.colors(
+                            uncheckedThumbColor = Color.White,
+                            uncheckedTrackColor = Color(0xFF1E293B),
+                        ),
+                    )
+                }
+            }
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = { page++ }) { Text("Skip for now", color = Color(0xFFB0AEC0)) }
         } else if (current.permissionLabel != null && page == 2) {
