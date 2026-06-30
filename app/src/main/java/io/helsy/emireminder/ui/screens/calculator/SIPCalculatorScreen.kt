@@ -162,7 +162,7 @@ fun SIPCalculatorScreen(onBack: () -> Unit) {
                     .padding(3.dp)
             ) {
                 Row {
-                    SipTab.values().forEach { tab ->
+                    SipTab.entries.forEach { tab ->
                         val selected = tab == selectedTab
                         Box(
                             modifier = Modifier

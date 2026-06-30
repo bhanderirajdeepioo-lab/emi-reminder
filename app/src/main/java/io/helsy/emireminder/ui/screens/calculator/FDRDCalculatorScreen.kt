@@ -51,7 +51,6 @@ private fun calcFD(principal: Double, ratePercent: Double, tenureYears: Double, 
 private fun calcRD(monthly: Double, ratePercent: Double, tenureYears: Double, freq: CompoundFreq): Double {
     val r = ratePercent / 100.0
     val n = if (freq == CompoundFreq.AT_MATURITY) 1.0 else freq.n.toDouble()
-    val periods = n * tenureYears
     val rPerPeriod = r / n
     val monthsPerPeriod = 12.0 / n
     var maturity = 0.0
@@ -128,7 +127,7 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                     .padding(3.dp)
             ) {
                 Row {
-                    FdTab.values().forEach { tab ->
+                    FdTab.entries.forEach { tab ->
                         val selected = tab == selectedTab
                         Box(
                             modifier = Modifier
@@ -297,7 +296,7 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                     Text("Compounding Frequency", fontSize = 11.sp, color = Color(0xFF64748B))
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        CompoundFreq.values().forEach { freq ->
+                        CompoundFreq.entries.forEach { freq ->
                             val selected = freq == compoundFreq
                             Box(
                                 modifier = Modifier
