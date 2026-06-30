@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.data.db.entity.Loan
+import com.emireminder.app.domain.model.LoanType
+import com.emireminder.app.domain.model.toLoanType
 import com.emireminder.app.ui.theme.Indigo100
 import com.emireminder.app.ui.theme.Indigo50
 import com.emireminder.app.ui.theme.Indigo600
@@ -354,7 +356,7 @@ private fun LoanSummarySection(loans: List<Loan>) {
                     Spacer(Modifier.height(8.dp))
                     Text("${loans.size}", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                     val loanTypesSummary = remember(loans) {
-                        loans.take(3).joinToString(" · ") { it.type.lowercase().replaceFirstChar { c -> c.uppercase() } }
+                        loans.take(3).joinToString(" · ") { it.loanType.displayName }
                     }
                     Text(
                         loanTypesSummary,
@@ -528,7 +530,7 @@ private fun LoanReminderCard(loan: Loan, onClick: () -> Unit) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(loan.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Slate800)
                     Text(
-                        loan.bankName.ifBlank { loan.type.lowercase().replaceFirstChar { it.uppercase() } + " Loan" },
+                        loan.bankName.ifBlank { loan.loanType.displayName },
                         fontSize = 12.sp,
                         color = Color(0xFF64748B),
                     )
@@ -569,11 +571,11 @@ private fun SectionLabel(text: String) {
     )
 }
 
-private fun loanTypeEmoji(type: String): String = when (type.uppercase()) {
-    "HOME"      -> "🏠"
-    "CAR"       -> "🚗"
-    "PERSONAL"  -> "👤"
-    "EDUCATION" -> "🎓"
-    "BUSINESS"  -> "💼"
-    else        -> "💰"
+private fun loanTypeEmoji(type: String): String = when (type.toLoanType()) {
+    LoanType.HOME      -> "🏠"
+    LoanType.CAR       -> "🚗"
+    LoanType.PERSONAL  -> "👤"
+    LoanType.EDUCATION -> "🎓"
+    LoanType.BUSINESS  -> "💼"
+    LoanType.OTHER     -> "💰"
 }

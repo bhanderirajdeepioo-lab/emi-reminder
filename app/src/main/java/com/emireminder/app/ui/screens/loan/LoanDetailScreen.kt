@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.data.db.entity.Loan
+import com.emireminder.app.domain.model.LoanType
+import com.emireminder.app.domain.model.toLoanType
 import com.emireminder.app.ui.theme.*
 import java.text.NumberFormat
 import java.time.Instant
@@ -127,7 +129,7 @@ private fun LoanDetailContent(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(loan.name, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                     Text(
-                        "${loan.type.lowercase().replaceFirstChar { it.uppercase() }} Loan${if (loan.bankName.isNotBlank()) " • ${loan.bankName}" else ""}",
+                        "${loan.loanType.displayName}${if (loan.bankName.isNotBlank()) " • ${loan.bankName}" else ""}",
                         fontSize = 13.sp,
                         color = Indigo100,
                     )
@@ -245,6 +247,7 @@ private fun calcTotalInterest(loan: Loan): Double {
     return (emi * loan.tenureMonths) - loan.principalAmount
 }
 
-private fun loanEmoji(type: String) = when (type.uppercase()) {
-    "HOME" -> "🏠"; "CAR" -> "🚗"; "PERSONAL" -> "👤"; "EDUCATION" -> "🎓"; "BUSINESS" -> "💼"; else -> "💰"
+private fun loanEmoji(type: String) = when (type.toLoanType()) {
+    LoanType.HOME -> "🏠"; LoanType.CAR -> "🚗"; LoanType.PERSONAL -> "👤"
+    LoanType.EDUCATION -> "🎓"; LoanType.BUSINESS -> "💼"; LoanType.OTHER -> "💰"
 }
