@@ -230,6 +230,15 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 val appliedInterestType by entry.savedStateHandle
                     .getStateFlow<String?>("selectedInterestType", null)
                     .collectAsState()
+                // Guard: if the bottom-nav popUpTo(HOME) silently no-op'd (HOME absent
+                // from the stack), Calculator ends up as the back-stack root.  Without
+                // this handler the system back exits the Activity instead of going HOME.
+                BackHandler(enabled = prevRoute == null) {
+                    navController.navigate(NavRoutes.HOME) {
+                        popUpTo(navController.graph.id)  // clear to graph root first
+                        launchSingleTop = true
+                    }
+                }
                 EMICalculatorScreen(
                     showBackButton = !isTabEntry,
                     initialInterestType = appliedInterestType ?: "REDUCING",
@@ -256,7 +265,11 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 CalculatorResultsScreen(
                     principal = p, rate = r, tenureMonths = t,
                     onBack = { navController.popBackStack() },
-                    onViewAmortization = { navController.navigate(NavRoutes.amortizationSchedule(p, r, t)) },
+                    onViewAmortization = {
+                        navController.navigate(NavRoutes.amortizationSchedule(p, r, t)) {
+                            launchSingleTop = true
+                        }
+                    },
                     onPrepayment = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR) },
                     onSaveAsReminder = { navController.navigate(NavRoutes.ADD_LOAN) },
                 )
