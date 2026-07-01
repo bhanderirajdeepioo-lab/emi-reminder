@@ -43,6 +43,7 @@ fun AddReminderSheet(
 
     LaunchedEffect(reminderId) {
         if (reminderId != null) viewModel.loadReminder(reminderId)
+        else viewModel.resetForm()
     }
 
     ModalBottomSheet(
