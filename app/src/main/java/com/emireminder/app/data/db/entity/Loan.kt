@@ -24,6 +24,7 @@ data class Loan(
     val bankName: String = "",
     val accountNumber: String = "",
     val interestType: String = "REDUCING", // "REDUCING" or "FLAT"
+    val emiDueDay: Int = 1,               // day of month (1–28) when EMI is due
 ) {
     @get:Ignore
     val loanType: LoanType get() = type.toLoanType()

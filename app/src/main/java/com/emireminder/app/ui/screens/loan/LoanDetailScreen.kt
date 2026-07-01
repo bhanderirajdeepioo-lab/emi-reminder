@@ -169,6 +169,13 @@ private fun LoanDetailContent(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         ) {
+            val nextDueText = remember(loan.emiDueDay) {
+                val t = today
+                val day = loan.emiDueDay.coerceIn(1, 28)
+                val candidate = try { t.withDayOfMonth(day) } catch (_: Exception) { t.withDayOfMonth(1) }
+                val nextDue = if (!candidate.isBefore(t)) candidate else candidate.plusMonths(1)
+                nextDue.format(java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy"))
+            }
             Row(
                 modifier = Modifier.fillMaxWidth().padding(20.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -176,7 +183,7 @@ private fun LoanDetailContent(
             ) {
                 EmiStatColumn("Monthly EMI", fmt.format(loan.emiAmount), Indigo600)
                 Box(modifier = Modifier.width(1.dp).height(48.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)))
-                EmiStatColumn("Rate", "%.1f%%".format(loan.interestRate), Color(0xFF0891B2))
+                EmiStatColumn("Next Due", nextDueText, UrgentRed)
                 Box(modifier = Modifier.width(1.dp).height(48.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)))
                 EmiStatColumn("Tenure", "${loan.tenureMonths} mo", SafeGreen)
             }

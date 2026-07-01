@@ -13,7 +13,7 @@ import com.emireminder.app.data.db.entity.SMSImport
 
 @Database(
     entities = [Loan::class, Reminder::class, SMSImport::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -26,6 +26,14 @@ abstract class AppDatabase : RoomDatabase() {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL(
                     "ALTER TABLE loans ADD COLUMN interestType TEXT NOT NULL DEFAULT 'REDUCING'"
+                )
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "ALTER TABLE loans ADD COLUMN emiDueDay INTEGER NOT NULL DEFAULT 1"
                 )
             }
         }

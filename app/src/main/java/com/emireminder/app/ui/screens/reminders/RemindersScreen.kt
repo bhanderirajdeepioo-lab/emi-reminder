@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,6 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.data.db.entity.Reminder
 import com.emireminder.app.ui.theme.*
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -189,9 +189,12 @@ fun RemindersScreen(
                             reminder = r,
                             daysText = "Overdue by ${todayDay - r.dueDayOfMonth}d",
                             chipColor = UrgentRed,
+                            isOverdue = true,
+                            isPaid = false,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
+                            onAction = { viewModel.markAsPaid(r) },
                         )
                     }
                 }
@@ -210,9 +213,12 @@ fun RemindersScreen(
                             reminder = r,
                             daysText = if (daysLeft == 0) "Due today!" else "Due in ${daysLeft}d",
                             chipColor = if (daysLeft <= 2) WarnOrange else SafeGreen,
+                            isOverdue = false,
+                            isPaid = false,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
+                            onAction = { viewModel.remindNow(r) },
                         )
                     }
                 }
@@ -225,10 +231,13 @@ fun RemindersScreen(
                         ReminderCard(
                             reminder = r,
                             daysText = "Paid",
-                            chipColor = Color(0xFF94A3B8),
+                            chipColor = SafeGreen,
+                            isOverdue = false,
+                            isPaid = true,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
+                            onAction = { viewModel.reactivate(r) },
                         )
                     }
                 }
@@ -275,11 +284,30 @@ private fun ReminderCard(
     reminder: Reminder,
     daysText: String,
     chipColor: Color,
+    isOverdue: Boolean,
+    isPaid: Boolean,
     onClick: () -> Unit,
     onDelete: () -> Unit,
     onEdit: () -> Unit,
+    onAction: () -> Unit,
 ) {
     val fmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+    val today = remember { LocalDate.now() }
+    val dueDateFmt = remember { DateTimeFormatter.ofPattern("d MMM yyyy") }
+    val dueDate = remember(reminder.dueDayOfMonth) {
+        val day = reminder.dueDayOfMonth.coerceIn(1, today.lengthOfMonth())
+        today.withDayOfMonth(day).format(dueDateFmt)
+    }
+    val actionLabel = when {
+        isPaid    -> "COMPLETED"
+        isOverdue -> "PAY NOW"
+        else      -> "REMIND"
+    }
+    val actionColor = when {
+        isPaid    -> SafeGreen
+        isOverdue -> UrgentRed
+        else      -> Indigo600
+    }
 
     Card(
         modifier = Modifier
@@ -305,45 +333,58 @@ private fun ReminderCard(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Indigo50),
+                        .background(chipColor.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
-                        if (reminder.isActive) Icons.Default.Notifications else Icons.Default.NotificationsOff,
-                        contentDescription = null,
-                        tint = if (reminder.isActive) Indigo600 else Color(0xFF94A3B8),
-                        modifier = Modifier.size(22.dp),
-                    )
+                    Text(loanEmojiFromName(reminder.loanName), fontSize = 20.sp)
                 }
                 Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(reminder.loanName, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                     Text(
-                        "Due on ${reminder.dueDayOfMonth}${dayOrdinal(reminder.dueDayOfMonth)} every month",
+                        "Due: $dueDate",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    Text(daysText, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = chipColor)
                 }
-                Column(horizontalAlignment = Alignment.End) {
+                Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(fmt.format(reminder.emiAmount), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                    Spacer(Modifier.height(4.dp))
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(chipColor.copy(alpha = 0.12f))
-                            .padding(horizontal = 8.dp, vertical = 3.dp),
+                            .background(actionColor)
+                            .clickable(onClick = onAction)
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
                     ) {
-                        Text(daysText, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = chipColor)
+                        Text(actionLabel, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }
-            IconButton(onClick = onEdit) {
-                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
-            }
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+            Column {
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                }
             }
         }
+    }
+}
+
+private fun loanEmojiFromName(name: String): String {
+    val n = name.lowercase()
+    return when {
+        n.contains("home") || n.contains("house") || n.contains("property") -> "🏠"
+        n.contains("car") || n.contains("auto") || n.contains("vehicle")    -> "🚗"
+        n.contains("bike") || n.contains("two") || n.contains("scooter")    -> "🏍"
+        n.contains("personal")                                               -> "💳"
+        n.contains("education") || n.contains("student")                    -> "🎓"
+        n.contains("business") || n.contains("msme")                        -> "🏢"
+        n.contains("gold")                                                   -> "🪙"
+        n.contains("medical") || n.contains("health")                       -> "🏥"
+        else                                                                 -> "💰"
     }
 }
 

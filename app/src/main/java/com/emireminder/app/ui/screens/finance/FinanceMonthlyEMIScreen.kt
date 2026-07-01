@@ -41,10 +41,7 @@ private data class LoanEmiItem(
     val isOverdue: Boolean,
 )
 
-private fun Loan.toDueDay(): Int {
-    val cal = Calendar.getInstance().apply { timeInMillis = startDate }
-    return cal.get(Calendar.DAY_OF_MONTH).coerceIn(1, 28)
-}
+private fun Loan.toDueDay(): Int = emiDueDay.coerceIn(1, 28)
 
 private val _emiAmountFmt = NumberFormat.getNumberInstance(Locale("en", "IN")).apply {
     maximumFractionDigits = 0

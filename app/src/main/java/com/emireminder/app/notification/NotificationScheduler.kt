@@ -75,6 +75,18 @@ class NotificationScheduler @Inject constructor(
 
     fun rescheduleAll(reminders: List<Reminder>) = reminders.forEach { scheduleReminder(it) }
 
+    fun showImmediateReminder(loanId: Int, loanName: String, emiAmount: Double, dueDay: Int) {
+        val triggerAt = System.currentTimeMillis() + 5_000L
+        val intent = Intent(context, ReminderReceiver::class.java).apply {
+            putExtra(EXTRA_LOAN_NAME, loanName)
+            putExtra(EXTRA_EMI_AMOUNT, emiAmount)
+            putExtra(EXTRA_REMINDER_ID, loanId)
+            putExtra(EXTRA_LOAN_ID, loanId)
+            putExtra(EXTRA_DUE_DAY, dueDay)
+        }
+        setAlarm(loanId, intent, triggerAt)
+    }
+
     private fun setAlarm(requestCode: Int, intent: Intent, triggerAt: Long) {
         val pending = PendingIntent.getBroadcast(
             context, requestCode, intent,

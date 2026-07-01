@@ -72,6 +72,7 @@ class AddLoanViewModel @Inject constructor(
                     accountNumber   = accountNumber.trim(),
                     notes           = notes.trim(),
                     interestType    = interestType,
+                    emiDueDay       = dueDayOfMonth.toIntOrNull()?.coerceIn(1, 28) ?: 1,
                 )
             )
             launch(Dispatchers.Main) { onSuccess() }
