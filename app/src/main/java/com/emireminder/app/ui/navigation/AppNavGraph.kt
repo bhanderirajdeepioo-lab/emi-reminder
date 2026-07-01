@@ -163,6 +163,7 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                             restoreState = false
                         }
                     },
+                    onNavigateToCalculator  = { navController.navigate(NavRoutes.EMI_CALCULATOR) { launchSingleTop = true } },
                 )
             }
 
@@ -176,6 +177,7 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                     onNavigateToSmsImport   = { navController.navigate(NavRoutes.SMS_IMPORT) },
                     onNavigateToAddLoan     = { navController.navigate(NavRoutes.ADD_LOAN) },
                     onNavigateToAddReminder = { navController.navigate(NavRoutes.REMINDERS) },
+                    onNavigateToCalculator  = { navController.navigate(NavRoutes.EMI_CALCULATOR) { launchSingleTop = true } },
                 )
             }
 

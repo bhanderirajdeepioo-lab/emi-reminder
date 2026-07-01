@@ -57,9 +57,11 @@ fun HomeScreen(
     onNavigateToSmsImport: () -> Unit,
     onNavigateToAddLoan: () -> Unit,
     onNavigateToAddReminder: () -> Unit,
+    onNavigateToCalculator: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val loans by viewModel.activeLoans.collectAsState()
+    val reminderCount by viewModel.activeReminderCount.collectAsState()
 
     Scaffold(
         floatingActionButton = {
@@ -81,6 +83,7 @@ fun HomeScreen(
             item {
                 DashboardHeader(
                     onNavigateToSettings = onNavigateToSettings,
+                    reminderCount = reminderCount,
                 )
             }
 
@@ -88,7 +91,7 @@ fun HomeScreen(
                 item { EmptyState(onNavigateToAddLoan, onNavigateToSmsImport) }
             } else {
                 item { LoanSummarySection(loans) }
-                item { QuickActionsSection(onNavigateToAddLoan, onNavigateToAnalytics) }
+                item { QuickActionsSection(onNavigateToAddLoan, onNavigateToAnalytics, onNavigateToCalculator) }
                 item {
                     Row(
                         modifier = Modifier
@@ -123,7 +126,7 @@ fun HomeScreen(
 // ── Header ────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun DashboardHeader(onNavigateToSettings: () -> Unit) {
+private fun DashboardHeader(onNavigateToSettings: () -> Unit, reminderCount: Int = 0) {
     val dateText = remember {
         LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.ENGLISH))
     }
@@ -196,7 +199,7 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit) {
                 )
             }
 
-            // Notification bell with badge
+            // Notification bell with live reminder badge
             Box {
                 Box(
                     modifier = Modifier
@@ -212,15 +215,22 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit) {
                         modifier = Modifier.size(20.dp),
                     )
                 }
-                Box(
-                    modifier = Modifier
-                        .size(14.dp)
-                        .clip(CircleShape)
-                        .background(UrgentRed)
-                        .align(Alignment.TopEnd),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text("2", fontSize = 8.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                if (reminderCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .size(14.dp)
+                            .clip(CircleShape)
+                            .background(UrgentRed)
+                            .align(Alignment.TopEnd),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            if (reminderCount > 9) "9+" else reminderCount.toString(),
+                            fontSize = 8.sp,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
             }
         }
@@ -443,7 +453,7 @@ private fun LoanSummarySection(loans: List<Loan>) {
 // ── Quick actions ─────────────────────────────────────────────────────────────
 
 @Composable
-private fun QuickActionsSection(onAddLoan: () -> Unit, onAnalytics: () -> Unit) {
+private fun QuickActionsSection(onAddLoan: () -> Unit, onAnalytics: () -> Unit, onCalculator: () -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Spacer(Modifier.height(16.dp))
         SectionLabel("QUICK ACTIONS")
@@ -459,7 +469,7 @@ private fun QuickActionsSection(onAddLoan: () -> Unit, onAnalytics: () -> Unit) 
                 bgColor = Indigo50,
                 iconColor = Indigo600,
                 modifier = Modifier.weight(1f),
-                onClick = {},
+                onClick = onCalculator,
             )
             QuickActionTile(
                 icon = Icons.Default.Add,
