@@ -32,6 +32,7 @@ fun InterestTypeSelectorScreen(
     tenureMonths: Int,
     currentType: String,
     onBack: () -> Unit,
+    onApply: (String) -> Unit = { onBack() },
     viewModel: CalculatorViewModel = hiltViewModel(),
 ) {
     var selected by remember { mutableStateOf(currentType) }
@@ -125,7 +126,7 @@ fun InterestTypeSelectorScreen(
             Spacer(Modifier.height(8.dp))
 
             Button(
-                onClick = onBack,
+                onClick = { onApply(selected) },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Indigo600),

@@ -198,11 +198,15 @@ fun AppNavGraph() {
             }
 
             // 9 — EMI Calculator (also the Calculator bottom-nav tab destination)
-            composable(NavRoutes.EMI_CALCULATOR) {
+            composable(NavRoutes.EMI_CALCULATOR) { entry ->
                 val prevRoute = navController.previousBackStackEntry?.destination?.route
                 val isTabEntry = prevRoute == null || prevRoute in bottomNavRoutes
+                val appliedInterestType by entry.savedStateHandle
+                    .getStateFlow<String?>("selectedInterestType", null)
+                    .collectAsState()
                 EMICalculatorScreen(
                     showBackButton = !isTabEntry,
+                    initialInterestType = appliedInterestType ?: "REDUCING",
                     onBack = { navController.popBackStack() },
                     onShowResults = { p, r, t -> navController.navigate(NavRoutes.calculatorResults(p, r, t)) },
                     onInterestTypeSelector = { p, r, t, type ->
@@ -275,12 +279,26 @@ fun AppNavGraph() {
                     tenureMonths = back.arguments?.getString("tenure")?.toIntOrNull() ?: 0,
                     currentType  = back.arguments?.getString("currentType") ?: "REDUCING",
                     onBack = { navController.popBackStack() },
+                    onApply = { type ->
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("selectedInterestType", type)
+                        navController.popBackStack()
+                    },
                 )
             }
 
             // 15 — SMS Import
             composable(NavRoutes.SMS_IMPORT) {
-                SMSImportScreen(onBack = { navController.popBackStack() })
+                SMSImportScreen(onBack = {
+                    // popBackStack() returns false when the back stack is empty, which
+                    // would finish the Activity and exit the app. Fallback to HOME instead.
+                    if (!navController.popBackStack()) {
+                        navController.navigate(NavRoutes.HOME) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                })
             }
 
             // 16 — Settings

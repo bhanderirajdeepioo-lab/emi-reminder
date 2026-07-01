@@ -60,6 +60,7 @@ fun EMICalculatorScreen(
     onInterestTypeSelector: (Double, Double, Int, String) -> Unit,
     showBackButton: Boolean = true,
     prefillLabel: String? = null,
+    initialInterestType: String = "REDUCING",
     viewModel: CalculatorViewModel = hiltViewModel(),
 ) {
     val initialTab = when (prefillLabel) {
@@ -74,6 +75,7 @@ fun EMICalculatorScreen(
     var rate by remember { mutableStateOf(config.defaultRate) }
     var tenure by remember { mutableStateOf(60) }
     var tenureUnit by remember { mutableStateOf(TenureUnit.YEARS) }
+    var interestType by remember { mutableStateOf(initialInterestType) }
     val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
 
     LaunchedEffect(selectedTab) {
@@ -82,8 +84,14 @@ fun EMICalculatorScreen(
         rate = cfg.defaultRate
     }
 
-    val emi = remember(principal, rate, tenure) {
-        viewModel.calculateEmi(principal, rate, tenure)
+    LaunchedEffect(initialInterestType) { interestType = initialInterestType }
+
+    val emi = remember(principal, rate, tenure, interestType) {
+        if (interestType == "FLAT") {
+            (principal + principal * (rate / 100.0) * (tenure / 12.0)) / tenure
+        } else {
+            viewModel.calculateEmi(principal, rate, tenure)
+        }
     }
 
     val tenureDisplay = when (tenureUnit) {
@@ -309,14 +317,17 @@ fun EMICalculatorScreen(
                 }
 
                 OutlinedButton(
-                    onClick = { onInterestTypeSelector(principal, rate, tenure, "REDUCING") },
+                    onClick = { onInterestTypeSelector(principal, rate, tenure, interestType) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
                         .padding(bottom = 8.dp),
                     shape = RoundedCornerShape(14.dp),
                 ) {
-                    Text("Change Interest Type (Flat / Reducing)", fontSize = 14.sp)
+                    Text(
+                        "Type: ${if (interestType == "FLAT") "Flat Rate" else "Reducing Balance"} · Change",
+                        fontSize = 14.sp,
+                    )
                 }
             }
         }
