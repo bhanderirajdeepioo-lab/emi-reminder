@@ -36,8 +36,8 @@ class ReminderWorker @AssistedInject constructor(
 
         val notification = NotificationCompat.Builder(applicationContext, EmiApp.CHANNEL_REMINDERS)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("EMI Due: $loanName")
-            .setContentText("Payment of ₹%.2f is due today.".format(emiAmount))
+            .setContentTitle("EMI Reminder")
+            .setContentText("Your $loanName EMI of ₹%.2f is due today.".format(emiAmount))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
