@@ -328,6 +328,7 @@ fun AppNavGraph() {
                     onViewAmortization = { p, r, t ->
                         navController.navigate(NavRoutes.amortizationSchedule(p, r, t))
                     },
+                    onPrepay = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR) },
                 )
             }
 
