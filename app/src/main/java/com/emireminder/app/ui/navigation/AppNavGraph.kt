@@ -227,6 +227,8 @@ fun AppNavGraph() {
                     principal = p, rate = r, tenureMonths = t,
                     onBack = { navController.popBackStack() },
                     onViewAmortization = { navController.navigate(NavRoutes.amortizationSchedule(p, r, t)) },
+                    onPrepayment = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR) },
+                    onSaveAsReminder = { navController.navigate(NavRoutes.ADD_LOAN) },
                 )
             }
 

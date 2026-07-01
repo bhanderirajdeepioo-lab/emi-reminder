@@ -9,6 +9,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -36,6 +38,8 @@ fun CalculatorResultsScreen(
     tenureMonths: Int,
     onBack: () -> Unit,
     onViewAmortization: () -> Unit,
+    onPrepayment: () -> Unit,
+    onSaveAsReminder: () -> Unit,
     viewModel: CalculatorViewModel = hiltViewModel(),
 ) {
     val emi = remember(principal, rate, tenureMonths) { viewModel.calculateEmi(principal, rate, tenureMonths) }
@@ -132,7 +136,7 @@ fun CalculatorResultsScreen(
                     }
                 }
 
-                // View amortization button
+                // Action buttons
                 Button(
                     onClick = onViewAmortization,
                     modifier = Modifier.fillMaxWidth().height(52.dp),
@@ -141,7 +145,30 @@ fun CalculatorResultsScreen(
                 ) {
                     Icon(Icons.Default.TableChart, null)
                     Spacer(Modifier.width(8.dp))
-                    Text("View Amortization Schedule", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                    Text("Amortize", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                }
+
+                OutlinedButton(
+                    onClick = onPrepayment,
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Indigo600),
+                    border = androidx.compose.foundation.BorderStroke(1.5.dp, Indigo600),
+                ) {
+                    Icon(Icons.Default.Savings, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Prepayment", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                }
+
+                Button(
+                    onClick = onSaveAsReminder,
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Violet600),
+                ) {
+                    Icon(Icons.Default.NotificationsActive, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("+ Save as Loan Reminder", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
