@@ -35,10 +35,15 @@ private val FREQUENCIES = listOf("Monthly", "Weekly", "Quarterly", "Yearly")
 @Composable
 fun AddReminderSheet(
     onDismiss: () -> Unit,
+    reminderId: Int? = null,
     viewModel: AddReminderViewModel = hiltViewModel(),
 ) {
     var showDayPicker by remember { mutableStateOf(false) }
     var showRepeatDropdown by remember { mutableStateOf(false) }
+
+    LaunchedEffect(reminderId) {
+        if (reminderId != null) viewModel.loadReminder(reminderId)
+    }
 
     ModalBottomSheet(
         onDismissRequest = { viewModel.resetForm(); onDismiss() },
@@ -61,7 +66,7 @@ fun AddReminderSheet(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    "Add Loan Reminder",
+                    if (viewModel.isEditing) "Edit Loan Reminder" else "Add Loan Reminder",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -267,7 +272,11 @@ fun AddReminderSheet(
                         strokeWidth = 2.dp,
                     )
                 } else {
-                    Text("Save Reminder", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        if (viewModel.isEditing) "Update Reminder" else "Save Reminder",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
                 }
             }
         }

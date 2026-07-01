@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.Search
@@ -41,6 +42,7 @@ fun RemindersScreen(
     viewModel: RemindersViewModel = hiltViewModel(),
 ) {
     var showAddSheet by remember { mutableStateOf(false) }
+    var editingReminderId by remember { mutableStateOf<Int?>(null) }
     val onAddReminder: () -> Unit = remember { { showAddSheet = true } }
     val reminders by viewModel.reminders.collectAsState()
     val today = remember { LocalDate.now() }
@@ -189,6 +191,7 @@ fun RemindersScreen(
                             chipColor = UrgentRed,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
+                            onEdit = { editingReminderId = r.id; showAddSheet = true },
                         )
                     }
                 }
@@ -209,6 +212,7 @@ fun RemindersScreen(
                             chipColor = if (daysLeft <= 2) WarnOrange else SafeGreen,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
+                            onEdit = { editingReminderId = r.id; showAddSheet = true },
                         )
                     }
                 }
@@ -224,6 +228,7 @@ fun RemindersScreen(
                             chipColor = Color(0xFF94A3B8),
                             onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
+                            onEdit = { editingReminderId = r.id; showAddSheet = true },
                         )
                     }
                 }
@@ -232,7 +237,13 @@ fun RemindersScreen(
     }
 
     if (showAddSheet) {
-        AddReminderSheet(onDismiss = { showAddSheet = false })
+        AddReminderSheet(
+            onDismiss = {
+                showAddSheet = false
+                editingReminderId = null
+            },
+            reminderId = editingReminderId,
+        )
     }
 }
 
@@ -266,6 +277,7 @@ private fun ReminderCard(
     chipColor: Color,
     onClick: () -> Unit,
     onDelete: () -> Unit,
+    onEdit: () -> Unit,
 ) {
     val fmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
 
@@ -324,6 +336,9 @@ private fun ReminderCard(
                         Text(daysText, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = chipColor)
                     }
                 }
+            }
+            IconButton(onClick = onEdit) {
+                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
             }
             IconButton(onClick = onDelete) {
                 Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))

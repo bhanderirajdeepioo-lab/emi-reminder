@@ -19,6 +19,9 @@ class AddReminderViewModel @Inject constructor(
     private val notificationScheduler: NotificationScheduler,
 ) : ViewModel() {
 
+    private var editingReminderId: Int? = null
+    private var editingLoanId: Int? = null
+
     var loanName by mutableStateOf("")
         private set
     var bankName by mutableStateOf("")
@@ -36,8 +39,25 @@ class AddReminderViewModel @Inject constructor(
     var isSaving by mutableStateOf(false)
         private set
 
+    val isEditing get() = editingReminderId != null
+
     val isFormValid by derivedStateOf {
         loanName.isNotBlank() && emiAmount.isNotBlank() && dueDay.isNotBlank()
+    }
+
+    fun loadReminder(reminderId: Int) {
+        viewModelScope.launch {
+            val reminder = reminderRepository.getReminderById(reminderId) ?: return@launch
+            editingReminderId = reminder.id
+            editingLoanId = reminder.loanId
+            loanName = reminder.loanName
+            bankName = reminder.bankName
+            emiAmount = reminder.emiAmount.toString()
+            dueDay = reminder.dueDayOfMonth.toString()
+            repeatFrequency = reminder.frequency.lowercase().replaceFirstChar { it.uppercase() }
+            notes = reminder.notes
+            notificationEnabled = reminder.notificationEnabled
+        }
     }
 
     fun onLoanNameChange(v: String) { loanName = v }
@@ -54,6 +74,8 @@ class AddReminderViewModel @Inject constructor(
     fun onNotificationToggle() { notificationEnabled = !notificationEnabled }
 
     fun resetForm() {
+        editingReminderId = null
+        editingLoanId = null
         loanName = ""
         bankName = ""
         emiAmount = ""
@@ -70,18 +92,39 @@ class AddReminderViewModel @Inject constructor(
         viewModelScope.launch {
             val amount = emiAmount.toDoubleOrNull() ?: run { isSaving = false; return@launch }
             val day = dueDay.toIntOrNull() ?: run { isSaving = false; return@launch }
-            val reminder = Reminder(
-                loanName = loanName,
-                bankName = bankName,
-                emiAmount = amount,
-                dueDayOfMonth = day,
-                frequency = repeatFrequency.uppercase(),
-                notes = notes,
-                notificationEnabled = notificationEnabled,
-            )
-            val insertedId = reminderRepository.insertReminder(reminder)
-            if (notificationEnabled) {
-                notificationScheduler.scheduleReminder(reminder.copy(id = insertedId.toInt()))
+            val existingId = editingReminderId
+            if (existingId != null) {
+                val updated = Reminder(
+                    id = existingId,
+                    loanId = editingLoanId,
+                    loanName = loanName,
+                    bankName = bankName,
+                    emiAmount = amount,
+                    dueDayOfMonth = day,
+                    frequency = repeatFrequency.uppercase(),
+                    notes = notes,
+                    notificationEnabled = notificationEnabled,
+                )
+                reminderRepository.updateReminder(updated)
+                if (notificationEnabled) {
+                    notificationScheduler.scheduleReminder(updated)
+                } else {
+                    notificationScheduler.cancelReminder(existingId)
+                }
+            } else {
+                val reminder = Reminder(
+                    loanName = loanName,
+                    bankName = bankName,
+                    emiAmount = amount,
+                    dueDayOfMonth = day,
+                    frequency = repeatFrequency.uppercase(),
+                    notes = notes,
+                    notificationEnabled = notificationEnabled,
+                )
+                val insertedId = reminderRepository.insertReminder(reminder)
+                if (notificationEnabled) {
+                    notificationScheduler.scheduleReminder(reminder.copy(id = insertedId.toInt()))
+                }
             }
             isSaving = false
             onSuccess()
