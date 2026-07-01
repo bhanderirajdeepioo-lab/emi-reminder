@@ -376,6 +376,9 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                     onCategorySelected = { name ->
                         navController.navigate(NavRoutes.emiCalculatorWithLabel(name))
                     },
+                    onCustomLoanType = {
+                        navController.navigate(NavRoutes.ADD_LOAN)
+                    },
                     onBack = { navController.popBackStack() },
                 )
             }
@@ -427,8 +430,8 @@ private fun FloatingNavBar(currentRoute: String?, onNavigate: (String) -> Unit) 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
             .navigationBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
         Box(
             modifier = Modifier
