@@ -475,7 +475,7 @@ private fun NavItem(item: NavItem, selected: Boolean, onClick: () -> Unit, modif
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 6.dp),
+            .padding(horizontal = 2.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (selected) {
@@ -483,19 +483,20 @@ private fun NavItem(item: NavItem, selected: Boolean, onClick: () -> Unit, modif
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
                     .background(Indigo600)
-                    .padding(horizontal = 14.dp, vertical = 8.dp)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(item.filledIcon, contentDescription = item.label, tint = Color.White, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(item.label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                    Spacer(Modifier.height(2.dp))
+                    Text(item.label, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color.White, maxLines = 1)
                 }
             }
         } else {
             Icon(item.outlinedIcon, contentDescription = item.label,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(24.dp))
             Spacer(Modifier.height(2.dp))
-            Text(item.label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(item.label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
         }
     }
 }
