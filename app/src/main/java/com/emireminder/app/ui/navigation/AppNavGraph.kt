@@ -37,6 +37,8 @@ import com.emireminder.app.ui.screens.calculator.*
 import com.emireminder.app.ui.screens.finance.*
 import com.emireminder.app.ui.screens.home.HomeScreen
 import com.emireminder.app.ui.screens.loan.*
+import com.emireminder.app.ui.screens.onboarding.CountrySelectScreen
+import com.emireminder.app.ui.screens.onboarding.LanguageSelectScreen
 import com.emireminder.app.ui.screens.onboarding.OnboardingScreen
 import com.emireminder.app.ui.screens.reminders.*
 import com.emireminder.app.ui.screens.settings.SettingsScreen
@@ -141,7 +143,11 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             // 1 — Splash
             composable(NavRoutes.SPLASH) {
                 SplashScreen(
-                    onNavigateToOnboarding = { navController.navigate(NavRoutes.ONBOARDING) { popUpTo(NavRoutes.SPLASH) { inclusive = true } } },
+                    onNavigateToOnboarding = {
+                        navController.navigate(NavRoutes.LANGUAGE_SELECT) {
+                            popUpTo(NavRoutes.SPLASH) { inclusive = true }
+                        }
+                    },
                     onNavigateToHome = {
                         navController.navigate(NavRoutes.HOME) { popUpTo(NavRoutes.SPLASH) { inclusive = true } }
                         // Notification deep link: open the tapped loan detail on top of Home.
@@ -153,12 +159,36 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 )
             }
 
-            // 2 — Onboarding
+            // 1b — Language selection (first step of onboarding flow)
+            composable(NavRoutes.LANGUAGE_SELECT) {
+                LanguageSelectScreen(
+                    onContinue = {
+                        navController.navigate(NavRoutes.ONBOARDING) {
+                            popUpTo(NavRoutes.LANGUAGE_SELECT) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            // 2 — Onboarding (3 informative intro screens)
             composable(NavRoutes.ONBOARDING) {
                 OnboardingScreen(
                     onComplete = {
+                        navController.navigate(NavRoutes.COUNTRY_SELECT) {
+                            popUpTo(NavRoutes.ONBOARDING) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            // 2b — Country selection (final step before main app)
+            composable(NavRoutes.COUNTRY_SELECT) {
+                CountrySelectScreen(
+                    onContinue = {
                         markOnboardingDone(context)
-                        navController.navigate(NavRoutes.HOME) { popUpTo(NavRoutes.ONBOARDING) { inclusive = true } }
+                        navController.navigate(NavRoutes.HOME) {
+                            popUpTo(NavRoutes.COUNTRY_SELECT) { inclusive = true }
+                        }
                     }
                 )
             }

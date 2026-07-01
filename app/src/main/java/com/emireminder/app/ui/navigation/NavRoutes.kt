@@ -4,8 +4,10 @@ import java.net.URLEncoder
 
 object NavRoutes {
     // --- Startup ---
-    const val SPLASH        = "splash"
-    const val ONBOARDING    = "onboarding"
+    const val SPLASH           = "splash"
+    const val LANGUAGE_SELECT  = "language_select"
+    const val ONBOARDING       = "onboarding"
+    const val COUNTRY_SELECT   = "country_select"
 
     // --- Bottom nav roots ---
     const val HOME               = "home"
