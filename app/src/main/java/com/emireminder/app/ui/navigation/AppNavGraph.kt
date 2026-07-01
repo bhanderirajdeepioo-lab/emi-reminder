@@ -347,9 +347,13 @@ fun AppNavGraph() {
                 arguments = listOf(navArgument("label") { type = NavType.StringType }),
             ) { back ->
                 val label = back.arguments?.getString("label").orEmpty()
+                val appliedInterestType by back.savedStateHandle
+                    .getStateFlow<String?>("selectedInterestType", null)
+                    .collectAsState()
                 EMICalculatorScreen(
                     prefillLabel = label.ifBlank { null },
                     showBackButton = true,
+                    initialInterestType = appliedInterestType ?: "REDUCING",
                     onBack = { navController.popBackStack() },
                     onShowResults = { p, r, t -> navController.navigate(NavRoutes.calculatorResults(p, r, t)) },
                     onInterestTypeSelector = { p, r, t, type ->
