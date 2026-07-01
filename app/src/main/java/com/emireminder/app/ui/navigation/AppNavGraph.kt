@@ -1,6 +1,7 @@
 package com.emireminder.app.ui.navigation
 
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -289,16 +290,16 @@ fun AppNavGraph() {
             }
 
             // 15 — SMS Import
+            // Explicit BackHandler covers KEYCODE_BACK / gesture back.  The NavHost's
+            // implicit handler is only active when previousBackStackEntry != null; if the
+            // back stack is ever corrupted (race from SplashScreen's inclusive popUpTo,
+            // or double-navigate), the implicit handler is silently disabled and the
+            // Activity exits instead of returning to Home.
+            // popBackStack(HOME, false) is safe: it pops until HOME is on top, which is
+            // the correct destination regardless of any intermediate stack entries.
             composable(NavRoutes.SMS_IMPORT) {
-                SMSImportScreen(onBack = {
-                    // popBackStack() returns false when the back stack is empty, which
-                    // would finish the Activity and exit the app. Fallback to HOME instead.
-                    if (!navController.popBackStack()) {
-                        navController.navigate(NavRoutes.HOME) {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }
-                })
+                BackHandler { navController.popBackStack(NavRoutes.HOME, false) }
+                SMSImportScreen(onBack = { navController.popBackStack(NavRoutes.HOME, false) })
             }
 
             // 16 — Settings
