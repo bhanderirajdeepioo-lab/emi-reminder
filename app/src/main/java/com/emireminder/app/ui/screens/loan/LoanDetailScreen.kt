@@ -107,16 +107,16 @@ private fun LoanDetailContent(
     onViewAmortization: (Double, Double, Int) -> Unit,
     onPrepay: () -> Unit,
 ) {
-    val totalInterest = calcTotalInterest(loan)
+    val totalInterest = remember(loan) { calcTotalInterest(loan) }
     val totalPayment = loan.principalAmount + totalInterest
     val pctInterest = if (totalPayment > 0) (totalInterest / totalPayment * 100) else 0.0
 
-    val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
-    val today = LocalDate.now()
-    val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
+    val startDate = remember(loan.startDate) { Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate() }
+    val today = remember { LocalDate.now() }
+    val monthsElapsed = remember(startDate, loan.tenureMonths) { ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths) }
     val tenureRemaining = (loan.tenureMonths - monthsElapsed).coerceAtLeast(0)
     val progressFraction = if (loan.tenureMonths > 0) monthsElapsed.toFloat() / loan.tenureMonths else 0f
-    val outstandingBalance = calcOutstandingBalance(loan, monthsElapsed)
+    val outstandingBalance = remember(loan, monthsElapsed) { calcOutstandingBalance(loan, monthsElapsed) }
 
     Column(
         modifier = Modifier
@@ -254,6 +254,21 @@ private fun LoanDetailContent(
 
             // EMI payment history (estimated)
             if (monthsElapsed > 0) {
+                val paymentHistory = remember(loan, monthsElapsed, startDate) {
+                    val r = loan.interestRate / (12 * 100)
+                    var bal = loan.principalAmount
+                    val historyCount = minOf(monthsElapsed, 4)
+                    val mFmt = DateTimeFormatter.ofPattern("MMM yyyy")
+                    val history = mutableListOf<Triple<String, Double, Double>>()
+                    for (m in 1..monthsElapsed) {
+                        val interest = bal * r
+                        bal -= (loan.emiAmount - interest)
+                        if (m > monthsElapsed - historyCount) {
+                            history.add(Triple(startDate.plusMonths(m.toLong()).format(mFmt), loan.emiAmount, interest))
+                        }
+                    }
+                    history.reversed()
+                }
                 SectionLabel("EMI PAYMENT HISTORY")
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -262,20 +277,7 @@ private fun LoanDetailContent(
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 ) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        val r = loan.interestRate / (12 * 100)
-                        var bal = loan.principalAmount
-                        val historyCount = minOf(monthsElapsed, 4)
-                        val history = mutableListOf<Triple<String, Double, Double>>()
-                        val mFmt = DateTimeFormatter.ofPattern("MMM yyyy")
-                        for (m in 1..monthsElapsed) {
-                            val interest = bal * r
-                            val principalPaid = loan.emiAmount - interest
-                            bal -= principalPaid
-                            if (m > monthsElapsed - historyCount) {
-                                history.add(Triple(startDate.plusMonths(m.toLong()).format(mFmt), loan.emiAmount, interest))
-                            }
-                        }
-                        history.reversed().forEach { (label, emi, interest) ->
+                        paymentHistory.forEach { (label, emi, interest) ->
                             PaymentHistoryRow(label, emi, interest, fmt)
                         }
                         if (monthsElapsed > 4) {

@@ -53,44 +53,51 @@ fun LoanAnalyticsScreen(
     val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
     var period by remember { mutableStateOf(AnalyticsPeriod.ONE_Y) }
 
-    val totalEmi = loans.sumOf { it.emiAmount }
-    val totalPrincipal = loans.sumOf { it.principalAmount }
+    val totalEmi = remember(loans) { loans.sumOf { it.emiAmount } }
+    val totalPrincipal = remember(loans) { loans.sumOf { it.principalAmount } }
 
-    val totalInterest = loans.sumOf {
-        val r = it.interestRate / (12 * 100)
-        if (r == 0.0) 0.0 else {
-            val emi = (it.principalAmount * r * Math.pow(1 + r, it.tenureMonths.toDouble())) /
-                (Math.pow(1 + r, it.tenureMonths.toDouble()) - 1)
-            (emi * it.tenureMonths) - it.principalAmount
+    val totalInterest = remember(loans) {
+        loans.sumOf {
+            val r = it.interestRate / (12 * 100)
+            if (r == 0.0) 0.0 else {
+                val emi = (it.principalAmount * r * Math.pow(1 + r, it.tenureMonths.toDouble())) /
+                    (Math.pow(1 + r, it.tenureMonths.toDouble()) - 1)
+                (emi * it.tenureMonths) - it.principalAmount
+            }
         }
     }
 
-    // Compute total paid and remaining interest based on period
-    val today = LocalDate.now()
-    val totalPaid = loans.sumOf { loan ->
-        val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
-        val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
-        loan.emiAmount * monthsElapsed
-    }
-    val remainingInterest = loans.sumOf { loan ->
-        val r = loan.interestRate / (12 * 100)
-        val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
-        val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
-        if (r == 0.0 || monthsElapsed >= loan.tenureMonths) return@sumOf 0.0
-        val remainingMonths = loan.tenureMonths - monthsElapsed
-        var balance = loan.principalAmount
-        repeat(monthsElapsed) {
-            val interest = balance * r
-            balance -= (loan.emiAmount - interest)
+    val today = remember { LocalDate.now() }
+    val totalPaid = remember(loans) {
+        loans.sumOf { loan ->
+            val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
+            val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
+            loan.emiAmount * monthsElapsed
         }
-        balance = maxOf(0.0, balance)
-        val remainingEmi = if (r > 0) (balance * r * (1 + r).pow(remainingMonths)) / ((1 + r).pow(remainingMonths) - 1) else loan.emiAmount
-        (remainingEmi * remainingMonths) - balance
+    }
+    val remainingInterest = remember(loans) {
+        loans.sumOf { loan ->
+            val r = loan.interestRate / (12 * 100)
+            val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
+            val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
+            if (r == 0.0 || monthsElapsed >= loan.tenureMonths) return@sumOf 0.0
+            val remainingMonths = loan.tenureMonths - monthsElapsed
+            var balance = loan.principalAmount
+            repeat(monthsElapsed) {
+                val interest = balance * r
+                balance -= (loan.emiAmount - interest)
+            }
+            balance = maxOf(0.0, balance)
+            val remainingEmi = if (r > 0) (balance * r * (1 + r).pow(remainingMonths)) / ((1 + r).pow(remainingMonths) - 1) else loan.emiAmount
+            (remainingEmi * remainingMonths) - balance
+        }
     }
 
-    val byCategory = loans.groupBy { it.type }
-        .mapValues { (_, list) -> list.sumOf { it.emiAmount } }
-        .entries.sortedByDescending { it.value }
+    val byCategory = remember(loans) {
+        loans.groupBy { it.type }
+            .mapValues { (_, list) -> list.sumOf { it.emiAmount } }
+            .entries.sortedByDescending { it.value }
+    }
 
     val categoryColors = listOf(HomeLoanColor, CarLoanColor, PersonalLoanColor, OtherLoanColor, Indigo600, Violet600, Color(0xFF059669), WarnOrange)
 
