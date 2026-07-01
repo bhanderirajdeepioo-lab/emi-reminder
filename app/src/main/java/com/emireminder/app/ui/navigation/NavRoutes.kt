@@ -1,5 +1,7 @@
 package com.emireminder.app.ui.navigation
 
+import java.net.URLEncoder
+
 object NavRoutes {
     // --- Startup ---
     const val SPLASH        = "splash"
@@ -29,9 +31,12 @@ object NavRoutes {
     const val AMORTIZATION_SCHEDULE  = "amortization/{principal}/{rate}/{tenure}"
 
     // --- Finance sub-screens ---
-    const val LOAN_CATEGORIES    = "loan_categories"
-    const val FD_RD_CALCULATOR   = "fd_rd_calculator"
-    const val SIP_CALCULATOR     = "sip_calculator"
+    const val LOAN_CATEGORIES         = "loan_categories"
+    const val FD_RD_CALCULATOR        = "fd_rd_calculator"
+    const val SIP_CALCULATOR          = "sip_calculator"
+    // EMI Calculator launched from LoanCategoriesScreen with a pre-selected label.
+    // Kept as a separate route so the standard "emi_calculator" bottom-tab route is unchanged.
+    const val EMI_CALCULATOR_PREFILL  = "emi_calculator_prefill/{label}"
 
     // --- Helpers ---
     fun loanDetail(loanId: Int)         = "loan_detail/$loanId"
@@ -39,6 +44,8 @@ object NavRoutes {
     fun interestTypeSelector(p: Double, r: Double, t: Int, type: String) =
         "interest_type/$p/$r/$t/$type"
     fun amortizationSchedule(p: Double, r: Double, t: Int) = "amortization/$p/$r/$t"
+    fun emiCalculatorWithLabel(label: String) =
+        "emi_calculator_prefill/${URLEncoder.encode(label, "UTF-8")}"
 }
 
 val bottomNavRoutes = setOf(

@@ -59,9 +59,15 @@ fun EMICalculatorScreen(
     onShowResults: (Double, Double, Int) -> Unit,
     onInterestTypeSelector: (Double, Double, Int, String) -> Unit,
     showBackButton: Boolean = true,
+    prefillLabel: String? = null,
     viewModel: CalculatorViewModel = hiltViewModel(),
 ) {
-    var selectedTab by remember { mutableStateOf(LoanTab.HOME) }
+    val initialTab = when (prefillLabel) {
+        "Car Loan"      -> LoanTab.CAR
+        "Personal Loan" -> LoanTab.PERSONAL
+        else            -> LoanTab.HOME
+    }
+    var selectedTab by remember { mutableStateOf(initialTab) }
     val config = loanTabConfigs[selectedTab]!!
 
     var principal by remember { mutableStateOf(config.defaultPrincipal) }
@@ -178,6 +184,30 @@ fun EMICalculatorScreen(
                         }
                     }
                 }
+            }
+
+            // Category badge — shown when arriving from LoanCategoriesScreen for a non-standard type
+            val standardTabs = setOf("Home Loan", "Car Loan", "Personal Loan")
+            if (prefillLabel != null && prefillLabel !in standardTabs) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Indigo50)
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("🔖", fontSize = 14.sp)
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Pre-filled with typical $prefillLabel values",
+                        fontSize = 12.sp,
+                        color = Indigo600,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
             }
 
             Column(

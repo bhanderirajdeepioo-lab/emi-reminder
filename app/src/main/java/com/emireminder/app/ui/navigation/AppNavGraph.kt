@@ -313,8 +313,27 @@ fun AppNavGraph() {
             // 19 — Loan Categories
             composable(NavRoutes.LOAN_CATEGORIES) {
                 LoanCategoriesScreen(
-                    onCategorySelected = { navController.navigate(NavRoutes.EMI_CALCULATOR) },
+                    onCategorySelected = { name ->
+                        navController.navigate(NavRoutes.emiCalculatorWithLabel(name))
+                    },
                     onBack = { navController.popBackStack() },
+                )
+            }
+
+            // 19b — EMI Calculator pre-filled from Loan Categories (shows tab / badge for category)
+            composable(
+                NavRoutes.EMI_CALCULATOR_PREFILL,
+                arguments = listOf(navArgument("label") { type = NavType.StringType }),
+            ) { back ->
+                val label = back.arguments?.getString("label").orEmpty()
+                EMICalculatorScreen(
+                    prefillLabel = label.ifBlank { null },
+                    showBackButton = true,
+                    onBack = { navController.popBackStack() },
+                    onShowResults = { p, r, t -> navController.navigate(NavRoutes.calculatorResults(p, r, t)) },
+                    onInterestTypeSelector = { p, r, t, type ->
+                        navController.navigate(NavRoutes.interestTypeSelector(p, r, t, type))
+                    },
                 )
             }
 
