@@ -150,9 +150,8 @@ private fun LoanDetailContent(
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                // Interest type + rate badges
+                // Rate badge only — interest type is not persisted on Loan entity yet
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    HeroBadge("Reducing Balance", Color(0xFF059669))
                     HeroBadge("%.2f%% p.a.".format(loan.interestRate), Color(0xFF0891B2))
                 }
             }
