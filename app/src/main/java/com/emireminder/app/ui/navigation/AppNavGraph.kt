@@ -174,6 +174,11 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             composable(NavRoutes.ONBOARDING) {
                 OnboardingScreen(
                     onComplete = {
+                        // Mark done here so any exit path (Skip or normal completion) persists
+                        // the flag. CountrySelectScreen is cosmetically optional from a state
+                        // machine perspective — the user may background the app before tapping
+                        // "Get Started", and we must not re-show onboarding on the next launch.
+                        markOnboardingDone(context)
                         navController.navigate(NavRoutes.COUNTRY_SELECT) {
                             popUpTo(NavRoutes.ONBOARDING) { inclusive = true }
                         }
@@ -185,7 +190,6 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             composable(NavRoutes.COUNTRY_SELECT) {
                 CountrySelectScreen(
                     onContinue = {
-                        markOnboardingDone(context)
                         navController.navigate(NavRoutes.HOME) {
                             popUpTo(NavRoutes.COUNTRY_SELECT) { inclusive = true }
                         }

@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,10 +22,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.ui.theme.*
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
-fun NotificationPreviewScreen(onBack: () -> Unit) {
+fun NotificationPreviewScreen(
+    onBack: () -> Unit,
+    viewModel: NotificationPreviewViewModel = hiltViewModel(),
+) {
+    val nextDueLoan by viewModel.nextDueLoan.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -44,14 +54,37 @@ fun NotificationPreviewScreen(onBack: () -> Unit) {
         ) {
             Text("This is how your EMI reminders appear on your device.", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 22.sp)
 
+            val loan = nextDueLoan
+            val loanName = loan?.name ?: "Home Loan"
+            val amountStr = loan?.let { formatAmount(it.emiAmount) } ?: "₹23,456"
+            val dueDateStr = loan?.let { nextDueDateLabel(it.emiDueDay) } ?: "5th Jun"
+
             SectionLabel("3 DAYS BEFORE DUE DATE")
-            NotificationMockup(title = "EMI Due in 3 Days", body = "Your Home Loan EMI of ₹23,456 is due on 5th Jun. Ensure your account has enough balance.", time = "10:00 AM", chipColor = SafeGreen, chipText = "On Time")
+            NotificationMockup(
+                title = "EMI Due in 3 Days",
+                body = "Your $loanName EMI of $amountStr is due on $dueDateStr. Ensure your account has enough balance.",
+                time = "10:00 AM",
+                chipColor = SafeGreen,
+                chipText = "On Time",
+            )
 
             SectionLabel("1 DAY BEFORE DUE DATE")
-            NotificationMockup(title = "EMI Due Tomorrow", body = "Your Home Loan EMI of ₹23,456 is due tomorrow (5th Jun). Don't miss it!", time = "09:00 AM", chipColor = WarnOrange, chipText = "Urgent")
+            NotificationMockup(
+                title = "EMI Due Tomorrow",
+                body = "Your $loanName EMI of $amountStr is due tomorrow ($dueDateStr). Don't miss it!",
+                time = "09:00 AM",
+                chipColor = WarnOrange,
+                chipText = "Urgent",
+            )
 
             SectionLabel("DUE TODAY")
-            NotificationMockup(title = "EMI Payment Due Today", body = "₹23,456 for Home Loan is due today. Pay now to avoid late fees.", time = "08:00 AM", chipColor = UrgentRed, chipText = "Due Today")
+            NotificationMockup(
+                title = "EMI Payment Due Today",
+                body = "$amountStr for $loanName is due today. Pay now to avoid late fees.",
+                time = "08:00 AM",
+                chipColor = UrgentRed,
+                chipText = "Due Today",
+            )
 
             Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Indigo50)) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -63,6 +96,11 @@ fun NotificationPreviewScreen(onBack: () -> Unit) {
             }
         }
     }
+}
+
+private fun formatAmount(amount: Double): String {
+    val fmt = NumberFormat.getNumberInstance(Locale("en", "IN"))
+    return "₹${fmt.format(amount.toLong())}"
 }
 
 @Composable

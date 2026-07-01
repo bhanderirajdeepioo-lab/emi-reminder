@@ -42,6 +42,7 @@ import com.emireminder.app.ui.theme.Violet600
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import java.util.Locale
 
@@ -374,6 +375,9 @@ private fun EmptyState(
 private fun LoanSummarySection(loans: List<Loan>) {
     val totalEmi = remember(loans) { loans.sumOf { it.emiAmount } }
     val currencyFmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+    val minDaysRemaining = remember(loans) {
+        loans.minOfOrNull { daysUntilNextDue(it.emiDueDay) }
+    }
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Spacer(Modifier.height(16.dp))
@@ -414,8 +418,21 @@ private fun LoanSummarySection(loans: List<Loan>) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Next Due Date", fontSize = 11.sp, color = Color(0xFFBAE6FD))
                     Spacer(Modifier.height(8.dp))
-                    Text("3", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                    Text("days remaining", fontSize = 11.sp, color = Color(0xFFE0F2FE))
+                    Text(
+                        if (minDaysRemaining != null) "$minDaysRemaining" else "—",
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White,
+                    )
+                    Text(
+                        when {
+                            minDaysRemaining == null -> "no loans"
+                            minDaysRemaining == 1    -> "day remaining"
+                            else                     -> "days remaining"
+                        },
+                        fontSize = 11.sp,
+                        color = Color(0xFFE0F2FE),
+                    )
                 }
             }
         }
@@ -533,7 +550,8 @@ private fun LoanReminderCard(loan: Loan, onClick: () -> Unit) {
     val loanAmountFmt = remember { NumberFormat.getNumberInstance(Locale("en", "IN")) }
     val urgentColor = UrgentRed
     val normalColor = Indigo600
-    val isUrgent = false // placeholder — connect to real due-date logic when available
+    val daysRemaining = remember(loan.emiDueDay) { daysUntilNextDue(loan.emiDueDay) }
+    val isUrgent = daysRemaining <= 3
 
     Card(
         modifier = Modifier
@@ -605,7 +623,12 @@ private fun LoanReminderCard(loan: Loan, onClick: () -> Unit) {
                             .background(Indigo50)
                             .padding(horizontal = 8.dp, vertical = 3.dp),
                     ) {
-                        Text("Due in 12d", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Indigo600)
+                        Text(
+                            if (daysRemaining == 0) "Due today" else "Due in ${daysRemaining}d",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (isUrgent) urgentColor else Indigo600,
+                        )
                     }
                 }
             }
@@ -649,6 +672,17 @@ private fun SectionLabel(text: String) {
         color = Color(0xFF64748B),
         letterSpacing = 0.5.sp,
     )
+}
+
+private fun daysUntilNextDue(emiDueDay: Int): Int {
+    val today = LocalDate.now()
+    val dueThisMonth = today.withDayOfMonth(emiDueDay.coerceIn(1, today.lengthOfMonth()))
+    return if (!dueThisMonth.isBefore(today)) {
+        ChronoUnit.DAYS.between(today, dueThisMonth).toInt()
+    } else {
+        val nextMonth = today.plusMonths(1)
+        ChronoUnit.DAYS.between(today, nextMonth.withDayOfMonth(emiDueDay.coerceIn(1, nextMonth.lengthOfMonth()))).toInt()
+    }
 }
 
 private fun loanTypeEmoji(type: String): String = when (type.toLoanType()) {
