@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.emireminder.app.ui.theme.*
 import java.text.NumberFormat
 import java.util.Locale
@@ -41,9 +42,15 @@ fun PrepaymentCalculatorScreen(
     onBack: () -> Unit,
     viewModel: CalculatorViewModel = hiltViewModel(),
 ) {
-    var principal by remember { mutableStateOf("1000000") }
-    var rate by remember { mutableStateOf("10") }
-    var tenure by remember { mutableStateOf("120") }
+    val activeLoan by viewModel.firstActiveLoan.collectAsStateWithLifecycle()
+    val seedPrincipal = activeLoan?.principalAmount?.toLong()?.toString() ?: "1000000"
+    val seedRate = activeLoan?.interestRate?.let { "%.2f".format(it) } ?: "10"
+    val seedTenure = activeLoan?.tenureMonths?.toString() ?: "120"
+    val seedLoanName = activeLoan?.name
+
+    var principal by remember(seedPrincipal) { mutableStateOf(seedPrincipal) }
+    var rate by remember(seedRate) { mutableStateOf(seedRate) }
+    var tenure by remember(seedTenure) { mutableStateOf(seedTenure) }
     var prepayAmount by remember { mutableStateOf("100000") }
     var prepayMonth by remember { mutableStateOf("12") }
     var goal by remember { mutableStateOf("TENURE") }
@@ -73,12 +80,21 @@ fun PrepaymentCalculatorScreen(
             modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text(
-                "Calculate how much you save by making a lump-sum prepayment on your loan.",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                lineHeight = 22.sp,
-            )
+            if (seedLoanName != null) {
+                Text(
+                    "$seedLoanName — Current loan details pre-filled.",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 22.sp,
+                )
+            } else {
+                Text(
+                    "Calculate how much you save by making a lump-sum prepayment on your loan.",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 22.sp,
+                )
+            }
 
             SectionLabel("ORIGINAL LOAN DETAILS")
             Card(

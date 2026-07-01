@@ -1,5 +1,6 @@
 package com.emireminder.app.ui.screens.calculator
 
+import android.content.Intent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Savings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,6 +25,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,13 +49,35 @@ fun CalculatorResultsScreen(
     val totalInterest = remember(emi, tenureMonths, principal) { viewModel.calculateTotalInterest(emi, tenureMonths, principal) }
     val totalPayment = principal + totalInterest
     val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Results", fontWeight = FontWeight.Bold) },
+                title = { Text("EMI Results", fontWeight = FontWeight.Bold) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Indigo600, titleContentColor = Color.White, navigationIconContentColor = Color.White),
+                actions = {
+                    IconButton(onClick = {
+                        val shareText = buildString {
+                            appendLine("EMI Calculation Summary")
+                            appendLine("Monthly EMI:    ${fmt.format(emi)}")
+                            appendLine("Principal:      ${fmt.format(principal)}")
+                            appendLine("Rate:           ${"%.2f".format(rate)}% p.a.")
+                            appendLine("Tenure:         ${tenureMonths / 12}y ${tenureMonths % 12}m")
+                            appendLine("Total Interest: ${fmt.format(totalInterest)}")
+                            appendLine("Total Payment:  ${fmt.format(totalPayment)}")
+                        }
+                        context.startActivity(Intent.createChooser(
+                            Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                            }, "Share EMI Summary"
+                        ))
+                    }) {
+                        Icon(Icons.Default.Share, contentDescription = "Share", tint = Color.White)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Indigo600, titleContentColor = Color.White, navigationIconContentColor = Color.White, actionIconContentColor = Color.White),
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
