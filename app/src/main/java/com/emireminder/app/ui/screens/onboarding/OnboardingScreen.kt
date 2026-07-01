@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,7 +64,9 @@ private val pages = listOf(
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun OnboardingScreen(onComplete: () -> Unit) {
-    var page by rememberSaveable { mutableIntStateOf(0) }
+    // Use remember (not rememberSaveable) so a Bundle-restored page index from a previous
+    // interrupted onboarding session cannot put a returning user on page 2 unexpectedly (HEL-217).
+    var page by remember { mutableIntStateOf(0) }
     val smsPermission = rememberPermissionState(android.Manifest.permission.READ_SMS)
     val notifPermission = if (android.os.Build.VERSION.SDK_INT >= 33) {
         rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)

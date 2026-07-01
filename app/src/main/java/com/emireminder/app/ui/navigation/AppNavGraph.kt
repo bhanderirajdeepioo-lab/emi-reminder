@@ -83,6 +83,21 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
     val firstLaunch = remember { isFirstLaunch(context) }
     val showBottomBar = currentRoute in bottomNavRoutes
 
+    // Returning users skip SPLASH entirely; deep link is fired from LaunchedEffect below.
+    // First-time users still go SPLASH → ONBOARDING → HOME via the existing splash animation.
+    // This eliminates the process-death race where NavController re-starts at SPLASH and a
+    // Bundle-restored page=2 in OnboardingScreen keeps users stuck on a screen they already
+    // completed (HEL-217).
+    val startDestination = if (firstLaunch) NavRoutes.SPLASH else NavRoutes.HOME
+
+    // For returning users, SPLASH's onNavigateToHome callback is never reached, so we fire
+    // the notification deep-link here instead.
+    LaunchedEffect(deepLinkLoanId) {
+        if (!firstLaunch && deepLinkLoanId != -1) {
+            navController.navigate(NavRoutes.loanDetail(deepLinkLoanId))
+        }
+    }
+
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
@@ -105,7 +120,7 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = NavRoutes.SPLASH,
+            startDestination = startDestination,
             // Always apply innerPadding — when there is no bottom bar, Scaffold returns zero bottom
             // inset, so this is a no-op. Conditionally reading showBottomBar here caused the Scaffold
             // ScaffoldLayoutWithMeasureFix snapshotFlow to iterate a null IdentityArraySet entry
