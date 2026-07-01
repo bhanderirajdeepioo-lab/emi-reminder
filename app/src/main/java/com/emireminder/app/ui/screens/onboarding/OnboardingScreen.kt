@@ -71,6 +71,16 @@ fun OnboardingScreen(onComplete: () -> Unit) {
         rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
     } else null
     var smsToggleState by remember { mutableStateOf(false) }
+    var smsPermissionRequested by remember { mutableStateOf(false) }
+
+    // Advance page only after permission dialog resolves (granted or denied)
+    LaunchedEffect(smsPermission.status) {
+        if (smsPermissionRequested) {
+            smsToggleState = smsPermission.status.isGranted
+            page = (page + 1).coerceAtMost(pages.lastIndex)
+            smsPermissionRequested = false
+        }
+    }
 
     val current = pages[page]
 
@@ -183,10 +193,9 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                     Switch(
                         checked = smsToggleState,
                         onCheckedChange = { on ->
-                            if (on) {
-                                smsToggleState = true
+                            if (on && !smsPermissionRequested) {
+                                smsPermissionRequested = true
                                 smsPermission.launchPermissionRequest()
-                                page++
                             }
                         },
                         colors = SwitchDefaults.colors(
