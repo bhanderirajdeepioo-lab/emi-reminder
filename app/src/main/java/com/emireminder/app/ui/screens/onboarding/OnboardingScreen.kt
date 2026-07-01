@@ -72,13 +72,24 @@ fun OnboardingScreen(onComplete: () -> Unit) {
     } else null
     var smsToggleState by remember { mutableStateOf(false) }
     var smsPermissionRequested by remember { mutableStateOf(false) }
+    var notifPermissionRequested by remember { mutableStateOf(false) }
 
-    // Advance page only after permission dialog resolves (granted or denied)
+    // Advance page only after SMS permission dialog resolves (granted or denied)
     LaunchedEffect(smsPermission.status) {
         if (smsPermissionRequested) {
             smsToggleState = smsPermission.status.isGranted
             page = (page + 1).coerceAtMost(pages.lastIndex)
             smsPermissionRequested = false
+        }
+    }
+
+    // Complete onboarding after notification permission dialog resolves.
+    // Previously onComplete() was called in the button's onClick BEFORE the dialog
+    // resolved, causing page 3 to disappear the instant it appeared (HEL-196).
+    LaunchedEffect(notifPermission?.status) {
+        if (notifPermissionRequested) {
+            notifPermissionRequested = false
+            onComplete()
         }
     }
 
@@ -210,8 +221,14 @@ fun OnboardingScreen(onComplete: () -> Unit) {
         } else if (current.permissionLabel != null && page == 2) {
             Button(
                 onClick = {
-                    notifPermission?.launchPermissionRequest()
-                    onComplete()
+                    if (notifPermission != null) {
+                        // Wait for the dialog to resolve; LaunchedEffect above calls onComplete().
+                        notifPermissionRequested = true
+                        notifPermission.launchPermissionRequest()
+                    } else {
+                        // Android < 13: no runtime permission needed, complete immediately.
+                        onComplete()
+                    }
                 },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(14.dp),
