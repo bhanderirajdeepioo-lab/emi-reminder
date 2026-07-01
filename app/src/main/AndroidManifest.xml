@@ -70,11 +70,19 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <meta-data
-            android:name="androidx.work.WorkManagerInitializer"
-            android:value="androidx.startup"
-            tools:node="remove"
-            xmlns:tools="http://schemas.android.com/tools" />
+        <!-- Disable WorkManager auto-init so HiltWorkerFactory is used instead.
+             Must be nested inside InitializationProvider — a top-level <meta-data remove>
+             only strips application-level entries and does NOT reach the provider. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            xmlns:tools="http://schemas.android.com/tools"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
 
     </application>
 

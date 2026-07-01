@@ -12,6 +12,7 @@ import com.emireminder.app.data.preferences.UserPreferencesRepository
 import com.emireminder.app.receiver.ReminderReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import java.util.Calendar
@@ -25,9 +26,11 @@ class NotificationScheduler @Inject constructor(
 ) {
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
 
-    // Cache latest prefs on the IO thread so scheduleReminder() can read them synchronously.
+    // Cache latest prefs on an IO-backed scope. Lazily means collection starts only on first
+    // subscriber, not during Application.onCreate() Hilt singleton init (avoids startup jank).
+    // SupervisorJob prevents exceptions from cancelling the scope.
     private val cachedPrefs = prefsRepository.userPreferences
-        .stateIn(CoroutineScope(Dispatchers.IO), SharingStarted.Eagerly, UserPreferences())
+        .stateIn(CoroutineScope(SupervisorJob() + Dispatchers.IO), SharingStarted.Lazily, UserPreferences())
 
     fun scheduleReminder(reminder: Reminder) {
         val prefs = cachedPrefs.value
