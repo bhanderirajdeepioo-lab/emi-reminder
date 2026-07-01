@@ -116,7 +116,14 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 )
             }
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        // Prevent Scaffold from consuming window insets independently — FloatingNavBar handles
+        // its own navigation bar insets via navigationBarsPadding(), and each screen handles
+        // status bar insets via its own Scaffold/TopAppBar. Without this, Scaffold's default
+        // safeDrawing contentWindowInsets conflicts with FloatingNavBar's navigationBarsPadding(),
+        // causing the accessibility hit targets to be offset from the visual nav tab positions
+        // (WindowInsets measurement bug, HEL-241).
+        contentWindowInsets = WindowInsets(0.dp),
     ) { innerPadding ->
         NavHost(
             navController = navController,
