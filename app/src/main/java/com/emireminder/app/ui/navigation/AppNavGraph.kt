@@ -174,10 +174,19 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             composable(NavRoutes.ONBOARDING) {
                 OnboardingScreen(
                     onComplete = {
-                        // Mark done here so any exit path (Skip or normal completion) persists
-                        // the flag. CountrySelectScreen is cosmetically optional from a state
-                        // machine perspective — the user may background the app before tapping
-                        // "Get Started", and we must not re-show onboarding on the next launch.
+                        // Normal completion path (user taps "Enable Notifications" on page 3).
+                        // Mark done here too: user may background before tapping "Get Started"
+                        // on CountrySelect, and we must not re-show onboarding on next launch.
+                        markOnboardingDone(context)
+                        navController.navigate(NavRoutes.COUNTRY_SELECT) {
+                            popUpTo(NavRoutes.ONBOARDING) { inclusive = true }
+                        }
+                    },
+                    onSkip = {
+                        // Skip paths ("Skip" top-right, "Skip for now" on page 2).
+                        // Must mark done here — these paths bypass the notification-permission
+                        // LaunchedEffect that normally drives onComplete(), so without this call
+                        // is_first_launch stays true and onboarding loops on every cold start.
                         markOnboardingDone(context)
                         navController.navigate(NavRoutes.COUNTRY_SELECT) {
                             popUpTo(NavRoutes.ONBOARDING) { inclusive = true }

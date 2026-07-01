@@ -63,7 +63,7 @@ private val pages = listOf(
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun OnboardingScreen(onComplete: () -> Unit) {
+fun OnboardingScreen(onComplete: () -> Unit, onSkip: () -> Unit) {
     // Use remember (not rememberSaveable) so a Bundle-restored page index from a previous
     // interrupted onboarding session cannot put a returning user on page 2 unexpectedly (HEL-217).
     var page by remember { mutableIntStateOf(0) }
@@ -108,7 +108,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
         // Skip button
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             if (page < pages.lastIndex) {
-                TextButton(onClick = onComplete) {
+                TextButton(onClick = onSkip) {
                     Text("Skip", color = Color(0xFFB0AEC0))
                 }
             }
@@ -236,7 +236,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
             ) { Text(current.permissionLabel, fontSize = 16.sp, fontWeight = FontWeight.SemiBold) }
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = onComplete) { Text("Skip for now", color = Color(0xFFB0AEC0)) }
+            TextButton(onClick = onSkip) { Text("Skip for now", color = Color(0xFFB0AEC0)) }
         } else {
             // Only page 0 reaches this branch — always move forward, never call onComplete()
             Button(
