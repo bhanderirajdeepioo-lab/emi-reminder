@@ -23,6 +23,7 @@ data class Loan(
     val notes: String = "",
     val bankName: String = "",
     val accountNumber: String = "",
+    val interestType: String = "REDUCING", // "REDUCING" or "FLAT"
 ) {
     @get:Ignore
     val loanType: LoanType get() = type.toLoanType()

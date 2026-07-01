@@ -150,8 +150,13 @@ private fun LoanDetailContent(
                     }
                 }
                 Spacer(Modifier.height(12.dp))
-                // Rate badge only — interest type is not persisted on Loan entity yet
+                // Interest type + rate badges
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val (interestTypeLabel, interestTypeBadgeColor) = if (loan.interestType == "FLAT")
+                        "Flat Rate" to Color(0xFFD97706)
+                    else
+                        "Reducing Balance" to Color(0xFF059669)
+                    HeroBadge(interestTypeLabel, interestTypeBadgeColor)
                     HeroBadge("%.2f%% p.a.".format(loan.interestRate), Color(0xFF0891B2))
                 }
             }

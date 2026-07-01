@@ -170,6 +170,29 @@ fun AddLoanScreen(
                 }
             }
 
+            // Interest Calculation Type
+            FormField("Interest Calculation") {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf("REDUCING" to "Reducing Balance", "FLAT" to "Flat Rate").forEach { (value, label) ->
+                        val selected = viewModel.interestType == value
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (selected) Indigo600 else Indigo50)
+                                .clickable { viewModel.interestType = value; viewModel.onEmiOverrideChange("") }
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                        ) {
+                            Text(
+                                label,
+                                fontSize = 13.sp,
+                                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                                color = if (selected) Color.White else Indigo600,
+                            )
+                        }
+                    }
+                }
+            }
+
             // EMI Amount (auto-calculated, editable)
             FormField("Monthly EMI (₹) *") {
                 val autoEmi = viewModel.autoEmi

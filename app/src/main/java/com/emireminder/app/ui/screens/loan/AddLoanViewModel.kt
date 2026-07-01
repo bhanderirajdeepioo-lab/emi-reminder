@@ -29,6 +29,7 @@ class AddLoanViewModel @Inject constructor(
     var accountNumber by mutableStateOf("")
     var notes         by mutableStateOf("")
     var dueDayOfMonth by mutableStateOf("")
+    var interestType  by mutableStateOf("REDUCING") // "REDUCING" or "FLAT"
 
     val autoEmi: Double
         get() {
@@ -61,15 +62,16 @@ class AddLoanViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             repository.insertLoan(
                 Loan(
-                    name           = loanName.trim(),
-                    type           = selectedType.name,
-                    bankName       = bankName.trim(),
+                    name            = loanName.trim(),
+                    type            = selectedType.name,
+                    bankName        = bankName.trim(),
                     principalAmount = principal.toDouble(),
-                    interestRate   = interestRate.toDoubleOrNull() ?: 0.0,
-                    tenureMonths   = tenureMonths.toIntOrNull() ?: 0,
-                    emiAmount      = displayEmi.toDouble(),
-                    accountNumber  = accountNumber.trim(),
-                    notes          = notes.trim(),
+                    interestRate    = interestRate.toDoubleOrNull() ?: 0.0,
+                    tenureMonths    = tenureMonths.toIntOrNull() ?: 0,
+                    emiAmount       = displayEmi.toDouble(),
+                    accountNumber   = accountNumber.trim(),
+                    notes           = notes.trim(),
+                    interestType    = interestType,
                 )
             )
             launch(Dispatchers.Main) { onSuccess() }
