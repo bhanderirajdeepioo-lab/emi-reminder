@@ -13,17 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.emireminder.app.ui.theme.DarkBg
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private val GradientTop   = Color(0xFF1E1B4B)
-private val GradientBot   = Color(0xFF4C1D95)
 private val LogoCircle    = Color(0xFF312E81)
 private val RingColor     = Color(0xFF818CF8)
 private val GlowColor     = Color(0xFF4F46E5)
@@ -66,7 +64,7 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(colors = listOf(GradientTop, GradientBot))),
+            .background(DarkBg),
     ) {
         // Ambient blob — top right
         Box(
