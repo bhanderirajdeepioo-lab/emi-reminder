@@ -2,6 +2,7 @@ package com.emireminder.app.ui.screens.loan
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,8 +32,17 @@ import com.emireminder.app.domain.model.toLoanType
 import com.emireminder.app.ui.screens.home.HomeViewModel
 import com.emireminder.app.ui.theme.*
 import java.text.NumberFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.math.min
+import kotlin.math.pow
+
+private enum class AnalyticsPeriod(val label: String, val months: Int?) {
+    SIX_M("6M", 6), ONE_Y("1Y", 12), THREE_Y("3Y", 36), ALL("All", null)
+}
 
 @Composable
 fun LoanAnalyticsScreen(
@@ -40,11 +51,11 @@ fun LoanAnalyticsScreen(
 ) {
     val loans by viewModel.activeLoans.collectAsState()
     val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+    var period by remember { mutableStateOf(AnalyticsPeriod.ONE_Y) }
 
     val totalEmi = loans.sumOf { it.emiAmount }
     val totalPrincipal = loans.sumOf { it.principalAmount }
 
-    // Estimated total interest across all loans
     val totalInterest = loans.sumOf {
         val r = it.interestRate / (12 * 100)
         if (r == 0.0) 0.0 else {
@@ -54,7 +65,29 @@ fun LoanAnalyticsScreen(
         }
     }
 
-    // Category breakdown
+    // Compute total paid and remaining interest based on period
+    val today = LocalDate.now()
+    val totalPaid = loans.sumOf { loan ->
+        val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
+        val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
+        loan.emiAmount * monthsElapsed
+    }
+    val remainingInterest = loans.sumOf { loan ->
+        val r = loan.interestRate / (12 * 100)
+        val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
+        val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
+        if (r == 0.0 || monthsElapsed >= loan.tenureMonths) return@sumOf 0.0
+        val remainingMonths = loan.tenureMonths - monthsElapsed
+        var balance = loan.principalAmount
+        repeat(monthsElapsed) {
+            val interest = balance * r
+            balance -= (loan.emiAmount - interest)
+        }
+        balance = maxOf(0.0, balance)
+        val remainingEmi = if (r > 0) (balance * r * (1 + r).pow(remainingMonths)) / ((1 + r).pow(remainingMonths) - 1) else loan.emiAmount
+        (remainingEmi * remainingMonths) - balance
+    }
+
     val byCategory = loans.groupBy { it.type }
         .mapValues { (_, list) -> list.sumOf { it.emiAmount } }
         .entries.sortedByDescending { it.value }
@@ -78,17 +111,79 @@ fun LoanAnalyticsScreen(
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentPadding = PaddingValues(bottom = 24.dp),
             ) {
-                // Summary cards
+                // Period toggle
                 item {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        SectionLabel("PORTFOLIO SUMMARY")
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            SummaryCard(modifier = Modifier.weight(1f), label = "Total Loans", value = "${loans.size}", color = Indigo600)
-                            SummaryCard(modifier = Modifier.weight(1f), label = "Monthly EMI", value = fmt.format(totalEmi), color = Color(0xFF0891B2))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        AnalyticsPeriod.entries.forEach { p ->
+                            val selected = p == period
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(if (selected) Indigo600 else MaterialTheme.colorScheme.surface)
+                                    .clickable { period = p }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    p.label,
+                                    fontSize = 13.sp,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            SummaryCard(modifier = Modifier.weight(1f), label = "Total Principal", value = "₹${formatLakh(totalPrincipal)}", color = SafeGreen)
-                            SummaryCard(modifier = Modifier.weight(1f), label = "Total Interest", value = "₹${formatLakh(totalInterest)}", color = WarnOrange)
+                    }
+                }
+
+                // Stacked bar chart: monthly EMI outflow by category
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        SectionLabel("MONTHLY EMI OUTFLOW")
+                        Spacer(Modifier.height(8.dp))
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    byCategory.forEachIndexed { i, (type, _) ->
+                                        LegendDot(
+                                            color = categoryColors.getOrElse(i) { Indigo600 },
+                                            label = type.lowercase().replaceFirstChar { it.uppercase() },
+                                        )
+                                    }
+                                }
+                                StackedBarChart(
+                                    loans = loans,
+                                    period = period,
+                                    colors = categoryColors,
+                                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Summary row: 3 inline cards
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SectionLabel("PORTFOLIO SUMMARY")
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            InlineSummaryCard(Modifier.weight(1f), "Total Paid", fmt.format(totalPaid.toLong()), Indigo600)
+                            InlineSummaryCard(Modifier.weight(1f), "Monthly EMI", fmt.format(totalEmi.toLong()), Color(0xFF0891B2))
+                            InlineSummaryCard(Modifier.weight(1f), "Remaining", fmt.format(remainingInterest.toLong()), WarnOrange)
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            InlineSummaryCard(Modifier.weight(1f), "Total Loans", "${loans.size}", SafeGreen)
+                            InlineSummaryCard(Modifier.weight(1f), "Principal", "₹${formatLakh(totalPrincipal)}", Indigo600)
+                            InlineSummaryCard(Modifier.weight(1f), "Interest Est.", "₹${formatLakh(totalInterest)}", WarnOrange)
                         }
                     }
                 }
@@ -156,9 +251,50 @@ fun LoanAnalyticsScreen(
                     }
                 }
 
-                // Loan list
+                // Foreclosure savings card
                 item {
                     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                        SectionLabel("FORECLOSURE SAVINGS")
+                        Spacer(Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Brush.linearGradient(listOf(Color(0xFF1E1B4B), Color(0xFF312E81))))
+                                .padding(20.dp),
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                    Column {
+                                        Text("If you close all loans today", fontSize = 12.sp, color = Color.White.copy(alpha = 0.7f))
+                                        Text("Interest savings potential", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    }
+                                    Box(
+                                        modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color(0xFF059669).copy(alpha = 0.25f)).padding(horizontal = 10.dp, vertical = 6.dp),
+                                    ) {
+                                        Text("SAVE", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6EE7B7))
+                                    }
+                                }
+                                Divider(color = Color.White.copy(alpha = 0.15f))
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Column {
+                                        Text("Remaining Interest", fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
+                                        Text(fmt.format(remainingInterest.toLong()), fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6EE7B7))
+                                    }
+                                    Column(horizontalAlignment = Alignment.End) {
+                                        Text("EMIs Saved", fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
+                                        val avgEmiSaved = if (totalEmi > 0) (remainingInterest / totalEmi).toInt() else 0
+                                        Text("~$avgEmiSaved months", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFA5B4FC))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Loan list
+                item {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                         SectionLabel("ALL ACTIVE LOANS")
                     }
                 }
@@ -166,6 +302,61 @@ fun LoanAnalyticsScreen(
                     LoanAnalyticsRow(loan = loan, fmt = fmt)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun StackedBarChart(loans: List<Loan>, period: AnalyticsPeriod, colors: List<Color>, modifier: Modifier) {
+    val byCategory = loans.groupBy { it.type }.entries.sortedByDescending { it.value.sumOf { l -> l.emiAmount } }
+    val barCount = when (period) {
+        AnalyticsPeriod.SIX_M -> 6; AnalyticsPeriod.ONE_Y -> 12; AnalyticsPeriod.THREE_Y -> 36; AnalyticsPeriod.ALL -> 12
+    }.coerceAtMost(12)
+    val maxEmi = loans.sumOf { it.emiAmount }.toFloat().coerceAtLeast(1f)
+
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height - 16.dp.toPx()
+        val barWidth = (w / barCount * 0.6f)
+        val gap = (w / barCount * 0.4f)
+
+        for (barIdx in 0 until barCount) {
+            val x = gap / 2 + barIdx * (barWidth + gap)
+            var yBottom = h
+            byCategory.forEachIndexed { catIdx, (_, catLoans) ->
+                val catEmi = catLoans.sumOf { it.emiAmount }.toFloat()
+                val barH = (h * catEmi / maxEmi)
+                val color = colors.getOrElse(catIdx) { Indigo600 }
+                drawRect(
+                    color = color,
+                    topLeft = Offset(x, yBottom - barH),
+                    size = Size(barWidth, barH),
+                )
+                yBottom -= barH
+            }
+        }
+    }
+}
+
+@Composable
+private fun LegendDot(color: Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Box(modifier = Modifier.size(8.dp).clip(RoundedCornerShape(4.dp)).background(color))
+        Text(label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun InlineSummaryCard(modifier: Modifier, label: String, value: String, color: Color) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(value, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = color, maxLines = 1)
         }
     }
 }
@@ -213,22 +404,6 @@ private fun CategoryBar(type: String, emi: Double, total: Double, color: Color, 
         Spacer(Modifier.height(4.dp))
         Box(modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)).background(color.copy(alpha = 0.12f))) {
             Box(modifier = Modifier.fillMaxWidth(ratio).fillMaxHeight().clip(RoundedCornerShape(3.dp)).background(color))
-        }
-    }
-}
-
-@Composable
-private fun SummaryCard(modifier: Modifier, label: String, value: String, color: Color) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Text(label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.height(6.dp))
-            Text(value, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = color)
         }
     }
 }
