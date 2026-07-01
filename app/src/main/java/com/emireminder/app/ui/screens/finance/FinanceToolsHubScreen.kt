@@ -49,7 +49,10 @@ fun FinanceToolsHubScreen(
     onNavigateToSip: () -> Unit,
     onNavigateToLoanCategories: () -> Unit,
 ) {
-    val loanTools = remember { listOf(
+    val loanTools = remember(
+        onNavigateToLoanCategories, onNavigateToEmiCalculator,
+        onNavigateToComparison, onNavigateToPrepayment,
+    ) { listOf(
         ListTool(
             icon = Icons.Default.Category,
             iconBg = Color(0xFFFFF7ED), iconTint = WarnOrange,
@@ -96,7 +99,7 @@ fun FinanceToolsHubScreen(
         ),
     ) }
 
-    val investmentTools = remember { listOf(
+    val investmentTools = remember(onNavigateToSip, onNavigateToFdRd) { listOf(
         GridTool(
             icon = Icons.Default.BarChart,
             iconBg = Indigo50, iconTint = Indigo600,
