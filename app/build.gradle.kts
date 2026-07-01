@@ -90,6 +90,9 @@ dependencies {
     // DataStore
     implementation(libs.datastore.preferences)
 
+    // AppCompat — for per-app locale switching via AppCompatDelegate
+    implementation(libs.appcompat)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

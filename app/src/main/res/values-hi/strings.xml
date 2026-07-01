@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EMI रिमाइंडर और कैलकुलेटर</string>
+    <string name="settings">सेटिंग्स</string>
+    <string name="language">भाषा</string>
+    <string name="reminders">रिमाइंडर</string>
+    <string name="home">होम</string>
+    <string name="add_reminder">रिमाइंडर जोड़ें</string>
+    <string name="save">सहेजें</string>
+    <string name="cancel">रद्द करें</string>
+    <string name="delete">हटाएं</string>
+    <string name="edit">संपादित करें</string>
+    <string name="notifications">सूचनाएं</string>
+    <string name="theme">थीम</string>
+    <string name="currency">मुद्रा</string>
+    <string name="backup">बैकअप</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EMI રિમાઇન્ડર અને કેલ્ક્યુલેટર</string>
+    <string name="settings">સેટિંગ્સ</string>
+    <string name="language">ભાષા</string>
+    <string name="reminders">રિમાઇન્ડર</string>
+    <string name="home">હોમ</string>
+    <string name="add_reminder">રિમાઇન્ડર ઉમેરો</string>
+    <string name="save">સાચવો</string>
+    <string name="cancel">રદ કરો</string>
+    <string name="delete">કાઢી નાખો</string>
+    <string name="edit">સંપાદિત કરો</string>
+    <string name="notifications">સૂચનાઓ</string>
+    <string name="theme">થીમ</string>
+    <string name="currency">ચલણ</string>
+    <string name="backup">બેકઅપ</string>
+</resources>

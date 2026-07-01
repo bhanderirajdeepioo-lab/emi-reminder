@@ -1,5 +1,6 @@
 package com.emireminder.app.ui.screens.settings
 
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -39,6 +41,7 @@ fun SettingsScreen(
     var showAdvanceDaysPicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showThemePicker by remember { mutableStateOf(false) }
+    var showLanguagePicker by remember { mutableStateOf(false) }
 
     val notifPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
         rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -74,6 +77,21 @@ fun SettingsScreen(
             onConfirm = { theme ->
                 viewModel.setTheme(theme)
                 showThemePicker = false
+            },
+        )
+    }
+
+    if (showLanguagePicker) {
+        LanguagePickerDialog(
+            current = prefs.language,
+            onDismiss = { showLanguagePicker = false },
+            onConfirm = { displayName, tag ->
+                viewModel.setLanguage(displayName)
+                AppCompatDelegate.setApplicationLocales(
+                    if (tag.isEmpty()) LocaleListCompat.getEmptyLocaleList()
+                    else LocaleListCompat.forLanguageTags(tag)
+                )
+                showLanguagePicker = false
             },
         )
     }
@@ -291,7 +309,7 @@ fun SettingsScreen(
                         label = "Language",
                         subtitle = "App display language",
                         value = prefs.language,
-                        onClick = { /* future */ },
+                        onClick = { showLanguagePicker = true },
                     )
                 }
             }
@@ -554,6 +572,50 @@ private fun ThemePickerDialog(current: String, onDismiss: () -> Unit, onConfirm:
             }
         },
         confirmButton = { TextButton(onClick = { onConfirm(selected) }) { Text("Apply") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
+}
+
+private data class LanguageOption(val displayName: String, val tag: String)
+
+@Composable
+private fun LanguagePickerDialog(
+    current: String,
+    onDismiss: () -> Unit,
+    onConfirm: (displayName: String, tag: String) -> Unit,
+) {
+    val options = remember {
+        listOf(
+            LanguageOption("English", ""),
+            LanguageOption("हिंदी", "hi"),
+            LanguageOption("ગુજરાતી", "gu"),
+        )
+    }
+    var selected by remember { mutableStateOf(options.firstOrNull { it.displayName == current } ?: options[0]) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Language / भाषा / ભાષા") },
+        text = {
+            Column {
+                options.forEach { option ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selected = option }
+                            .padding(vertical = 8.dp),
+                    ) {
+                        RadioButton(
+                            selected = option == selected,
+                            onClick = { selected = option },
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(option.displayName, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = { onConfirm(selected.displayName, selected.tag) }) { Text("Apply") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
 }
