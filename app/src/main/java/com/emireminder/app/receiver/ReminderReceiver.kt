@@ -45,7 +45,7 @@ class ReminderReceiver : BroadcastReceiver() {
         )
 
         val notification = NotificationCompat.Builder(context, EmiApp.CHANNEL_REMINDERS)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(com.emireminder.app.R.drawable.ic_notification)
             .setContentTitle("EMI Reminder")
             .setContentText("Your $loanName EMI of ₹%.2f is due today.".format(emiAmount))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
