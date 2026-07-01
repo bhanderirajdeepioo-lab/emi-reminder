@@ -16,11 +16,15 @@ class ReminderReceiver : BroadcastReceiver() {
         val loanName   = intent.getStringExtra(NotificationScheduler.EXTRA_LOAN_NAME) ?: "EMI Due"
         val emiAmount  = intent.getDoubleExtra(NotificationScheduler.EXTRA_EMI_AMOUNT, 0.0)
         val reminderId = intent.getIntExtra(NotificationScheduler.EXTRA_REMINDER_ID, 0)
+        val loanId     = intent.getIntExtra(NotificationScheduler.EXTRA_LOAN_ID, -1)
 
         val launchPending = PendingIntent.getActivity(
             context, reminderId,
             Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                // loanId lets AppNavGraph deep-link straight to Loan Detail.
+                // -1 means the loan was deleted; the app opens to Home instead.
+                putExtra(NotificationScheduler.EXTRA_LOAN_ID, loanId)
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )

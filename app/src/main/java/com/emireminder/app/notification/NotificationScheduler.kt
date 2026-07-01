@@ -91,6 +91,7 @@ class NotificationScheduler @Inject constructor(
         putExtra(EXTRA_LOAN_NAME, reminder.loanName)
         putExtra(EXTRA_EMI_AMOUNT, reminder.emiAmount)
         putExtra(EXTRA_REMINDER_ID, reminder.id)
+        putExtra(EXTRA_LOAN_ID, reminder.loanId ?: -1)
         putExtra(EXTRA_DUE_DAY, reminder.dueDayOfMonth)
     }
 
@@ -98,6 +99,7 @@ class NotificationScheduler @Inject constructor(
         const val EXTRA_LOAN_NAME   = "loan_name"
         const val EXTRA_EMI_AMOUNT  = "emi_amount"
         const val EXTRA_REMINDER_ID = "reminder_id"
+        const val EXTRA_LOAN_ID     = "loan_id"
         const val EXTRA_DUE_DAY     = "due_day"
         const val TEST_NOTIFICATION_ID = Int.MAX_VALUE
 
