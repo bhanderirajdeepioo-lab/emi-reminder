@@ -71,7 +71,7 @@ private fun markOnboardingDone(context: Context) {
 }
 
 @Composable
-fun AppNavGraph() {
+fun AppNavGraph(deepLinkLoanId: Int = -1) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -120,7 +120,13 @@ fun AppNavGraph() {
             composable(NavRoutes.SPLASH) {
                 SplashScreen(
                     onNavigateToOnboarding = { navController.navigate(NavRoutes.ONBOARDING) { popUpTo(NavRoutes.SPLASH) { inclusive = true } } },
-                    onNavigateToHome = { navController.navigate(NavRoutes.HOME) { popUpTo(NavRoutes.SPLASH) { inclusive = true } } },
+                    onNavigateToHome = {
+                        navController.navigate(NavRoutes.HOME) { popUpTo(NavRoutes.SPLASH) { inclusive = true } }
+                        // Notification deep link: open the tapped loan detail on top of Home.
+                        if (deepLinkLoanId != -1) {
+                            navController.navigate(NavRoutes.loanDetail(deepLinkLoanId))
+                        }
+                    },
                     isFirstLaunch = firstLaunch
                 )
             }
@@ -187,14 +193,16 @@ fun AppNavGraph() {
             }
 
             // 8 — Finance Tools Hub / Calculator tab
+            // launchSingleTop=true on every sub-screen navigation prevents a double-tap from
+            // firing two navigate() calls back-to-back and landing on the wrong screen (BUG-1/BUG-3).
             composable(NavRoutes.FINANCE_TOOLS_HUB) {
                 FinanceToolsHubScreen(
-                    onNavigateToEmiCalculator    = { navController.navigate(NavRoutes.EMI_CALCULATOR) },
-                    onNavigateToComparison       = { navController.navigate(NavRoutes.COMPARISON_CALCULATOR) },
-                    onNavigateToPrepayment       = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR) },
-                    onNavigateToFdRd             = { navController.navigate(NavRoutes.FD_RD_CALCULATOR) },
-                    onNavigateToSip              = { navController.navigate(NavRoutes.SIP_CALCULATOR) },
-                    onNavigateToLoanCategories   = { navController.navigate(NavRoutes.LOAN_CATEGORIES) },
+                    onNavigateToEmiCalculator  = { navController.navigate(NavRoutes.EMI_CALCULATOR)       { launchSingleTop = true } },
+                    onNavigateToComparison     = { navController.navigate(NavRoutes.COMPARISON_CALCULATOR) { launchSingleTop = true } },
+                    onNavigateToPrepayment     = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR) { launchSingleTop = true } },
+                    onNavigateToFdRd           = { navController.navigate(NavRoutes.FD_RD_CALCULATOR)      { launchSingleTop = true } },
+                    onNavigateToSip            = { navController.navigate(NavRoutes.SIP_CALCULATOR)        { launchSingleTop = true } },
+                    onNavigateToLoanCategories = { navController.navigate(NavRoutes.LOAN_CATEGORIES)       { launchSingleTop = true } },
                 )
             }
 
@@ -407,9 +415,14 @@ private fun FloatingNavBar(currentRoute: String?, onNavigate: (String) -> Unit) 
             ) {
                 bottomNavItems.forEach { item ->
                     val selected = currentRoute == item.route
-                    NavItem(item = item, selected = selected, onClick = {
-                        if (!selected) onNavigate(item.route)
-                    })
+                    // weight(1f) gives every tab an equal 25 % touch target so positions
+                    // stay stable regardless of which tab's pill is currently expanded.
+                    NavItem(
+                        item = item,
+                        selected = selected,
+                        onClick = { if (!selected) onNavigate(item.route) },
+                        modifier = Modifier.weight(1f),
+                    )
                 }
             }
         }
@@ -417,9 +430,9 @@ private fun FloatingNavBar(currentRoute: String?, onNavigate: (String) -> Unit) 
 }
 
 @Composable
-private fun NavItem(item: NavItem, selected: Boolean, onClick: () -> Unit) {
+private fun NavItem(item: NavItem, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 6.dp),
