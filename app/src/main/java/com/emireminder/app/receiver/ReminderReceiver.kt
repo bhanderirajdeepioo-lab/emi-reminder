@@ -51,6 +51,16 @@ class ReminderReceiver : BroadcastReceiver() {
             emiAmount = emiAmount,
             upiVpa = upiVpa,
         )
+        val markPaidPending = actionPending(
+            context,
+            requestCode = reminderId * 10 + 4,
+            action = NotificationActionReceiver.ACTION_MARK_PAID,
+            reminderId = reminderId,
+            notificationId = reminderId,
+            loanId = loanId,
+            loanName = loanName,
+            emiAmount = emiAmount,
+        )
 
         val notificationBuilder = NotificationCompat.Builder(context, EmiApp.CHANNEL_REMINDERS)
             .setSmallIcon(R.drawable.ic_notification)

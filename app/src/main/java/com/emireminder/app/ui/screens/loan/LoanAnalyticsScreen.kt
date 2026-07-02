@@ -35,6 +35,10 @@ import com.emireminder.app.domain.model.LoanType
 import com.emireminder.app.domain.model.toLoanType
 import com.emireminder.app.ui.theme.*
 import java.text.NumberFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.math.atan2
 import kotlin.math.min
@@ -70,6 +74,7 @@ fun LoanAnalyticsScreen(
     val totalInterest = uiState.totalInterest
     val totalPaid = uiState.totalPaid
     val remainingInterest = uiState.remainingInterest
+    val today = remember { LocalDate.now() }
     val byCategory = uiState.byCategory
 
     data class LoanForecast(val loan: Loan, val remainingMonths: Int, val interestSavings: Double)
