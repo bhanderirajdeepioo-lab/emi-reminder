@@ -95,6 +95,7 @@ fun HomeScreen(
             item {
                 DashboardHeader(
                     onNavigateToSettings = onNavigateToSettings,
+                    onNavigateToReminders = onNavigateToReminders,
                     reminderCount = reminderCount,
                 )
             }
@@ -144,7 +145,7 @@ fun HomeScreen(
 // ── Header ────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun DashboardHeader(onNavigateToSettings: () -> Unit, reminderCount: Int = 0) {
+private fun DashboardHeader(onNavigateToSettings: () -> Unit, onNavigateToReminders: () -> Unit, reminderCount: Int = 0) {
     val dateText = remember {
         LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.ENGLISH))
     }
@@ -218,36 +219,38 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit, reminderCount: Int
             }
 
             // Notification bell with live reminder badge
-            Box {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF3730A3)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        Icons.Default.Notifications,
-                        contentDescription = "Notifications",
-                        tint = Color(0xFFE0E7FF),
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-                if (reminderCount > 0) {
+            IconButton(onClick = onNavigateToReminders) {
+                Box {
                     Box(
                         modifier = Modifier
-                            .size(14.dp)
+                            .size(36.dp)
                             .clip(CircleShape)
-                            .background(UrgentRed)
-                            .align(Alignment.TopEnd),
+                            .background(Color(0xFF3730A3)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(
-                            if (reminderCount > 9) "9+" else reminderCount.toString(),
-                            fontSize = 8.sp,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
+                        Icon(
+                            Icons.Default.Notifications,
+                            contentDescription = "Notifications",
+                            tint = Color(0xFFE0E7FF),
+                            modifier = Modifier.size(20.dp),
                         )
+                    }
+                    if (reminderCount > 0) {
+                        Box(
+                            modifier = Modifier
+                                .size(14.dp)
+                                .clip(CircleShape)
+                                .background(UrgentRed)
+                                .align(Alignment.TopEnd),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                if (reminderCount > 9) "9+" else reminderCount.toString(),
+                                fontSize = 8.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
                     }
                 }
             }
