@@ -429,8 +429,8 @@ fun SettingsScreen(
                         icon = Icons.Default.Cloud,
                         iconBg = Color(0xFFF0FDF4),
                         iconTint = SafeGreen,
-                        label = "Backup to Storage",
-                        subtitle = "Export backup file to device storage",
+                        label = "Backup Data",
+                        subtitle = "Export backup file to any storage location",
                         value = "Backup",
                         onClick = { /* future */ },
                     )
