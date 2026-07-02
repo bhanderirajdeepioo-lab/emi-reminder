@@ -149,7 +149,7 @@ fun SettingsScreen(
                         Text("Tap to set up name & photo", fontSize = 13.sp, color = Color(0xFFC7D2FE))
                         Text("EMI Reminder App", fontSize = 11.sp, color = Color(0xFFA5B4FC))
                     }
-                    // Edit icon hidden until profile-edit feature is implemented (HEL-452)
+                    // Edit icon hidden until profile-edit feature is implemented
                 }
             }
 
