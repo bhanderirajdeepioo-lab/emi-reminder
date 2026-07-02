@@ -37,9 +37,11 @@ import com.emireminder.app.ui.screens.calculator.*
 import com.emireminder.app.ui.screens.finance.*
 import com.emireminder.app.ui.screens.home.HomeScreen
 import com.emireminder.app.ui.screens.loan.*
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.ui.screens.onboarding.CountrySelectScreen
 import com.emireminder.app.ui.screens.onboarding.LanguageSelectScreen
 import com.emireminder.app.ui.screens.onboarding.OnboardingScreen
+import com.emireminder.app.ui.screens.onboarding.OnboardingViewModel
 import com.emireminder.app.ui.screens.reminders.*
 import com.emireminder.app.ui.screens.settings.SettingsScreen
 import com.emireminder.app.ui.screens.sms.SMSImportScreen
@@ -201,8 +203,10 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
 
             // 2b — Country selection (final step before main app)
             composable(NavRoutes.COUNTRY_SELECT) {
+                val onboardingVm: OnboardingViewModel = hiltViewModel()
                 CountrySelectScreen(
-                    onContinue = {
+                    onContinue = { currencyCode ->
+                        onboardingVm.setCurrency(currencyCode)
                         // Clear the entire back stack (SPLASH/LANGUAGE_SELECT/ONBOARDING/COUNTRY_SELECT)
                         // so HOME is the only entry — pressing Back from HOME exits the app cleanly.
                         navController.navigate(NavRoutes.HOME) {

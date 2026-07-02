@@ -1,6 +1,5 @@
 package com.emireminder.app.ui.screens.onboarding
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -84,8 +82,7 @@ private val COUNTRIES = listOf(
 )
 
 @Composable
-fun CountrySelectScreen(onContinue: (countryCode: String) -> Unit) {
-    val context = LocalContext.current
+fun CountrySelectScreen(onContinue: (currencyCode: String) -> Unit) {
     var query by remember { mutableStateOf("") }
     var selectedCode by remember { mutableStateOf("IN") }
 
@@ -207,14 +204,8 @@ fun CountrySelectScreen(onContinue: (countryCode: String) -> Unit) {
         ) {
             Button(
                 onClick = {
-                    val prefs = context.getSharedPreferences("emi_prefs", Context.MODE_PRIVATE)
                     val selected = COUNTRIES.find { it.code == selectedCode }
-                    prefs.edit()
-                        .putString("selected_country", selectedCode)
-                        .putString("selected_currency_code", selected?.currencyCode ?: "INR")
-                        .putString("selected_currency_symbol", selected?.currencySymbol ?: "₹")
-                        .apply()
-                    onContinue(selectedCode)
+                    onContinue(selected?.currencyCode ?: "INR")
                 },
                 modifier = Modifier
                     .fillMaxWidth()
