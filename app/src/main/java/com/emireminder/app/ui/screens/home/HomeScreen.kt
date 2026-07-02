@@ -94,7 +94,7 @@ fun HomeScreen(
             }
 
             if (loans.isEmpty()) {
-                item { EmptyState(onNavigateToAddLoan, onNavigateToSmsImport) }
+                item { EmptyState(onNavigateToAddLoan, onNavigateToSmsImport, onNavigateToCalculator) }
             } else {
                 item { LoanSummarySection(loans, currencySymbol) }
                 item { QuickActionsSection(onNavigateToAddLoan, onNavigateToAnalytics, onNavigateToCalculator) }
@@ -206,36 +206,38 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit, reminderCount: Int
             }
 
             // Notification bell with live reminder badge
-            Box {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF3730A3)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        Icons.Default.Notifications,
-                        contentDescription = "Notifications",
-                        tint = Color(0xFFE0E7FF),
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-                if (reminderCount > 0) {
+            IconButton(onClick = onNavigateToReminders) {
+                Box {
                     Box(
                         modifier = Modifier
-                            .size(14.dp)
+                            .size(36.dp)
                             .clip(CircleShape)
-                            .background(UrgentRed)
-                            .align(Alignment.TopEnd),
+                            .background(Color(0xFF3730A3)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(
-                            if (reminderCount > 9) "9+" else reminderCount.toString(),
-                            fontSize = 8.sp,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
+                        Icon(
+                            Icons.Default.Notifications,
+                            contentDescription = "Notifications",
+                            tint = Color(0xFFE0E7FF),
+                            modifier = Modifier.size(20.dp),
                         )
+                    }
+                    if (reminderCount > 0) {
+                        Box(
+                            modifier = Modifier
+                                .size(14.dp)
+                                .clip(CircleShape)
+                                .background(UrgentRed)
+                                .align(Alignment.TopEnd),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                if (reminderCount > 9) "9+" else reminderCount.toString(),
+                                fontSize = 8.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
                     }
                 }
             }
@@ -250,6 +252,7 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit, reminderCount: Int
 private fun EmptyState(
     onAddLoan: () -> Unit,
     onSmsImport: () -> Unit,
+    onNavigateToCalculator: () -> Unit,
 ) {
     val smsPermissionState = rememberPermissionState(android.Manifest.permission.READ_SMS)
 
@@ -296,7 +299,9 @@ private fun EmptyState(
         ) {
             // Calculate EMI card
             Card(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(onClick = onNavigateToCalculator),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
