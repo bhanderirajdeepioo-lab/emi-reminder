@@ -325,7 +325,7 @@ private fun LoanDetailContent(
                 if (loan.bankName.isNotBlank()) DetailRow(Icons.Default.Business, "Bank / Lender", loan.bankName)
                 if (loan.accountNumber.isNotBlank()) DetailRow(Icons.Default.CreditCard, "Account Number", "xxxx${loan.accountNumber.takeLast(4)}")
                 DetailRow(Icons.Default.CalendarToday, "Start Date", startDate.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
-                if (loan.upiVpa.isNotBlank()) DetailRow(Icons.Default.AccountBalanceWallet, "UPI VPA", loan.upiVpa)
+
                 if (loan.notes.isNotBlank()) DetailRow(Icons.Default.Note, "Notes", loan.notes)
             }
 

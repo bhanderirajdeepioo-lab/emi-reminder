@@ -52,12 +52,14 @@ class NotificationScheduler @Inject constructor(
         loanName: String,
         emiAmount: Double,
         triggerAt: Long,
+        upiVpa: String = "",
     ) {
         val snoozeIntent = Intent(context, ReminderReceiver::class.java).apply {
             putExtra(EXTRA_LOAN_NAME, loanName)
             putExtra(EXTRA_EMI_AMOUNT, emiAmount)
             putExtra(EXTRA_REMINDER_ID, reminderId)
             putExtra(EXTRA_DUE_DAY, 0)
+            putExtra(EXTRA_UPI_VPA, upiVpa)
         }
         setAlarm(reminderId, snoozeIntent, triggerAt)
     }
@@ -75,7 +77,7 @@ class NotificationScheduler @Inject constructor(
 
     fun rescheduleAll(reminders: List<Reminder>) = reminders.forEach { scheduleReminder(it) }
 
-    fun showImmediateReminder(loanId: Int, loanName: String, emiAmount: Double, dueDay: Int) {
+    fun showImmediateReminder(loanId: Int, loanName: String, emiAmount: Double, dueDay: Int, upiVpa: String = "") {
         val triggerAt = System.currentTimeMillis() + 5_000L
         val intent = Intent(context, ReminderReceiver::class.java).apply {
             putExtra(EXTRA_LOAN_NAME, loanName)
@@ -83,6 +85,7 @@ class NotificationScheduler @Inject constructor(
             putExtra(EXTRA_REMINDER_ID, loanId)
             putExtra(EXTRA_LOAN_ID, loanId)
             putExtra(EXTRA_DUE_DAY, dueDay)
+            putExtra(EXTRA_UPI_VPA, upiVpa)
         }
         setAlarm(loanId, intent, triggerAt)
     }
@@ -105,6 +108,7 @@ class NotificationScheduler @Inject constructor(
         putExtra(EXTRA_REMINDER_ID, reminder.id)
         putExtra(EXTRA_LOAN_ID, reminder.loanId ?: -1)
         putExtra(EXTRA_DUE_DAY, reminder.dueDayOfMonth)
+        putExtra(EXTRA_UPI_VPA, reminder.upiVpa)
     }
 
     companion object {
@@ -113,6 +117,7 @@ class NotificationScheduler @Inject constructor(
         const val EXTRA_REMINDER_ID = "reminder_id"
         const val EXTRA_LOAN_ID     = "loan_id"
         const val EXTRA_DUE_DAY     = "due_day"
+        const val EXTRA_UPI_VPA     = "upi_vpa"
         const val TEST_NOTIFICATION_ID = Int.MAX_VALUE
 
         fun nextAlarmMillis(dueDayOfMonth: Int, hour: Int = 9, minute: Int = 0): Long {

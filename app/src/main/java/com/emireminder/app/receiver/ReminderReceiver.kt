@@ -18,6 +18,7 @@ class ReminderReceiver : BroadcastReceiver() {
         val emiAmount  = intent.getDoubleExtra(NotificationScheduler.EXTRA_EMI_AMOUNT, 0.0)
         val reminderId = intent.getIntExtra(NotificationScheduler.EXTRA_REMINDER_ID, 0)
         val loanId     = intent.getIntExtra(NotificationScheduler.EXTRA_LOAN_ID, -1)
+        val upiVpa     = intent.getStringExtra(NotificationScheduler.EXTRA_UPI_VPA) ?: ""
 
         val launchPending = PendingIntent.getActivity(
             context, reminderId,
@@ -30,15 +31,15 @@ class ReminderReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        val payNowPending = actionPending(
+        val markPaidPending = actionPending(
             context,
             requestCode = reminderId * 10 + 1,
-            action = NotificationActionReceiver.ACTION_PAY_NOW,
+            action = NotificationActionReceiver.ACTION_MARK_PAID,
             reminderId = reminderId,
             notificationId = reminderId,
-            loanId = loanId,
             loanName = loanName,
             emiAmount = emiAmount,
+            upiVpa = upiVpa,
         )
         val snoozePending = actionPending(
             context,
@@ -46,21 +47,36 @@ class ReminderReceiver : BroadcastReceiver() {
             action = NotificationActionReceiver.ACTION_SNOOZE,
             reminderId = reminderId,
             notificationId = reminderId,
-            loanId = loanId,
             loanName = loanName,
             emiAmount = emiAmount,
+            upiVpa = upiVpa,
         )
 
-        val notification = NotificationCompat.Builder(context, EmiApp.CHANNEL_REMINDERS)
+        val notificationBuilder = NotificationCompat.Builder(context, EmiApp.CHANNEL_REMINDERS)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("EMI Reminder")
             .setContentText("Your $loanName EMI of ₹%.2f is due today.".format(emiAmount))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(launchPending)
-            .addAction(android.R.drawable.ic_menu_send, "Pay Now", payNowPending)
-            .addAction(android.R.drawable.ic_media_pause, "Remind Later", snoozePending)
-            .build()
+            .addAction(android.R.drawable.ic_menu_send, "Mark Paid", markPaidPending)
+            .addAction(android.R.drawable.ic_media_pause, "Snooze 1 Day", snoozePending)
+
+        if (upiVpa.isNotBlank()) {
+            val payNowPending = actionPending(
+                context,
+                requestCode = reminderId * 10 + 3,
+                action = NotificationActionReceiver.ACTION_PAY_NOW,
+                reminderId = reminderId,
+                notificationId = reminderId,
+                loanName = loanName,
+                emiAmount = emiAmount,
+                upiVpa = upiVpa,
+            )
+            notificationBuilder.addAction(android.R.drawable.ic_menu_send, "Pay Now", payNowPending)
+        }
+
+        val notification = notificationBuilder.build()
 
         context.getSystemService(NotificationManager::class.java).notify(reminderId, notification)
     }
@@ -71,17 +87,17 @@ class ReminderReceiver : BroadcastReceiver() {
         action: String,
         reminderId: Int,
         notificationId: Int,
-        loanId: Int,
         loanName: String,
         emiAmount: Double,
+        upiVpa: String = "",
     ): PendingIntent {
         val intent = Intent(context, NotificationActionReceiver::class.java).apply {
             this.action = action
             putExtra(NotificationScheduler.EXTRA_REMINDER_ID, reminderId)
             putExtra(NotificationActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
-            putExtra(NotificationScheduler.EXTRA_LOAN_ID, loanId)
             putExtra(NotificationScheduler.EXTRA_LOAN_NAME, loanName)
             putExtra(NotificationScheduler.EXTRA_EMI_AMOUNT, emiAmount)
+            putExtra(NotificationScheduler.EXTRA_UPI_VPA, upiVpa)
         }
         return PendingIntent.getBroadcast(
             context, requestCode, intent,

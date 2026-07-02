@@ -41,7 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
         val MIGRATION_4_5 = object : Migration(4, 5) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL(
-                    "ALTER TABLE loans ADD COLUMN upiVpa TEXT NOT NULL DEFAULT ''"
+                    "ALTER TABLE reminders ADD COLUMN upiVpa TEXT NOT NULL DEFAULT ''"
                 )
             }
         }

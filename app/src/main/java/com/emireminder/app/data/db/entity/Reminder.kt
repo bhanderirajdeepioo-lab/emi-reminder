@@ -1,6 +1,7 @@
 package com.emireminder.app.data.db.entity
 
 import androidx.compose.runtime.Immutable
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
@@ -30,4 +31,5 @@ data class Reminder(
     val notificationEnabled: Boolean = true,
     val notes: String = "",
     val lastTriggeredAt: Long? = null,
+    @ColumnInfo(defaultValue = "") val upiVpa: String = "",
 )

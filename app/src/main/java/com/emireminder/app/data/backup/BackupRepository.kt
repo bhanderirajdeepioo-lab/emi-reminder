@@ -22,9 +22,9 @@ import javax.inject.Singleton
  *   "exportedAt": <epoch ms>,
  *   "loans": [ { id, name, type, principalAmount, interestRate, tenureMonths, emiAmount,
  *                startDate, isActive, notes, bankName, accountNumber, interestType,
- *                emiDueDay, upiVpa }, ... ],
+ *                emiDueDay }, ... ],
  *   "reminders": [ { id, loanId, loanName, bankName, emiAmount, dueDayOfMonth,
- *                    frequency, isActive, notificationEnabled, notes, lastTriggeredAt }, ... ]
+ *                    frequency, isActive, notificationEnabled, notes, lastTriggeredAt, upiVpa }, ... ]
  * }
  * Restore uses upsert (OnConflictStrategy.REPLACE on primary key) so re-running restore
  * on an already-populated DB produces no duplicates.
@@ -99,7 +99,6 @@ class BackupRepository @Inject constructor(
         put("accountNumber", loan.accountNumber)
         put("interestType", loan.interestType)
         put("emiDueDay", loan.emiDueDay)
-        put("upiVpa", loan.upiVpa)
     }
 
     private fun jsonToLoan(o: JSONObject) = Loan(
@@ -117,7 +116,6 @@ class BackupRepository @Inject constructor(
         accountNumber = o.optString("accountNumber", ""),
         interestType = o.optString("interestType", "REDUCING"),
         emiDueDay = o.optInt("emiDueDay", 1),
-        upiVpa = o.optString("upiVpa", ""),
     )
 
     private fun reminderToJson(r: Reminder) = JSONObject().apply {
@@ -132,6 +130,7 @@ class BackupRepository @Inject constructor(
         put("notificationEnabled", r.notificationEnabled)
         put("notes", r.notes)
         if (r.lastTriggeredAt != null) put("lastTriggeredAt", r.lastTriggeredAt) else put("lastTriggeredAt", JSONObject.NULL)
+        put("upiVpa", r.upiVpa)
     }
 
     private fun jsonToReminder(o: JSONObject) = Reminder(
@@ -146,6 +145,7 @@ class BackupRepository @Inject constructor(
         notificationEnabled = o.optBoolean("notificationEnabled", true),
         notes = o.optString("notes", ""),
         lastTriggeredAt = if (o.isNull("lastTriggeredAt")) null else o.getLong("lastTriggeredAt"),
+        upiVpa = o.optString("upiVpa", ""),
     )
 }
 

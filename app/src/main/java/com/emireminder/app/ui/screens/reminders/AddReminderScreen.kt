@@ -15,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -145,6 +148,44 @@ fun AddReminderSheet(
                     )
                 }
             }
+            Spacer(Modifier.height(16.dp))
+
+            // UPI VPA — optional, enables Pay Now notification action
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                SheetLabel("PAY NOW VPA")
+                Spacer(Modifier.width(4.dp))
+                var showVpaTooltip by remember { mutableStateOf(false) }
+                Icon(
+                    Icons.Default.Info,
+                    contentDescription = "Info",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .size(14.dp)
+                        .clickable { showVpaTooltip = !showVpaTooltip },
+                )
+                if (showVpaTooltip) {
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        "Enables 1-tap Pay Now in notification",
+                        fontSize = 10.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+            OutlinedTextField(
+                value = viewModel.upiVpa,
+                onValueChange = viewModel::onUpiVpaChange,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                placeholder = { Text("Optional: bank UPI ID (e.g. hdfc@upi)") },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    capitalization = KeyboardCapitalization.None,
+                    imeAction = ImeAction.Next,
+                ),
+                singleLine = true,
+            )
             Spacer(Modifier.height(16.dp))
 
             // Due Date + Repeat — two columns
