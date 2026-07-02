@@ -8,6 +8,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.emireminder.app.EmiApp
 import com.emireminder.app.MainActivity
+import com.emireminder.app.R
 import com.emireminder.app.notification.NotificationScheduler
 
 class ReminderReceiver : BroadcastReceiver() {
@@ -51,7 +52,7 @@ class ReminderReceiver : BroadcastReceiver() {
         )
 
         val notification = NotificationCompat.Builder(context, EmiApp.CHANNEL_REMINDERS)
-            .setSmallIcon(com.emireminder.app.R.drawable.ic_notification)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("EMI Reminder")
             .setContentText("Your $loanName EMI of ₹%.2f is due today.".format(emiAmount))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
