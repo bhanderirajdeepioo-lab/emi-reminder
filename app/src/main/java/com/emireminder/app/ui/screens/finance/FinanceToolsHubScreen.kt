@@ -166,6 +166,7 @@ fun FinanceToolsHubScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Indigo600,
                     titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
                 ),
             )
         },
