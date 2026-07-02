@@ -1,5 +1,10 @@
 package com.emireminder.app.ui.screens.onboarding
 
+import android.app.AlarmManager
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -23,10 +28,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.*
 import com.emireminder.app.ui.theme.*
 import kotlinx.coroutines.delay
@@ -66,16 +75,40 @@ private val pages = listOf(
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun OnboardingScreen(onComplete: () -> Unit, onSkip: () -> Unit) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     // Use remember (not rememberSaveable) so a Bundle-restored page index from a previous
     // interrupted onboarding session cannot put a returning user on page 2 unexpectedly (HEL-217).
     var page by remember { mutableIntStateOf(0) }
     val smsPermission = rememberPermissionState(android.Manifest.permission.READ_SMS)
-    val notifPermission = if (android.os.Build.VERSION.SDK_INT >= 33) {
+    val notifPermission = if (Build.VERSION.SDK_INT >= 33) {
         rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
     } else null
     var smsToggleState by remember { mutableStateOf(false) }
     var smsPermissionRequested by remember { mutableStateOf(false) }
     var notifPermissionRequested by remember { mutableStateOf(false) }
+
+    // Exact alarms — Android 12+ (API 31) only; below S the permission is auto-granted
+    val isAndroid12Plus = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val alarmManager = remember { context.getSystemService(AlarmManager::class.java) }
+    // Reflect actual permission status; starts ON if already granted, OFF if not (user must grant)
+    var exactAlarmToggle by remember {
+        mutableStateOf(
+            if (isAndroid12Plus) alarmManager.canScheduleExactAlarms() else true,
+        )
+    }
+
+    // Re-check exact alarm permission whenever the user returns from the system Settings deep-link
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && isAndroid12Plus) {
+                exactAlarmToggle = alarmManager.canScheduleExactAlarms()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     // Debounce guard: buttons outside AnimatedContent re-render instantly on page change while the
     // 400ms slide animation is still running. Without this lock the incoming p2 "Skip for now"
@@ -260,6 +293,74 @@ fun OnboardingScreen(onComplete: () -> Unit, onSkip: () -> Unit) {
                         )
                     }
                 }
+
+                // Exact Alarms toggle — Android 12+ only (HEL-481)
+                if (isAndroid12Plus) {
+                    Spacer(Modifier.height(8.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF312E81).copy(alpha = 0.8f)),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Text(
+                                        "Exact Alarms",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFE0E7FF),
+                                    )
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = Color(0xFF7C3AED).copy(alpha = 0.8f),
+                                    ) {
+                                        Text(
+                                            "Required",
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color.White,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        )
+                                    }
+                                }
+                                Text(
+                                    "Precise timing for EMI reminders",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF818CF8),
+                                )
+                            }
+                            Switch(
+                                checked = exactAlarmToggle,
+                                onCheckedChange = { _ ->
+                                    // If permission not yet granted, open the system Settings
+                                    // deep-link so the user can allow SCHEDULE_EXACT_ALARM.
+                                    // The DisposableEffect above re-checks status on resume.
+                                    if (!alarmManager.canScheduleExactAlarms()) {
+                                        val intent = Intent(
+                                            Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                                            Uri.parse("package:${context.packageName}"),
+                                        )
+                                        context.startActivity(intent)
+                                    }
+                                },
+                                colors = SwitchDefaults.colors(
+                                    uncheckedThumbColor = Color.White,
+                                    uncheckedTrackColor = Color(0xFF1E293B),
+                                ),
+                            )
+                        }
+                    }
+                }
+
                 Spacer(Modifier.height(8.dp))
                 TextButton(onClick = lockAndAdvancePage) { Text("Skip for now", color = Color(0xFFB0AEC0)) }
             } else if (current.permissionLabel != null && page == 2) {
