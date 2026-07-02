@@ -57,6 +57,7 @@
             <intent-filter>
                 <action android:name="com.emireminder.app.ACTION_MARK_PAID" />
                 <action android:name="com.emireminder.app.ACTION_SNOOZE" />
+                <action android:name="com.emireminder.app.ACTION_PAY_NOW" />
             </intent-filter>
         </receiver>
 

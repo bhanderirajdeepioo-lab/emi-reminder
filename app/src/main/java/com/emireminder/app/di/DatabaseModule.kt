@@ -51,7 +51,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             "emi_reminder.db"
         )
-        .addMigrations(AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4)
+        .addMigrations(AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5)
         .addCallback(seedCallback)
         .fallbackToDestructiveMigration()
         .fallbackToDestructiveMigrationOnDowngrade()
