@@ -22,7 +22,7 @@ import javax.inject.Singleton
  *   "exportedAt": <epoch ms>,
  *   "loans": [ { id, name, type, principalAmount, interestRate, tenureMonths, emiAmount,
  *                startDate, isActive, notes, bankName, accountNumber, interestType,
- *                emiDueDay }, ... ],
+ *                emiDueDay, upiVpa }, ... ],
  *   "reminders": [ { id, loanId, loanName, bankName, emiAmount, dueDayOfMonth,
  *                    frequency, isActive, notificationEnabled, notes, lastTriggeredAt, upiVpa }, ... ]
  * }
@@ -99,6 +99,7 @@ class BackupRepository @Inject constructor(
         put("accountNumber", loan.accountNumber)
         put("interestType", loan.interestType)
         put("emiDueDay", loan.emiDueDay)
+        put("upiVpa", loan.upiVpa)
     }
 
     private fun jsonToLoan(o: JSONObject) = Loan(
@@ -116,6 +117,7 @@ class BackupRepository @Inject constructor(
         accountNumber = o.optString("accountNumber", ""),
         interestType = o.optString("interestType", "REDUCING"),
         emiDueDay = o.optInt("emiDueDay", 1),
+        upiVpa = o.optString("upiVpa", ""),
     )
 
     private fun reminderToJson(r: Reminder) = JSONObject().apply {
