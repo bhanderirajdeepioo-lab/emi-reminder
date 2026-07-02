@@ -367,8 +367,8 @@ fun SettingsScreen(
                         icon = Icons.Default.Cloud,
                         iconBg = Color(0xFFF0FDF4),
                         iconTint = SafeGreen,
-                        label = "Backup to Google Drive",
-                        subtitle = "Auto-backup enabled",
+                        label = "Backup to Storage",
+                        subtitle = "Export backup file to device storage",
                         value = "Backup",
                         onClick = { /* future */ },
                     )
