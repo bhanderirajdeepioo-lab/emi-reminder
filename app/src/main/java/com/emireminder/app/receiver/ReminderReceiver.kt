@@ -69,6 +69,7 @@ class ReminderReceiver : BroadcastReceiver() {
                 action = NotificationActionReceiver.ACTION_PAY_NOW,
                 reminderId = reminderId,
                 notificationId = reminderId,
+                loanId = loanId,
                 loanName = loanName,
                 emiAmount = emiAmount,
                 upiVpa = upiVpa,

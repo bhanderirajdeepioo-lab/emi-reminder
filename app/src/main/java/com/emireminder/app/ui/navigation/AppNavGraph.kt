@@ -38,7 +38,6 @@ import com.emireminder.app.ui.screens.calculator.*
 import com.emireminder.app.ui.screens.finance.*
 import com.emireminder.app.ui.screens.home.HomeScreen
 import com.emireminder.app.ui.screens.loan.*
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.ui.screens.onboarding.CountrySelectScreen
 import com.emireminder.app.ui.screens.onboarding.LanguageSelectScreen
 import com.emireminder.app.ui.screens.onboarding.OnboardingScreen

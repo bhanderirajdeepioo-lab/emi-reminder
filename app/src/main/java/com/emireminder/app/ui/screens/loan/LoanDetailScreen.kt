@@ -196,9 +196,9 @@ private fun LoanDetailContent(
     val startDate = remember(loan.startDate) { Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate() }
     val today = remember { LocalDate.now() }
     val monthsElapsed = remember(startDate, loan.tenureMonths) { ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths) }
-    val paidMonths = remember(monthsElapsed, today, loan.emiDueDay) {
-        if (today.dayOfMonth < loan.emiDueDay) (monthsElapsed - 1).coerceAtLeast(0) else monthsElapsed
-    }
+    // Exclude the current month from payment history when today is before the EMI due day —
+    // the EMI hasn't been collected yet so it must not appear as PAID.
+    val paidMonths = if (today.dayOfMonth < loan.emiDueDay) (monthsElapsed - 1).coerceAtLeast(0) else monthsElapsed
     val tenureRemaining = (loan.tenureMonths - monthsElapsed).coerceAtLeast(0)
     val progressFraction = if (loan.tenureMonths > 0) monthsElapsed.toFloat() / loan.tenureMonths else 0f
     val outstandingBalance = remember(loan, monthsElapsed) { calcOutstandingBalance(loan, monthsElapsed) }
@@ -325,7 +325,7 @@ private fun LoanDetailContent(
                 if (loan.bankName.isNotBlank()) DetailRow(Icons.Default.Business, "Bank / Lender", loan.bankName)
                 if (loan.accountNumber.isNotBlank()) DetailRow(Icons.Default.CreditCard, "Account Number", "xxxx${loan.accountNumber.takeLast(4)}")
                 DetailRow(Icons.Default.CalendarToday, "Start Date", startDate.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
-
+                if (loan.upiVpa.isNotBlank()) DetailRow(Icons.Default.AccountBalanceWallet, "UPI VPA", loan.upiVpa)
                 if (loan.notes.isNotBlank()) DetailRow(Icons.Default.Note, "Notes", loan.notes)
             }
 
@@ -346,7 +346,7 @@ private fun LoanDetailContent(
             }
 
             // EMI payment history (estimated)
-            if (monthsElapsed > 0) {
+            if (paidMonths > 0) {
                 val currentMonthLabel = remember(startDate, monthsElapsed) {
                     startDate.plusMonths(monthsElapsed.toLong()).format(DateTimeFormatter.ofPattern("MMM yyyy"))
                 }
