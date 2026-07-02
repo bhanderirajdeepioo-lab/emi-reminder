@@ -100,7 +100,7 @@ fun HomeScreen(
             }
 
             if (loans.isEmpty()) {
-                item { EmptyState(onNavigateToAddLoan, onNavigateToSmsImport) }
+                item { EmptyState(onNavigateToAddLoan, onNavigateToSmsImport, onNavigateToCalculator) }
             } else {
                 item { LoanSummarySection(loans, currencySymbol) }
                 item {
@@ -262,6 +262,7 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit, reminderCount: Int
 private fun EmptyState(
     onAddLoan: () -> Unit,
     onSmsImport: () -> Unit,
+    onNavigateToCalculator: () -> Unit,
 ) {
     val smsPermissionState = rememberPermissionState(android.Manifest.permission.READ_SMS)
 
@@ -308,7 +309,9 @@ private fun EmptyState(
         ) {
             // Calculate EMI card
             Card(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(onClick = onNavigateToCalculator),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
