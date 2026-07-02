@@ -1,5 +1,7 @@
 package com.emireminder.app.ui.screens.calculator
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,13 +25,18 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.ui.theme.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -61,6 +68,7 @@ fun AmortizationScheduleScreen(
         }
     }
 
+    val context = LocalContext.current
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -76,7 +84,13 @@ fun AmortizationScheduleScreen(
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) } },
                 actions = {
                     IconButton(onClick = {
-                        scope.launch { snackbarHostState.showSnackbar("Export feature coming soon") }
+                        scope.launch {
+                            try {
+                                exportAmortizationCsv(context, principal, rate, rows, startDate, monthFmt)
+                            } catch (e: Exception) {
+                                snackbarHostState.showSnackbar("Export failed: ${e.message}")
+                            }
+                        }
                     }) {
                         Icon(Icons.Default.Download, "Export", tint = Color.White)
                     }
@@ -215,6 +229,36 @@ fun AmortizationScheduleScreen(
             }
         }
     }
+}
+
+private suspend fun exportAmortizationCsv(
+    context: Context,
+    principal: Double,
+    rate: Double,
+    rows: List<AmortRow>,
+    startDate: LocalDate,
+    monthFmt: DateTimeFormatter,
+) {
+    val dateFmt = DateTimeFormatter.ofPattern("dd MMM yyyy")
+    val file = withContext(Dispatchers.IO) {
+        val csv = buildString {
+            appendLine("Month,Date,EMI Amount,Principal,Interest,Balance")
+            rows.forEach { row ->
+                val date = startDate.plusMonths(row.month.toLong()).format(dateFmt)
+                appendLine("${row.month},$date,${String.format("%.2f", row.emi)},${String.format("%.2f", row.principal)},${String.format("%.2f", row.interest)},${String.format("%.2f", row.balance)}")
+            }
+        }
+        val fileName = "amortization_${principal.toLong()}_${rate}.csv"
+        File(context.cacheDir, fileName).also { it.writeText(csv) }
+    }
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/csv"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        putExtra(Intent.EXTRA_SUBJECT, "Amortization Schedule")
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, "Export Amortization Schedule"))
 }
 
 @Composable
