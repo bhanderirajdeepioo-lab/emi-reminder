@@ -210,6 +210,8 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                         onboardingVm.setCurrency(currencyCode)
                         // Clear the entire back stack (SPLASH/LANGUAGE_SELECT/ONBOARDING/COUNTRY_SELECT)
                         // so HOME is the only entry — pressing Back from HOME exits the app cleanly.
+                        // onContinue is called from CountrySelectScreen's LaunchedEffect only AFTER
+                        // the DataStore currency write has completed (no write/cancel race).
                         navController.navigate(NavRoutes.HOME) {
                             popUpTo(navController.graph.id) { inclusive = true }
                         }
