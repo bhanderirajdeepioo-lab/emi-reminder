@@ -306,6 +306,23 @@ fun AddReminderSheet(
             }
             Spacer(Modifier.height(20.dp))
 
+            val errorMsg = viewModel.errorMessage
+            if (errorMsg != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                ) {
+                    Text(
+                        errorMsg,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(12.dp),
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+            }
+
             // Save CTA
             Button(
                 onClick = {
