@@ -374,7 +374,7 @@ private fun LoanDetailContent(
                 ) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         if (paidMonths < monthsElapsed) {
-                            PendingEmiRow(currentMonthLabel, loan.emiAmount, fmt)
+                            PendingEmiRow(currentMonthLabel, loan.emiAmount, fmtAmt)
                         }
                         paymentHistory.forEach { (label, emi, interest) ->
                             PaymentHistoryRow(label, emi, interest, fmtAmt)
@@ -468,7 +468,7 @@ private fun PaymentHistoryRow(monthLabel: String, emi: Double, interest: Double,
 }
 
 @Composable
-private fun PendingEmiRow(monthLabel: String, emi: Double, fmt: NumberFormat) {
+private fun PendingEmiRow(monthLabel: String, emi: Double, fmtAmt: (Number) -> String) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier.size(32.dp).clip(CircleShape).background(WarnOrange.copy(alpha = 0.15f)),
@@ -488,7 +488,7 @@ private fun PendingEmiRow(monthLabel: String, emi: Double, fmt: NumberFormat) {
                 Text("PENDING", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = WarnOrange)
             }
         }
-        Text(fmt.format(emi.toLong()), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Indigo600)
+        Text(fmtAmt(emi.toLong()), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Indigo600)
     }
 }
 

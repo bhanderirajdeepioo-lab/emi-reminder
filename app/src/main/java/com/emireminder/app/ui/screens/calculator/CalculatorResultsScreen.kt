@@ -112,7 +112,7 @@ fun CalculatorResultsScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         MiniStat("${tenureMonths} mo", "Tenure")
                         MiniStat("%.1f%%".format(rate), "Rate")
-                        MiniStat(fmt.format(principal).replace(Regex(",00,000(\\.00)?$"), "L"), "Principal")
+                        MiniStat(numFmt.format(principal).replace(Regex(",00,000(\\.00)?$"), "L"), "Principal")
                     }
                 }
             }
