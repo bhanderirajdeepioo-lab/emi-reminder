@@ -56,7 +56,7 @@ private enum class TenureUnit(val label: String) {
 @Composable
 fun EMICalculatorScreen(
     onBack: () -> Unit,
-    onShowResults: (Double, Double, Int) -> Unit,
+    onShowResults: (Double, Double, Int, String) -> Unit,
     onInterestTypeSelector: (Double, Double, Int, String) -> Unit,
     showBackButton: Boolean = true,
     prefillLabel: String? = null,
@@ -306,7 +306,7 @@ fun EMICalculatorScreen(
 
                 // Buttons
                 Button(
-                    onClick = { onShowResults(principal, rate, tenure) },
+                    onClick = { onShowResults(principal, rate, tenure, selectedTab.name) },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Indigo600),

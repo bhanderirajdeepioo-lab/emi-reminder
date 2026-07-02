@@ -26,7 +26,7 @@ object NavRoutes {
 
     // --- Calculator screens ---
     const val EMI_CALCULATOR         = "emi_calculator"
-    const val CALCULATOR_RESULTS     = "calculator_results/{principal}/{rate}/{tenure}"
+    const val CALCULATOR_RESULTS     = "calculator_results/{principal}/{rate}/{tenure}/{loanType}"
     const val COMPARISON_CALCULATOR  = "comparison_calculator"
     const val PREPAYMENT_CALCULATOR  = "prepayment_calculator"
     const val INTEREST_TYPE_SELECTOR = "interest_type/{principal}/{rate}/{tenure}/{currentType}"
@@ -42,7 +42,7 @@ object NavRoutes {
 
     // --- Helpers ---
     fun loanDetail(loanId: Int)         = "loan_detail/$loanId"
-    fun calculatorResults(p: Double, r: Double, t: Int) = "calculator_results/$p/$r/$t"
+    fun calculatorResults(p: Double, r: Double, t: Int, loanType: String = "HOME") = "calculator_results/$p/$r/$t/$loanType"
     fun interestTypeSelector(p: Double, r: Double, t: Int, type: String) =
         "interest_type/$p/$r/$t/$type"
     fun amortizationSchedule(p: Double, r: Double, t: Int) = "amortization/$p/$r/$t"

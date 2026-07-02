@@ -73,6 +73,11 @@ class AddReminderViewModel @Inject constructor(
     fun onNotesChange(value: String) { notes = value }
     fun onNotificationToggle() { notificationEnabled = !notificationEnabled }
 
+    fun prefillFromCalculator(emiAmount: Double, loanName: String) {
+        this.emiAmount = "%.2f".format(emiAmount).trimEnd('0').trimEnd('.')
+        this.loanName = loanName
+    }
+
     fun resetForm() {
         editingReminderId = null
         editingLoanId = null

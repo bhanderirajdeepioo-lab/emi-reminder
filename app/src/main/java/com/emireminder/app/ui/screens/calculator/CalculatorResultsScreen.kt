@@ -16,7 +16,11 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.emireminder.app.ui.screens.reminders.AddReminderSheet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,10 +43,10 @@ fun CalculatorResultsScreen(
     principal: Double,
     rate: Double,
     tenureMonths: Int,
+    loanType: String = "HOME",
     onBack: () -> Unit,
     onViewAmortization: () -> Unit,
     onPrepayment: () -> Unit,
-    onSaveAsReminder: () -> Unit,
     viewModel: CalculatorViewModel = hiltViewModel(),
 ) {
     val emi = remember(principal, rate, tenureMonths) { viewModel.calculateEmi(principal, rate, tenureMonths) }
@@ -50,6 +54,7 @@ fun CalculatorResultsScreen(
     val totalPayment = principal + totalInterest
     val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
     val context = LocalContext.current
+    var showReminderSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -186,7 +191,7 @@ fun CalculatorResultsScreen(
                 }
 
                 Button(
-                    onClick = onSaveAsReminder,
+                    onClick = { showReminderSheet = true },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Violet600),
@@ -198,6 +203,20 @@ fun CalculatorResultsScreen(
             }
         }
     }
+
+    if (showReminderSheet) {
+        AddReminderSheet(
+            onDismiss = { showReminderSheet = false },
+            prefillEmiAmount = emi,
+            prefillLoanName = loanTypeToDisplayName(loanType),
+        )
+    }
+}
+
+private fun loanTypeToDisplayName(loanType: String) = when (loanType) {
+    "CAR"      -> "Car Loan"
+    "PERSONAL" -> "Personal Loan"
+    else       -> "Home Loan"
 }
 
 @Composable
