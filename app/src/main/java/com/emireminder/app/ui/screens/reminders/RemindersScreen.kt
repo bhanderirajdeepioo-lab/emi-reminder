@@ -14,12 +14,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -40,7 +36,6 @@ import java.time.format.DateTimeFormatter
 import java.text.NumberFormat
 import java.util.Locale
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun RemindersScreen(
     onReminderClick: (Int) -> Unit,
@@ -48,8 +43,6 @@ fun RemindersScreen(
     onNavigateToSmsImport: () -> Unit = {},
     viewModel: RemindersViewModel = hiltViewModel(),
 ) {
-    val smsPermission = rememberPermissionState(android.Manifest.permission.READ_SMS)
-
     var showAddSheet by remember { mutableStateOf(false) }
     var editingReminderId by remember { mutableStateOf<Int?>(null) }
     val onAddReminder: () -> Unit = remember { { showAddSheet = true } }
@@ -90,18 +83,21 @@ fun RemindersScreen(
                     .padding(horizontal = 20.dp)
                     .padding(top = 18.dp, bottom = 12.dp),
             ) {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("Reminders", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                        Text("${reminders.size} active EMI reminders", fontSize = 13.sp, color = Indigo100)
-                    }
-                    if (smsPermission.status.isGranted) {
-                        IconButton(onClick = onNavigateToSmsImport) {
-                            Icon(Icons.Default.Message, contentDescription = "Import from SMS", tint = Color.White.copy(alpha = 0.8f))
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("Reminders", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Box(modifier = Modifier.align(Alignment.CenterEnd)) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(Color(0xFF312E81))
+                                .clickable { showAddSheet = true }
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                        ) {
+                            Text("+ New", fontSize = 12.sp, color = Color(0xFFA5B4FC), fontWeight = FontWeight.Medium)
                         }
-                    }
-                    IconButton(onClick = onNavigateToNotificationPreview) {
-                        Icon(Icons.Default.Notifications, contentDescription = "Preview notification", tint = Color.White.copy(alpha = 0.8f))
                     }
                 }
                 Spacer(Modifier.height(12.dp))
@@ -205,6 +201,7 @@ fun RemindersScreen(
                             daysText = "Overdue",
                             chipColor = UrgentRed,
                             isOverdue = true,
+                            isDueSoon = false,
                             isPaid = false,
                             currencySymbol = currencySymbol,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
@@ -242,6 +239,7 @@ fun RemindersScreen(
                             daysText = daysText,
                             chipColor = urgencyColor,
                             isOverdue = false,
+                            isDueSoon = daysLeft in 0..7,
                             isPaid = false,
                             currencySymbol = currencySymbol,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
@@ -263,6 +261,7 @@ fun RemindersScreen(
                             daysText = "",
                             chipColor = Color(0xFFE5E7EB),
                             isOverdue = false,
+                            isDueSoon = false,
                             isPaid = true,
                             currencySymbol = currencySymbol,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
@@ -317,6 +316,7 @@ private fun ReminderCard(
     daysText: String,
     chipColor: Color,
     isOverdue: Boolean,
+    isDueSoon: Boolean = false,
     isPaid: Boolean,
     currencySymbol: String,
     onClick: () -> Unit,
@@ -344,14 +344,32 @@ private fun ReminderCard(
         isOverdue -> UrgentRed
         else      -> Indigo600
     }
+    val chipBg = when {
+        isOverdue -> UrgentRed
+        isDueSoon -> Color(0xFFFEF3C7)
+        isPaid    -> Color(0xFFDCFCE7)
+        else      -> Color(0xFFEEF2FF)
+    }
+    val chipTextColor = when {
+        isOverdue -> Color.White
+        isDueSoon -> Color(0xFFD97706)
+        isPaid    -> Color(0xFF059669)
+        else      -> Indigo600
+    }
+    val cardBg = when {
+        isPaid    -> Color(0xFFF0FDF4)
+        isOverdue -> Color(0xFFFEF2F2)
+        isDueSoon -> Color(0xFFFFFBEB)
+        else      -> Color.White
+    }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = cardBg),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(modifier = Modifier.height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
@@ -393,12 +411,12 @@ private fun ReminderCard(
                     Text("$currencySymbol${numFmt.format(reminder.emiAmount)}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(actionColor)
+                            .clip(RoundedCornerShape(11.dp))
+                            .background(chipBg)
                             .clickable(onClick = onAction)
                             .padding(horizontal = 10.dp, vertical = 4.dp),
                     ) {
-                        Text(actionLabel, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(actionLabel, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = chipTextColor)
                     }
                 }
             }

@@ -15,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -57,7 +56,6 @@ private enum class TenureUnit(val label: String) {
 fun EMICalculatorScreen(
     onBack: () -> Unit,
     onShowResults: (Double, Double, Int, String) -> Unit,
-    onInterestTypeSelector: (Double, Double, Int, String) -> Unit,
     showBackButton: Boolean = true,
     prefillLabel: String? = null,
     initialInterestType: String = "REDUCING",
@@ -93,6 +91,8 @@ fun EMICalculatorScreen(
             viewModel.calculateEmi(principal, rate, tenure)
         }
     }
+    val reducingEmi = remember(principal, rate, tenure) { viewModel.calculateEmi(principal, rate, tenure) }
+    val flatEmi = remember(principal, rate, tenure) { (principal + principal * (rate / 100.0) * (tenure / 12.0)) / tenure }
 
     val tenureDisplay = when (tenureUnit) {
         TenureUnit.YEARS -> "${tenure / 12} yr ${if (tenure % 12 > 0) "${tenure % 12} mo" else ""}".trim()
@@ -133,30 +133,6 @@ fun EMICalculatorScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState()),
         ) {
-            // Live EMI banner
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Brush.linearGradient(listOf(Indigo600, Violet600)))
-                    .padding(vertical = 24.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Monthly EMI", fontSize = 13.sp, color = Indigo100)
-                    Text(
-                        fmt.format(emi),
-                        fontSize = 34.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.White,
-                    )
-                    Text(
-                        "Total: ${fmt.format(emi * tenure)}  •  Interest: ${fmt.format((emi * tenure) - principal)}",
-                        fontSize = 12.sp,
-                        color = Indigo100.copy(alpha = 0.8f),
-                    )
-                }
-            }
-
             // Loan-type tabs in dark pill container
             Box(
                 modifier = Modifier
@@ -304,7 +280,57 @@ fun EMICalculatorScreen(
                     }
                 }
 
-                // Buttons
+                // Inline interest type selector
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    listOf("REDUCING" to "Reducing Balance", "FLAT" to "Flat Rate").forEach { (type, label) ->
+                        val isSelected = interestType == type
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(if (isSelected) Indigo600 else MaterialTheme.colorScheme.surface)
+                                .clickable { interestType = type }
+                                .padding(vertical = 14.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                if (isSelected) {
+                                    Text("✓", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                                }
+                                Text(
+                                    label,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Comparison info tip card
+                val emiDiff = flatEmi - reducingEmi
+                if (emiDiff > 1.0) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFFFFF7ED))
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                    ) {
+                        Text(
+                            "⚠ Flat rate costs ${fmt.format(emiDiff)} more/month than reducing balance",
+                            fontSize = 12.sp,
+                            color = Color(0xFFD97706),
+                            lineHeight = 18.sp,
+                        )
+                    }
+                }
+
+                // Calculate button
                 Button(
                     onClick = { onShowResults(principal, rate, tenure, selectedTab.name) },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
@@ -313,21 +339,7 @@ fun EMICalculatorScreen(
                 ) {
                     Icon(Icons.Default.Calculate, null)
                     Spacer(Modifier.width(8.dp))
-                    Text("View Detailed Results", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-                }
-
-                OutlinedButton(
-                    onClick = { onInterestTypeSelector(principal, rate, tenure, interestType) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .padding(bottom = 8.dp),
-                    shape = RoundedCornerShape(14.dp),
-                ) {
-                    Text(
-                        "Type: ${if (interestType == "FLAT") "Flat Rate" else "Reducing Balance"} · Change",
-                        fontSize = 14.sp,
-                    )
+                    Text("Calculate EMI →", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
