@@ -36,8 +36,12 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     try {
                         reminderRepository.getReminderById(reminderId)?.let { reminder ->
                             reminderRepository.updateReminder(
-                                reminder.copy(lastTriggeredAt = System.currentTimeMillis()),
+                                reminder.copy(
+                                    isActive = false,
+                                    lastTriggeredAt = System.currentTimeMillis(),
+                                ),
                             )
+                            notificationScheduler.cancelReminder(reminderId)
                         }
                     } finally {
                         notificationManager.cancel(notificationId)
