@@ -16,6 +16,10 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sms
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,12 +40,16 @@ import java.time.format.DateTimeFormatter
 import java.text.NumberFormat
 import java.util.Locale
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun RemindersScreen(
     onReminderClick: (Int) -> Unit,
     onNavigateToNotificationPreview: () -> Unit = {},
+    onNavigateToSmsImport: () -> Unit = {},
     viewModel: RemindersViewModel = hiltViewModel(),
 ) {
+    val smsPermission = rememberPermissionState(android.Manifest.permission.READ_SMS)
+
     var showAddSheet by remember { mutableStateOf(false) }
     var editingReminderId by remember { mutableStateOf<Int?>(null) }
     val onAddReminder: () -> Unit = remember { { showAddSheet = true } }
@@ -86,6 +94,11 @@ fun RemindersScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text("Reminders", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                         Text("${reminders.size} active EMI reminders", fontSize = 13.sp, color = Indigo100)
+                    }
+                    if (smsPermission.status.isGranted) {
+                        IconButton(onClick = onNavigateToSmsImport) {
+                            Icon(Icons.Default.Sms, contentDescription = "Import from SMS", tint = Color.White.copy(alpha = 0.8f))
+                        }
                     }
                     IconButton(onClick = onNavigateToNotificationPreview) {
                         Icon(Icons.Default.Notifications, contentDescription = "Preview notification", tint = Color.White.copy(alpha = 0.8f))
@@ -198,6 +211,7 @@ fun RemindersScreen(
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
                             onAction = { viewModel.markAsPaid(r) },
+                            onToggle = { viewModel.toggleReminder(r) },
                         )
                     }
                 }
@@ -234,6 +248,7 @@ fun RemindersScreen(
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
                             onAction = { viewModel.remindNow(r) },
+                            onToggle = { viewModel.toggleReminder(r) },
                         )
                     }
                 }
@@ -254,6 +269,7 @@ fun RemindersScreen(
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
                             onAction = { viewModel.reactivate(r) },
+                            onToggle = { viewModel.toggleReminder(r) },
                         )
                     }
                 }
@@ -307,6 +323,7 @@ private fun ReminderCard(
     onDelete: () -> Unit,
     onEdit: () -> Unit,
     onAction: () -> Unit,
+    onToggle: () -> Unit = {},
 ) {
     val numFmt = remember { NumberFormat.getNumberInstance(Locale("en", "IN")).apply { minimumFractionDigits = 2; maximumFractionDigits = 2 } }
     val today = remember { LocalDate.now() }
@@ -315,6 +332,8 @@ private fun ReminderCard(
         val day = reminder.dueDayOfMonth.coerceIn(1, today.lengthOfMonth())
         today.withDayOfMonth(day).format(dueDateFmt)
     }
+    val isDisabled = !reminder.isActive
+    val borderColor = if (isDisabled) Color(0xFFCBD5E1) else chipColor
     val actionLabel = when {
         isPaid    -> "COMPLETED"
         isOverdue -> "PAY NOW"
@@ -340,20 +359,20 @@ private fun ReminderCard(
                 modifier = Modifier
                     .width(4.dp)
                     .fillMaxHeight()
-                    .background(chipColor),
+                    .background(borderColor),
             )
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 14.dp, vertical = 12.dp)
-                    .alpha(if (isPaid) 0.5f else 1f),
+                    .alpha(if (isDisabled) 0.4f else 1f),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(chipColor.copy(alpha = 0.1f)),
+                        .background(borderColor.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(loanEmojiFromName(reminder.loanName), fontSize = 20.sp)
@@ -383,12 +402,18 @@ private fun ReminderCard(
                     }
                 }
             }
-            Column {
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Switch(
+                    checked = reminder.isActive,
+                    onCheckedChange = { onToggle() },
+                    modifier = Modifier.padding(end = 8.dp).height(28.dp),
+                    colors = SwitchDefaults.colors(checkedThumbColor = Indigo600, checkedTrackColor = Indigo600.copy(alpha = 0.3f)),
+                )
+                IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(15.dp))
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(15.dp))
                 }
             }
         }

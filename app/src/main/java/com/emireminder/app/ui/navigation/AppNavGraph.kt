@@ -261,6 +261,7 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 RemindersScreen(
                     onReminderClick = { loanId -> navController.navigate(NavRoutes.loanDetail(loanId)) },
                     onNavigateToNotificationPreview = { navController.navigate(NavRoutes.NOTIFICATION) },
+                    onNavigateToSmsImport = { navController.navigate(NavRoutes.SMS_IMPORT) },
                 )
             }
 
@@ -414,7 +415,10 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
 
             // 17 — Loan Analytics
             composable(NavRoutes.LOAN_ANALYTICS) {
-                LoanAnalyticsScreen(onBack = { navController.popBackStack() })
+                LoanAnalyticsScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToPrepayment = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR) { launchSingleTop = true } },
+                )
             }
 
             // 18 — Loan Detail
