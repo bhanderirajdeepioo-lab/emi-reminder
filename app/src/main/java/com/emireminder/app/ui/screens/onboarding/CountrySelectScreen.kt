@@ -1,6 +1,5 @@
 package com.emireminder.app.ui.screens.onboarding
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,11 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.ui.theme.*
 
 private data class Country(
@@ -84,10 +83,18 @@ private val COUNTRIES = listOf(
 )
 
 @Composable
-fun CountrySelectScreen(onContinue: (countryCode: String) -> Unit) {
-    val context = LocalContext.current
+fun CountrySelectScreen(
+    onContinue: () -> Unit,
+    viewModel: CountrySelectViewModel = hiltViewModel(),
+) {
     var query by remember { mutableStateOf("") }
     var selectedCode by remember { mutableStateOf("IN") }
+
+    // Navigate only after the DataStore write has completed — avoids the race where
+    // viewModelScope cancels mid-write when the back stack entry is popped.
+    LaunchedEffect(viewModel.currencySaved) {
+        if (viewModel.currencySaved) onContinue()
+    }
 
     val filtered = remember(query) {
         if (query.isBlank()) COUNTRIES
@@ -207,14 +214,8 @@ fun CountrySelectScreen(onContinue: (countryCode: String) -> Unit) {
         ) {
             Button(
                 onClick = {
-                    val prefs = context.getSharedPreferences("emi_prefs", Context.MODE_PRIVATE)
                     val selected = COUNTRIES.find { it.code == selectedCode }
-                    prefs.edit()
-                        .putString("selected_country", selectedCode)
-                        .putString("selected_currency_code", selected?.currencyCode ?: "INR")
-                        .putString("selected_currency_symbol", selected?.currencySymbol ?: "₹")
-                        .apply()
-                    onContinue(selectedCode)
+                    viewModel.saveCountryCurrency(selected?.currencyCode ?: "INR")
                 },
                 modifier = Modifier
                     .fillMaxWidth()
