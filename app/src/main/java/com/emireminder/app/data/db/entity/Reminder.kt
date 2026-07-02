@@ -30,4 +30,5 @@ data class Reminder(
     val notificationEnabled: Boolean = true,
     val notes: String = "",
     val lastTriggeredAt: Long? = null,
+    val upiVpa: String = "",
 )
