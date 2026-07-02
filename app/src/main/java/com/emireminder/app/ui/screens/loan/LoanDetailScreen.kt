@@ -114,6 +114,9 @@ private fun LoanDetailContent(
     val startDate = remember(loan.startDate) { Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate() }
     val today = remember { LocalDate.now() }
     val monthsElapsed = remember(startDate, loan.tenureMonths) { ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths) }
+    // Exclude the current month from payment history when today is before the EMI due day —
+    // the EMI hasn't been collected yet so it must not appear as PAID.
+    val paidMonths = if (today.dayOfMonth < loan.emiDueDay) (monthsElapsed - 1).coerceAtLeast(0) else monthsElapsed
     val tenureRemaining = (loan.tenureMonths - monthsElapsed).coerceAtLeast(0)
     val progressFraction = if (loan.tenureMonths > 0) monthsElapsed.toFloat() / loan.tenureMonths else 0f
     val outstandingBalance = remember(loan, monthsElapsed) { calcOutstandingBalance(loan, monthsElapsed) }
@@ -264,17 +267,17 @@ private fun LoanDetailContent(
             }
 
             // EMI payment history (estimated)
-            if (monthsElapsed > 0) {
-                val paymentHistory = remember(loan, monthsElapsed, startDate) {
+            if (paidMonths > 0) {
+                val paymentHistory = remember(loan, paidMonths, startDate) {
                     val r = loan.interestRate / (12 * 100)
                     var bal = loan.principalAmount
-                    val historyCount = minOf(monthsElapsed, 4)
+                    val historyCount = minOf(paidMonths, 4)
                     val mFmt = DateTimeFormatter.ofPattern("MMM yyyy")
                     val history = mutableListOf<Triple<String, Double, Double>>()
-                    for (m in 1..monthsElapsed) {
+                    for (m in 1..paidMonths) {
                         val interest = bal * r
                         bal -= (loan.emiAmount - interest)
-                        if (m > monthsElapsed - historyCount) {
+                        if (m > paidMonths - historyCount) {
                             history.add(Triple(startDate.plusMonths(m.toLong()).format(mFmt), loan.emiAmount, interest))
                         }
                     }
@@ -291,9 +294,9 @@ private fun LoanDetailContent(
                         paymentHistory.forEach { (label, emi, interest) ->
                             PaymentHistoryRow(label, emi, interest, fmt)
                         }
-                        if (monthsElapsed > 4) {
+                        if (paidMonths > 4) {
                             Text(
-                                "... and ${monthsElapsed - 4} more payments",
+                                "... and ${paidMonths - 4} more payments",
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 4.dp),
