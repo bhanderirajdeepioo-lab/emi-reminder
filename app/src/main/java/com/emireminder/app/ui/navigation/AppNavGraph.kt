@@ -179,7 +179,7 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                         // on CountrySelect, and we must not re-show onboarding on next launch.
                         markOnboardingDone(context)
                         navController.navigate(NavRoutes.COUNTRY_SELECT) {
-                            popUpTo(NavRoutes.ONBOARDING) { inclusive = true }
+                            launchSingleTop = true
                         }
                     },
                     onSkip = {
@@ -187,9 +187,13 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                         // Must mark done here — these paths bypass the notification-permission
                         // LaunchedEffect that normally drives onComplete(), so without this call
                         // is_first_launch stays true and onboarding loops on every cold start.
+                        // NOTE: Do NOT popUpTo(ONBOARDING) here — LANGUAGE_SELECT and ONBOARDING
+                        // were each popped on entry, so the back stack may be [ONBOARDING] only.
+                        // Popping ONBOARDING inclusive would empty the stack, finishing the
+                        // Activity before COUNTRY_SELECT can be added (BUG-8 root cause).
                         markOnboardingDone(context)
                         navController.navigate(NavRoutes.COUNTRY_SELECT) {
-                            popUpTo(NavRoutes.ONBOARDING) { inclusive = true }
+                            launchSingleTop = true
                         }
                     }
                 )
@@ -199,8 +203,10 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             composable(NavRoutes.COUNTRY_SELECT) {
                 CountrySelectScreen(
                     onContinue = {
+                        // Clear the entire back stack (SPLASH/LANGUAGE_SELECT/ONBOARDING/COUNTRY_SELECT)
+                        // so HOME is the only entry — pressing Back from HOME exits the app cleanly.
                         navController.navigate(NavRoutes.HOME) {
-                            popUpTo(NavRoutes.COUNTRY_SELECT) { inclusive = true }
+                            popUpTo(navController.graph.id) { inclusive = true }
                         }
                     }
                 )
