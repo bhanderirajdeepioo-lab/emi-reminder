@@ -12,6 +12,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.unit.Dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
@@ -43,6 +47,13 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 private data class AmortRow(val month: Int, val emi: Double, val principal: Double, val interest: Double, val balance: Double)
+
+private data class YearSummary(val year: Int, val totalEmi: Double, val totalPrincipal: Double, val totalInterest: Double)
+
+private sealed interface AmortItem {
+    data class Row(val data: AmortRow, val isCurrentMonth: Boolean) : AmortItem
+    data class YearEnd(val summary: YearSummary) : AmortItem
+}
 
 @Composable
 fun AmortizationScheduleScreen(
@@ -76,6 +87,38 @@ fun AmortizationScheduleScreen(
     val totalYears = (tenureMonths + 11) / 12
     val startDate = remember { LocalDate.now() }
     val monthFmt = DateTimeFormatter.ofPattern("MMM ''yy")
+
+    // Current month index (0-based) relative to schedule start
+    val currentMonthIndex = remember {
+        val today = LocalDate.now()
+        val months = java.time.temporal.ChronoUnit.MONTHS.between(startDate, today).toInt()
+        months.coerceIn(0, tenureMonths - 1)
+    }
+
+    // Build flat list: data rows interleaved with year-end summary cards
+    val amortItems: List<AmortItem> = remember(rows, currentMonthIndex) {
+        buildList {
+            var yearEmi = 0.0; var yearPrincipal = 0.0; var yearInterest = 0.0
+            rows.forEachIndexed { idx, row ->
+                yearEmi += row.emi; yearPrincipal += row.principal; yearInterest += row.interest
+                add(AmortItem.Row(row, idx == currentMonthIndex))
+                if ((idx + 1) % 12 == 0 || idx == rows.lastIndex) {
+                    val yearNum = idx / 12 + 1
+                    add(AmortItem.YearEnd(YearSummary(yearNum, yearEmi, yearPrincipal, yearInterest)))
+                    yearEmi = 0.0; yearPrincipal = 0.0; yearInterest = 0.0
+                }
+            }
+        }
+    }
+
+    // Map year index -> position of first row in that year within amortItems (for jump pills)
+    val yearFirstRowIndex: List<Int> = remember(amortItems) {
+        (0 until totalYears).map { yearIdx ->
+            val targetMonthIdx = yearIdx * 12
+            amortItems.indexOfFirst { it is AmortItem.Row && it.data.month - 1 == targetMonthIdx }
+                .takeIf { it >= 0 } ?: 0
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -155,18 +198,13 @@ fun AmortizationScheduleScreen(
                     ) {
                         repeat(totalYears) { yearIdx ->
                             val yearLabel = "Y${yearIdx + 1}"
-                            val firstMonthIdx = yearIdx * 12
-                            // +2 offset: 1 for summary banner, 1 for chart, 1 for pills themselves
+                            // +4 header items (banner, chart, pills row, header row) before amortItems
+                            val targetPos = 4 + (yearFirstRowIndex.getOrElse(yearIdx) { yearIdx * 13 })
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(20.dp))
                                     .background(Indigo600)
-                                    .clickable {
-                                        scope.launch {
-                                            // 4 header items before data rows
-                                            listState.animateScrollToItem(4 + firstMonthIdx)
-                                        }
-                                    }
+                                    .clickable { scope.launch { listState.animateScrollToItem(targetPos) } }
                                     .padding(horizontal = 14.dp, vertical = 6.dp),
                             ) {
                                 Text(yearLabel, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
@@ -192,39 +230,73 @@ fun AmortizationScheduleScreen(
                 }
             }
 
-            // Data rows
-            itemsIndexed(rows) { idx, row ->
-                val bgColor = if (idx % 2 == 0) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background
-                val monthName = startDate.plusMonths(row.month.toLong()).format(monthFmt)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(bgColor)
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    // Month: show year badge at start of each year, month name otherwise
-                    Box(modifier = Modifier.width(72.dp), contentAlignment = Alignment.CenterStart) {
-                        if (row.month % 12 == 1) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(4.dp))
-                                        .background(Indigo600)
-                                        .padding(horizontal = 4.dp, vertical = 2.dp),
-                                ) {
-                                    Text("Y${(row.month - 1) / 12 + 1}", fontSize = 9.sp, color = Color.White, fontWeight = FontWeight.Bold)
+            // Data rows + year-end summary cards
+            itemsIndexed(amortItems) { _, item ->
+                when (item) {
+                    is AmortItem.Row -> {
+                        val row = item.data
+                        val isCurrent = item.isCurrentMonth
+                        val monthName = startDate.plusMonths(row.month.toLong()).format(monthFmt)
+                        val bgColor = when {
+                            isCurrent -> Indigo50
+                            else -> if (row.month % 2 == 0) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .then(if (isCurrent) Modifier.drawLeftBorder(Indigo600, 4.dp) else Modifier)
+                                .background(bgColor)
+                                .padding(horizontal = 16.dp, vertical = if (isCurrent) 10.dp else 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Box(modifier = Modifier.width(72.dp), contentAlignment = Alignment.CenterStart) {
+                                Column {
+                                    if (row.month % 12 == 1) {
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(4.dp))
+                                                    .background(Indigo600)
+                                                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                                            ) {
+                                                Text("Y${(row.month - 1) / 12 + 1}", fontSize = 9.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                                            }
+                                            Text(monthName, fontSize = 9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                    } else {
+                                        Text(monthName, fontSize = 10.sp, color = if (isCurrent) Indigo600 else MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal)
+                                    }
+                                    if (isCurrent) {
+                                        Text("Month ${row.month} of $tenureMonths", fontSize = 8.sp, color = Indigo600, fontWeight = FontWeight.SemiBold)
+                                    }
                                 }
-                                Text(monthName, fontSize = 9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                        } else {
-                            Text(monthName, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            TableCell(fmt(row.emi), Modifier.weight(1f), if (isCurrent) Indigo600 else MaterialTheme.colorScheme.onSurface)
+                            TableCell(fmt(row.principal), Modifier.weight(1f), Indigo600)
+                            TableCell(fmt(row.interest), Modifier.weight(1f), WarnOrange)
+                            TableCell(fmt(row.balance), Modifier.weight(1.3f))
                         }
                     }
-                    TableCell(fmt(row.emi), Modifier.weight(1f), MaterialTheme.colorScheme.onSurface)
-                    TableCell(fmt(row.principal), Modifier.weight(1f), Indigo600)
-                    TableCell(fmt(row.interest), Modifier.weight(1f), WarnOrange)
-                    TableCell(fmt(row.balance), Modifier.weight(1.3f))
+                    is AmortItem.YearEnd -> {
+                        val s = item.summary
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 6.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color(0xFF1E293B))
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text("Year ${s.year} Summary", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF94A3B8))
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    YearSumCol("Total EMI", fmt(s.totalEmi), Color.White)
+                                    YearSumCol("Interest", fmt(s.totalInterest), WarnOrange)
+                                    YearSumCol("Principal", fmt(s.totalPrincipal), Color(0xFF6EE7B7))
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -341,4 +413,16 @@ private fun TableHeaderCell(text: String, modifier: Modifier) {
 @Composable
 private fun TableCell(text: String, modifier: Modifier, color: Color = MaterialTheme.colorScheme.onSurface) {
     Text(text, modifier = modifier, fontSize = 10.sp, color = color, textAlign = TextAlign.End, maxLines = 1)
+}
+
+@Composable
+private fun YearSumCol(label: String, value: String, valueColor: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, fontSize = 9.sp, color = Color(0xFF94A3B8))
+        Text(value, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = valueColor)
+    }
+}
+
+private fun Modifier.drawLeftBorder(color: Color, width: Dp): Modifier = drawBehind {
+    drawRect(color = color, size = androidx.compose.ui.geometry.Size(width.toPx(), size.height))
 }

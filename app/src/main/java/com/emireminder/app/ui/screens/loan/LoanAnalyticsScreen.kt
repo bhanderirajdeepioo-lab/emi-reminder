@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -47,6 +48,7 @@ private enum class AnalyticsPeriod(val label: String, val months: Int?) {
 @Composable
 fun LoanAnalyticsScreen(
     onBack: () -> Unit,
+    onNavigateToPrepayment: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val loans by viewModel.activeLoans.collectAsState()
@@ -97,6 +99,28 @@ fun LoanAnalyticsScreen(
         loans.groupBy { it.type }
             .mapValues { (_, list) -> list.sumOf { it.emiAmount } }
             .entries.sortedByDescending { it.value }
+    }
+
+    data class LoanForecast(val loan: Loan, val remainingMonths: Int, val interestSavings: Double)
+    val topForecastLoan: LoanForecast? = remember(loans) {
+        loans.mapNotNull { loan ->
+            val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
+            val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
+            val remaining = loan.tenureMonths - monthsElapsed
+            if (remaining <= 0) return@mapNotNull null
+            val r = loan.interestRate / (12 * 100)
+            var balance = loan.principalAmount
+            repeat(monthsElapsed) {
+                val interest = balance * r
+                balance -= (loan.emiAmount - interest)
+            }
+            balance = maxOf(0.0, balance)
+            val savings = if (r > 0) {
+                val remEmi = (balance * r * (1 + r).pow(remaining)) / ((1 + r).pow(remaining) - 1)
+                (remEmi * remaining) - balance
+            } else 0.0
+            LoanForecast(loan, remaining, savings)
+        }.maxByOrNull { it.remainingMonths }
     }
 
     val categoryColors = listOf(HomeLoanColor, CarLoanColor, PersonalLoanColor, OtherLoanColor, Indigo600, Violet600, Color(0xFF059669), WarnOrange)
@@ -258,40 +282,50 @@ fun LoanAnalyticsScreen(
                     }
                 }
 
-                // Foreclosure savings card
-                item {
-                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
-                        SectionLabel("FORECLOSURE SAVINGS")
-                        Spacer(Modifier.height(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Brush.linearGradient(listOf(Color(0xFF1E1B4B), Color(0xFF312E81))))
-                                .padding(20.dp),
-                        ) {
-                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                    Column {
-                                        Text("If you close all loans today", fontSize = 12.sp, color = Color.White.copy(alpha = 0.7f))
-                                        Text("Interest savings potential", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                // Foreclosure insight card (loan-specific)
+                if (topForecastLoan != null) {
+                    item {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                            SectionLabel("FORECLOSURE INSIGHT")
+                            Spacer(Modifier.height(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Brush.linearGradient(listOf(Color(0xFF1E1B4B), Color(0xFF312E81))))
+                                    .padding(20.dp),
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(topForecastLoan.loan.name, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                            Text("has ${topForecastLoan.remainingMonths} EMIs left", fontSize = 12.sp, color = Color.White.copy(alpha = 0.7f))
+                                        }
+                                        Box(
+                                            modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color(0xFF059669).copy(alpha = 0.25f)).padding(horizontal = 10.dp, vertical = 6.dp),
+                                        ) {
+                                            Text("INSIGHT", fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6EE7B7))
+                                        }
                                     }
-                                    Box(
-                                        modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color(0xFF059669).copy(alpha = 0.25f)).padding(horizontal = 10.dp, vertical = 6.dp),
+                                    Divider(color = Color.White.copy(alpha = 0.15f))
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Column {
+                                            Text("Foreclosure saves", fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
+                                            Text(fmt.format(topForecastLoan.interestSavings.toLong()), fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6EE7B7))
+                                        }
+                                        Column(horizontalAlignment = Alignment.End) {
+                                            Text("EMIs remaining", fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
+                                            Text("${topForecastLoan.remainingMonths} months", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFA5B4FC))
+                                        }
+                                    }
+                                    Button(
+                                        onClick = onNavigateToPrepayment,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5)),
+                                        shape = RoundedCornerShape(10.dp),
+                                        contentPadding = PaddingValues(vertical = 10.dp),
                                     ) {
-                                        Text("SAVE", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6EE7B7))
-                                    }
-                                }
-                                Divider(color = Color.White.copy(alpha = 0.15f))
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Column {
-                                        Text("Remaining Interest", fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
-                                        Text(fmt.format(remainingInterest.toLong()), fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6EE7B7))
-                                    }
-                                    Column(horizontalAlignment = Alignment.End) {
-                                        Text("EMIs Saved", fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
-                                        val avgEmiSaved = if (totalEmi > 0) (remainingInterest / totalEmi).toInt() else 0
-                                        Text("~$avgEmiSaved months", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFA5B4FC))
+                                        Text("View Prepayment Calculator", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                                     }
                                 }
                             }
