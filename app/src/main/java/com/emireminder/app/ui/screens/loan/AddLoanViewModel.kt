@@ -57,25 +57,29 @@ class AddLoanViewModel @Inject constructor(
                 principal.toDoubleOrNull() != null &&
                 displayEmi.toDoubleOrNull() != null
 
-    fun save(onSuccess: () -> Unit) {
+    fun save(onSuccess: () -> Unit, onError: (Exception) -> Unit) {
         if (!isValid) return
         viewModelScope.launch(Dispatchers.IO) {
-            repository.insertLoan(
-                Loan(
-                    name            = loanName.trim(),
-                    type            = selectedType.name,
-                    bankName        = bankName.trim(),
-                    principalAmount = principal.toDouble(),
-                    interestRate    = interestRate.toDoubleOrNull() ?: 0.0,
-                    tenureMonths    = tenureMonths.toIntOrNull() ?: 0,
-                    emiAmount       = displayEmi.toDouble(),
-                    accountNumber   = accountNumber.trim(),
-                    notes           = notes.trim(),
-                    interestType    = interestType,
-                    emiDueDay       = dueDayOfMonth.toIntOrNull()?.coerceIn(1, 28) ?: 1,
+            try {
+                repository.insertLoan(
+                    Loan(
+                        name            = loanName.trim(),
+                        type            = selectedType.name,
+                        bankName        = bankName.trim(),
+                        principalAmount = principal.toDouble(),
+                        interestRate    = interestRate.toDoubleOrNull() ?: 0.0,
+                        tenureMonths    = tenureMonths.toIntOrNull() ?: 0,
+                        emiAmount       = displayEmi.toDouble(),
+                        accountNumber   = accountNumber.trim(),
+                        notes           = notes.trim(),
+                        interestType    = interestType,
+                        emiDueDay       = dueDayOfMonth.toIntOrNull()?.coerceIn(1, 28) ?: 1,
+                    )
                 )
-            )
-            launch(Dispatchers.Main) { onSuccess() }
+                launch(Dispatchers.Main) { onSuccess() }
+            } catch (e: Exception) {
+                launch(Dispatchers.Main) { onError(e) }
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,10 +37,13 @@ fun AddLoanScreen(
     var saving by remember { mutableStateOf(false) }
     var typeDropdownOpen by remember { mutableStateOf(false) }
     val fmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     BackHandler { onBack() }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Add Loan", fontWeight = FontWeight.Bold) },
@@ -306,7 +310,13 @@ fun AddLoanScreen(
             Button(
                 onClick = {
                     saving = true
-                    viewModel.save(onSuccess = onBack)
+                    viewModel.save(
+                        onSuccess = onBack,
+                        onError = {
+                            saving = false
+                            scope.launch { snackbarHostState.showSnackbar("Failed to save loan. Please try again.") }
+                        },
+                    )
                 },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(14.dp),

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -42,6 +43,7 @@ private data class GridTool(
 
 @Composable
 fun FinanceToolsHubScreen(
+    onNavigateBack: () -> Unit,
     onNavigateToEmiCalculator: () -> Unit,
     onNavigateToComparison: () -> Unit,
     onNavigateToPrepayment: () -> Unit,
@@ -152,6 +154,15 @@ fun FinanceToolsHubScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Finance Tools", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White,
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Indigo600,
                     titleContentColor = Color.White,
