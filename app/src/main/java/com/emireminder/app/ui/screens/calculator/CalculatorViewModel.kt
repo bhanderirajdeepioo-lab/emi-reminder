@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.emireminder.app.data.db.entity.Loan
+import com.emireminder.app.data.preferences.UserPreferencesRepository
 import com.emireminder.app.data.repository.LoanRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -14,7 +15,12 @@ import kotlin.math.pow
 @HiltViewModel
 class CalculatorViewModel @Inject constructor(
     loanRepository: LoanRepository,
+    prefsRepository: UserPreferencesRepository,
 ) : ViewModel() {
+
+    val currencySymbol = prefsRepository.userPreferences
+        .map { it.currencySymbol }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "₹")
 
     val firstActiveLoan = loanRepository.getActiveLoans()
         .map { it.firstOrNull() }

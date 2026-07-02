@@ -1,5 +1,9 @@
 package com.emireminder.app.ui.screens.settings
 
+import android.content.Context
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,16 +23,25 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.emireminder.app.data.db.entity.Loan
 import com.emireminder.app.ui.theme.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -37,11 +50,40 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val prefs by viewModel.prefs.collectAsStateWithLifecycle()
+    val driveBackupState by viewModel.driveBackupState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     var testSent by remember { mutableStateOf(false) }
     var showAdvanceDaysPicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showThemePicker by remember { mutableStateOf(false) }
+    var showCurrencyPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
+
+    val dateTag = remember { SimpleDateFormat("yyyyMMdd_HHmm", Locale.US).format(Date()) }
+
+    val backupLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri -> uri?.let { viewModel.performBackup(it) } }
+
+    val restoreLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri -> uri?.let { viewModel.performRestore(it) } }
+
+    LaunchedEffect(driveBackupState) {
+        when (val state = driveBackupState) {
+            is DriveBackupUiState.Success -> {
+                snackbarHostState.showSnackbar(state.message)
+                viewModel.clearDriveBackupState()
+            }
+            is DriveBackupUiState.Error -> {
+                snackbarHostState.showSnackbar("Error: ${state.message}")
+                viewModel.clearDriveBackupState()
+            }
+            else -> Unit
+        }
+    }
 
     val notifPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
         rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -81,6 +123,17 @@ fun SettingsScreen(
         )
     }
 
+    if (showCurrencyPicker) {
+        CurrencyPickerDialog(
+            current = prefs.currency,
+            onDismiss = { showCurrencyPicker = false },
+            onConfirm = { currency ->
+                viewModel.setCurrency(currency)
+                showCurrencyPicker = false
+            },
+        )
+    }
+
     if (showLanguagePicker) {
         LanguagePickerDialog(
             current = prefs.language,
@@ -112,6 +165,7 @@ fun SettingsScreen(
                 ),
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -288,8 +342,8 @@ fun SettingsScreen(
                         iconTint = SafeGreen,
                         label = "Currency",
                         subtitle = "Symbol shown in amounts",
-                        value = "₹ ${prefs.currency}",
-                        onClick = { /* future */ },
+                        value = "${prefs.currencySymbol} ${prefs.currency}",
+                        onClick = { showCurrencyPicker = true },
                     )
                     HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
 
@@ -350,7 +404,20 @@ fun SettingsScreen(
                         label = "Export data (CSV)",
                         subtitle = "Download all loan data",
                         value = null,
-                        onClick = { /* future */ },
+                        onClick = {
+                            scope.launch {
+                                val loans = viewModel.getActiveLoansForExport()
+                                if (loans.isEmpty()) {
+                                    snackbarHostState.showSnackbar("No loans to export")
+                                } else {
+                                    try {
+                                        exportLoansCsv(context, loans)
+                                    } catch (e: Exception) {
+                                        snackbarHostState.showSnackbar("Export failed: ${e.message}")
+                                    }
+                                }
+                            }
+                        },
                     )
                     HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
 
@@ -567,6 +634,40 @@ private fun ThemePickerDialog(current: String, onDismiss: () -> Unit, onConfirm:
     )
 }
 
+private fun String.escapeCsv(): String {
+    return if (contains(',') || contains('"') || contains('\n')) {
+        "\"${replace("\"", "\"\"")}\""
+    } else this
+}
+
+private suspend fun exportLoansCsv(context: Context, loans: List<Loan>) {
+    val file = withContext(Dispatchers.IO) {
+        val dateStr = SimpleDateFormat("yyyyMMdd", Locale.US).format(Date())
+        val csv = buildString {
+            appendLine("Loan Name,Type,Principal,Interest Rate,Tenure (months),EMI Amount,Due Day,Bank Name,Start Date,Status")
+            val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+            loans.forEach { loan ->
+                val startDate = dateFmt.format(Date(loan.startDate))
+                val status = if (loan.isActive) "Active" else "Closed"
+                appendLine(
+                    "${loan.name.escapeCsv()},${loan.type},${loan.principalAmount}," +
+                    "${loan.interestRate},${loan.tenureMonths},${loan.emiAmount}," +
+                    "${loan.emiDueDay},${loan.bankName.escapeCsv()},$startDate,$status"
+                )
+            }
+        }
+        File(context.cacheDir, "emi_reminder_export_$dateStr.csv").also { it.writeText(csv, Charsets.UTF_8) }
+    }
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/csv"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        putExtra(Intent.EXTRA_SUBJECT, "EMI Reminder — Loan Export")
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, "Export Loan Data"))
+}
+
 private data class LanguageOption(val displayName: String, val tag: String)
 
 @Composable
@@ -607,6 +708,53 @@ private fun LanguagePickerDialog(
             }
         },
         confirmButton = { TextButton(onClick = { onConfirm(selected.displayName, selected.tag) }) { Text("Apply") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
+}
+
+private data class CurrencyOption(val code: String, val symbol: String, val name: String)
+
+@Composable
+private fun CurrencyPickerDialog(
+    current: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit,
+) {
+    val options = remember {
+        listOf(
+            CurrencyOption("INR", "₹", "Indian Rupee"),
+            CurrencyOption("USD", "$", "US Dollar"),
+            CurrencyOption("EUR", "€", "Euro"),
+            CurrencyOption("GBP", "£", "British Pound"),
+            CurrencyOption("AED", "د.إ", "UAE Dirham"),
+            CurrencyOption("SGD", "S$", "Singapore Dollar"),
+        )
+    }
+    var selected by remember { mutableStateOf(options.firstOrNull { it.code == current } ?: options[0]) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Currency") },
+        text = {
+            Column {
+                options.forEach { option ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selected = option }
+                            .padding(vertical = 8.dp),
+                    ) {
+                        RadioButton(selected = option == selected, onClick = { selected = option })
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "${option.symbol}  ${option.name} (${option.code})",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = { onConfirm(selected.code) }) { Text("Apply") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
 }

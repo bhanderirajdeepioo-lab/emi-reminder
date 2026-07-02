@@ -20,6 +20,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -45,6 +46,7 @@ fun RemindersScreen(
     var editingReminderId by remember { mutableStateOf<Int?>(null) }
     val onAddReminder: () -> Unit = remember { { showAddSheet = true } }
     val reminders by viewModel.reminders.collectAsState()
+    val currencySymbol by viewModel.currencySymbol.collectAsState()
     val today = remember { LocalDate.now() }
     val todayDay = today.dayOfMonth
 
@@ -187,10 +189,11 @@ fun RemindersScreen(
                     items(filteredOverdue, key = { it.id }) { r ->
                         ReminderCard(
                             reminder = r,
-                            daysText = "Overdue by ${todayDay - r.dueDayOfMonth}d",
+                            daysText = "Overdue",
                             chipColor = UrgentRed,
                             isOverdue = true,
                             isPaid = false,
+                            currencySymbol = currencySymbol,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
@@ -209,12 +212,24 @@ fun RemindersScreen(
                     }
                     items(filteredUpcoming, key = { it.id }) { r ->
                         val daysLeft = r.dueDayOfMonth - todayDay
+                        val urgencyColor = when {
+                            daysLeft <= 3  -> Color(0xFF111827)
+                            daysLeft <= 7  -> Color(0xFF374151)
+                            daysLeft <= 14 -> Color(0xFF9CA3AF)
+                            else           -> Indigo600
+                        }
+                        val daysText = when {
+                            daysLeft == 0  -> "Due today"
+                            daysLeft <= 3  -> "Due in ${daysLeft}d ⚠"
+                            else           -> "Due in ${daysLeft}d"
+                        }
                         ReminderCard(
                             reminder = r,
-                            daysText = if (daysLeft == 0) "Due today!" else "Due in ${daysLeft}d",
-                            chipColor = if (daysLeft <= 2) WarnOrange else SafeGreen,
+                            daysText = daysText,
+                            chipColor = urgencyColor,
                             isOverdue = false,
                             isPaid = false,
+                            currencySymbol = currencySymbol,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
@@ -230,10 +245,11 @@ fun RemindersScreen(
                     items(filteredDone, key = { it.id }) { r ->
                         ReminderCard(
                             reminder = r,
-                            daysText = "Paid",
-                            chipColor = SafeGreen,
+                            daysText = "",
+                            chipColor = Color(0xFFE5E7EB),
                             isOverdue = false,
                             isPaid = true,
+                            currencySymbol = currencySymbol,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
@@ -286,12 +302,13 @@ private fun ReminderCard(
     chipColor: Color,
     isOverdue: Boolean,
     isPaid: Boolean,
+    currencySymbol: String,
     onClick: () -> Unit,
     onDelete: () -> Unit,
     onEdit: () -> Unit,
     onAction: () -> Unit,
 ) {
-    val fmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+    val numFmt = remember { NumberFormat.getNumberInstance(Locale("en", "IN")).apply { minimumFractionDigits = 2; maximumFractionDigits = 2 } }
     val today = remember { LocalDate.now() }
     val dueDateFmt = remember { DateTimeFormatter.ofPattern("d MMM yyyy") }
     val dueDate = remember(reminder.dueDayOfMonth) {
@@ -326,7 +343,10 @@ private fun ReminderCard(
                     .background(chipColor),
             )
             Row(
-                modifier = Modifier.weight(1f).padding(horizontal = 14.dp, vertical = 12.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 14.dp, vertical = 12.dp)
+                    .alpha(if (isPaid) 0.5f else 1f),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
@@ -346,10 +366,12 @@ private fun ReminderCard(
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Text(daysText, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = chipColor)
+                    if (!isPaid && daysText.isNotEmpty()) {
+                        Text(daysText, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = chipColor)
+                    }
                 }
                 Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(fmt.format(reminder.emiAmount), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("$currencySymbol${numFmt.format(reminder.emiAmount)}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))

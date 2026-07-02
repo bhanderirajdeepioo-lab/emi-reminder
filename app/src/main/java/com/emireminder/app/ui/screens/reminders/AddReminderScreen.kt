@@ -36,14 +36,25 @@ private val FREQUENCIES = listOf("Monthly", "Weekly", "Quarterly", "Yearly")
 fun AddReminderSheet(
     onDismiss: () -> Unit,
     reminderId: Int? = null,
+    prefillEmiAmount: Double? = null,
+    prefillLoanName: String? = null,
     viewModel: AddReminderViewModel = hiltViewModel(),
 ) {
     var showDayPicker by remember { mutableStateOf(false) }
     var showRepeatDropdown by remember { mutableStateOf(false) }
 
-    LaunchedEffect(reminderId) {
-        if (reminderId != null) viewModel.loadReminder(reminderId)
-        else viewModel.resetForm()
+    LaunchedEffect(reminderId, prefillEmiAmount, prefillLoanName) {
+        if (reminderId != null) {
+            viewModel.loadReminder(reminderId)
+        } else {
+            viewModel.resetForm()
+            if (prefillEmiAmount != null || prefillLoanName != null) {
+                viewModel.prefillFromCalculator(
+                    emiAmount = prefillEmiAmount ?: 0.0,
+                    loanName = prefillLoanName ?: "",
+                )
+            }
+        }
     }
 
     ModalBottomSheet(

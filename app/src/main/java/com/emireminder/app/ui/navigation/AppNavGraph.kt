@@ -300,7 +300,7 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                     showBackButton = !isTabEntry,
                     initialInterestType = appliedInterestType ?: "REDUCING",
                     onBack = { navController.popBackStack() },
-                    onShowResults = { p, r, t -> navController.navigate(NavRoutes.calculatorResults(p, r, t)) },
+                    onShowResults = { p, r, t, lt -> navController.navigate(NavRoutes.calculatorResults(p, r, t, lt)) },
                     onInterestTypeSelector = { p, r, t, type ->
                         navController.navigate(NavRoutes.interestTypeSelector(p, r, t, type))
                     },
@@ -314,13 +314,15 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                     navArgument("principal") { type = NavType.StringType },
                     navArgument("rate")      { type = NavType.StringType },
                     navArgument("tenure")    { type = NavType.StringType },
+                    navArgument("loanType")  { type = NavType.StringType },
                 )
             ) { back ->
-                val p = back.arguments?.getString("principal")?.toDoubleOrNull() ?: 0.0
-                val r = back.arguments?.getString("rate")?.toDoubleOrNull() ?: 0.0
-                val t = back.arguments?.getString("tenure")?.toIntOrNull() ?: 0
+                val p  = back.arguments?.getString("principal")?.toDoubleOrNull() ?: 0.0
+                val r  = back.arguments?.getString("rate")?.toDoubleOrNull() ?: 0.0
+                val t  = back.arguments?.getString("tenure")?.toIntOrNull() ?: 0
+                val lt = back.arguments?.getString("loanType") ?: "HOME"
                 CalculatorResultsScreen(
-                    principal = p, rate = r, tenureMonths = t,
+                    principal = p, rate = r, tenureMonths = t, loanType = lt,
                     onBack = { navController.popBackStack() },
                     onViewAmortization = {
                         navController.navigate(NavRoutes.amortizationSchedule(p, r, t)) {
@@ -328,7 +330,6 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                         }
                     },
                     onPrepayment = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR) },
-                    onSaveAsReminder = { navController.navigate(NavRoutes.ADD_LOAN) },
                 )
             }
 
@@ -454,7 +455,7 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                     showBackButton = true,
                     initialInterestType = appliedInterestType ?: "REDUCING",
                     onBack = { navController.popBackStack() },
-                    onShowResults = { p, r, t -> navController.navigate(NavRoutes.calculatorResults(p, r, t)) },
+                    onShowResults = { p, r, t, lt -> navController.navigate(NavRoutes.calculatorResults(p, r, t, lt)) },
                     onInterestTypeSelector = { p, r, t, type ->
                         navController.navigate(NavRoutes.interestTypeSelector(p, r, t, type))
                     },

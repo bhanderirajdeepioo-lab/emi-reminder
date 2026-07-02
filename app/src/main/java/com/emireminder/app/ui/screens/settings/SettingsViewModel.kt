@@ -1,24 +1,44 @@
 package com.emireminder.app.ui.screens.settings
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.emireminder.app.data.backup.BackupRepository
+import com.emireminder.app.data.backup.RestoreResult
+import com.emireminder.app.data.db.entity.Loan
 import com.emireminder.app.data.preferences.UserPreferences
 import com.emireminder.app.data.preferences.UserPreferencesRepository
+import com.emireminder.app.data.repository.LoanRepository
 import com.emireminder.app.notification.NotificationScheduler
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+sealed interface DriveBackupUiState {
+    data object Idle : DriveBackupUiState
+    data object BackingUp : DriveBackupUiState
+    data object Restoring : DriveBackupUiState
+    data class Success(val message: String) : DriveBackupUiState
+    data class Error(val message: String) : DriveBackupUiState
+}
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val notificationScheduler: NotificationScheduler,
     private val prefsRepository: UserPreferencesRepository,
+    private val loanRepository: LoanRepository,
+    private val backupRepository: BackupRepository,
 ) : ViewModel() {
 
     val prefs = prefsRepository.userPreferences
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UserPreferences())
+
+    private val _driveBackupState = MutableStateFlow<DriveBackupUiState>(DriveBackupUiState.Idle)
+    val driveBackupState = _driveBackupState.asStateFlow()
 
     fun sendTestNotification() = notificationScheduler.scheduleTestNotification()
 
@@ -52,5 +72,35 @@ class SettingsViewModel @Inject constructor(
 
     fun setSmsImportEnabled(enabled: Boolean) = viewModelScope.launch {
         prefsRepository.setSmsImportEnabled(enabled)
+    }
+
+    suspend fun getActiveLoansForExport(): List<Loan> = loanRepository.getActiveLoansOnce()
+
+    fun performBackup(uri: Uri) = viewModelScope.launch {
+        _driveBackupState.value = DriveBackupUiState.BackingUp
+        try {
+            backupRepository.backup(uri)
+            _driveBackupState.value = DriveBackupUiState.Success("Backup saved successfully")
+        } catch (e: Exception) {
+            _driveBackupState.value = DriveBackupUiState.Error(
+                e.message?.take(120) ?: "Backup failed"
+            )
+        }
+    }
+
+    fun performRestore(uri: Uri) = viewModelScope.launch {
+        _driveBackupState.value = DriveBackupUiState.Restoring
+        when (val result = backupRepository.restore(uri)) {
+            is RestoreResult.Success ->
+                _driveBackupState.value = DriveBackupUiState.Success(
+                    "Restored ${result.loanCount} loan(s) and ${result.reminderCount} reminder(s)"
+                )
+            is RestoreResult.Error ->
+                _driveBackupState.value = DriveBackupUiState.Error(result.message)
+        }
+    }
+
+    fun clearDriveBackupState() {
+        _driveBackupState.value = DriveBackupUiState.Idle
     }
 }

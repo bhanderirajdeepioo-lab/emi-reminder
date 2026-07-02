@@ -16,7 +16,12 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.emireminder.app.ui.screens.reminders.AddReminderSheet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,17 +44,20 @@ fun CalculatorResultsScreen(
     principal: Double,
     rate: Double,
     tenureMonths: Int,
+    loanType: String = "HOME",
     onBack: () -> Unit,
     onViewAmortization: () -> Unit,
     onPrepayment: () -> Unit,
-    onSaveAsReminder: () -> Unit,
     viewModel: CalculatorViewModel = hiltViewModel(),
 ) {
     val emi = remember(principal, rate, tenureMonths) { viewModel.calculateEmi(principal, rate, tenureMonths) }
     val totalInterest = remember(emi, tenureMonths, principal) { viewModel.calculateTotalInterest(emi, tenureMonths, principal) }
     val totalPayment = principal + totalInterest
-    val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+    val currencySymbol by viewModel.currencySymbol.collectAsState()
+    val numFmt = remember { NumberFormat.getNumberInstance(Locale("en", "IN")).apply { minimumFractionDigits = 2; maximumFractionDigits = 2 } }
+    fun fmtAmt(amount: Double): String = "$currencySymbol${numFmt.format(amount)}"
     val context = LocalContext.current
+    var showReminderSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -60,12 +68,12 @@ fun CalculatorResultsScreen(
                     IconButton(onClick = {
                         val shareText = buildString {
                             appendLine("EMI Calculation Summary")
-                            appendLine("Monthly EMI:    ${fmt.format(emi)}")
-                            appendLine("Principal:      ${fmt.format(principal)}")
+                            appendLine("Monthly EMI:    ${fmtAmt(emi)}")
+                            appendLine("Principal:      ${fmtAmt(principal)}")
                             appendLine("Rate:           ${"%.2f".format(rate)}% p.a.")
                             appendLine("Tenure:         ${tenureMonths / 12}y ${tenureMonths % 12}m")
-                            appendLine("Total Interest: ${fmt.format(totalInterest)}")
-                            appendLine("Total Payment:  ${fmt.format(totalPayment)}")
+                            appendLine("Total Interest: ${fmtAmt(totalInterest)}")
+                            appendLine("Total Payment:  ${fmtAmt(totalPayment)}")
                         }
                         context.startActivity(Intent.createChooser(
                             Intent(Intent.ACTION_SEND).apply {
@@ -99,7 +107,7 @@ fun CalculatorResultsScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Monthly EMI", fontSize = 14.sp, color = Indigo100)
                     Spacer(Modifier.height(4.dp))
-                    Text(fmt.format(emi), fontSize = 40.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                    Text(fmtAmt(emi), fontSize = 40.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         MiniStat("${tenureMonths} mo", "Tenure")
@@ -131,12 +139,12 @@ fun CalculatorResultsScreen(
                         )
                         Spacer(Modifier.width(20.dp))
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            LegendRow("Principal", fmt.format(principal), Indigo600, principal / totalPayment)
-                            LegendRow("Interest", fmt.format(totalInterest), WarnOrange, totalInterest / totalPayment)
+                            LegendRow("Principal", fmtAmt(principal), Indigo600, principal / totalPayment)
+                            LegendRow("Interest", fmtAmt(totalInterest), WarnOrange, totalInterest / totalPayment)
                             Divider()
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text("Total", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                                Text(fmt.format(totalPayment), fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = Indigo600)
+                                Text(fmtAmt(totalPayment), fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = Indigo600)
                             }
                         }
                     }
@@ -151,13 +159,13 @@ fun CalculatorResultsScreen(
                 ) {
                     Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text("Payment Breakdown", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                        ResultRow("Loan Amount", fmt.format(principal))
+                        ResultRow("Loan Amount", fmtAmt(principal))
                         ResultRow("Annual Rate", "%.2f%%".format(rate))
                         ResultRow("Loan Tenure", "$tenureMonths months (${tenureMonths / 12}y ${tenureMonths % 12}m)")
                         Divider()
-                        ResultRow("Monthly EMI", fmt.format(emi), bold = true, color = Indigo600)
-                        ResultRow("Total Interest", fmt.format(totalInterest), color = WarnOrange)
-                        ResultRow("Total Payment", fmt.format(totalPayment), bold = true)
+                        ResultRow("Monthly EMI", fmtAmt(emi), bold = true, color = Indigo600)
+                        ResultRow("Total Interest", fmtAmt(totalInterest), color = WarnOrange)
+                        ResultRow("Total Payment", fmtAmt(totalPayment), bold = true)
                     }
                 }
 
@@ -186,7 +194,7 @@ fun CalculatorResultsScreen(
                 }
 
                 Button(
-                    onClick = onSaveAsReminder,
+                    onClick = { showReminderSheet = true },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Violet600),
@@ -198,6 +206,20 @@ fun CalculatorResultsScreen(
             }
         }
     }
+
+    if (showReminderSheet) {
+        AddReminderSheet(
+            onDismiss = { showReminderSheet = false },
+            prefillEmiAmount = emi,
+            prefillLoanName = loanTypeToDisplayName(loanType),
+        )
+    }
+}
+
+private fun loanTypeToDisplayName(loanType: String) = when (loanType) {
+    "CAR"      -> "Car Loan"
+    "PERSONAL" -> "Personal Loan"
+    else       -> "Home Loan"
 }
 
 @Composable

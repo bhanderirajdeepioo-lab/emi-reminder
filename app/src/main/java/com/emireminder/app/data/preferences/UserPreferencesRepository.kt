@@ -22,7 +22,16 @@ data class UserPreferences(
     val currency: String = "INR",
     val language: String = "English",
     val smsImportEnabled: Boolean = false,
-)
+) {
+    val currencySymbol: String get() = when (currency) {
+        "USD" -> "$"
+        "EUR" -> "€"
+        "GBP" -> "£"
+        "AED" -> "د.إ"
+        "SGD" -> "S$"
+        else  -> "₹"
+    }
+}
 
 @Singleton
 class UserPreferencesRepository @Inject constructor(

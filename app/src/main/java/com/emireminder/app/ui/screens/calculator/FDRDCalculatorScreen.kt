@@ -346,14 +346,7 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
 
             // Bank comparison (FD only)
             if (selectedTab == FdTab.FD) {
-                val bankRates = remember {
-                    listOf(
-                        "SBI" to 7.10,
-                        "HDFC Bank" to 7.25,
-                        "ICICI Bank" to 7.20,
-                        "Bajaj Finance" to 8.35,
-                    )
-                }
+                val bestIdx = FD_BANK_RATES.indices.maxByOrNull { FD_BANK_RATES[it].ratePercent } ?: 0
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -361,8 +354,13 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            "Top Bank FD Rates (${tenureYears}${if (tenureInMonths) " mo" else " yr"})",
+                            "Bank FD Rate Comparison (${tenureYears}${if (tenureInMonths) " mo" else " yr"})",
                             fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Slate800,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Tap a row to use that bank's rate",
+                            fontSize = 10.sp, color = Color(0xFF94A3B8),
                         )
                         Spacer(Modifier.height(8.dp))
                         Row(
@@ -375,43 +373,46 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                             Text("Bank", fontSize = 10.sp, fontWeight = FontWeight.Bold,
                                 color = Amber900, modifier = Modifier.weight(1f))
                             Text("Rate", fontSize = 10.sp, fontWeight = FontWeight.Bold,
-                                color = Amber900, modifier = Modifier.width(60.dp))
+                                color = Amber900, modifier = Modifier.width(68.dp))
                             Text("Maturity", fontSize = 10.sp, fontWeight = FontWeight.Bold,
                                 color = Amber900, modifier = Modifier.width(90.dp), textAlign = TextAlign.End)
                         }
                         Spacer(Modifier.height(4.dp))
-                        val bestIdx = bankRates.indices.maxByOrNull { bankRates[it].second } ?: 0
-                        bankRates.forEachIndexed { idx, (name, bankRate) ->
+                        FD_BANK_RATES.forEachIndexed { idx, entry ->
                             val bankMaturity = calcFD(
-                                principal.toDouble(), bankRate, tenureDecimal, compoundFreq,
+                                principal.toDouble(), entry.ratePercent, tenureDecimal, compoundFreq,
                             )
                             val isBest = idx == bestIdx
                             Row(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .clickable { ratePercent = entry.ratePercent.toFloat() }
+                                    .padding(vertical = 6.dp, horizontal = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Text(name, fontSize = 12.sp, modifier = Modifier.weight(1f))
+                                Text(entry.bankName, fontSize = 12.sp, modifier = Modifier.weight(1f))
                                 if (isBest) {
                                     Box(
                                         modifier = Modifier
-                                            .width(60.dp)
+                                            .width(68.dp)
                                             .clip(RoundedCornerShape(8.dp))
                                             .background(Amber700)
                                             .padding(horizontal = 4.dp, vertical = 2.dp),
                                         contentAlignment = Alignment.Center,
                                     ) {
-                                        Text("%.2f%% ★".format(bankRate), fontSize = 10.sp,
+                                        Text("%.2f%% ★".format(entry.ratePercent), fontSize = 10.sp,
                                             fontWeight = FontWeight.Bold, color = Color.White)
                                     }
                                 } else {
-                                    Text("%.2f%%".format(bankRate), fontSize = 12.sp,
+                                    Text("%.2f%%".format(entry.ratePercent), fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold, color = SafeGreen,
-                                        modifier = Modifier.width(60.dp))
+                                        modifier = Modifier.width(68.dp))
                                 }
                                 Text(fmt(bankMaturity), fontSize = 12.sp,
                                     modifier = Modifier.width(90.dp), textAlign = TextAlign.End)
                             }
-                            if (idx < bankRates.lastIndex)
+                            if (idx < FD_BANK_RATES.lastIndex)
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
                         }
                     }

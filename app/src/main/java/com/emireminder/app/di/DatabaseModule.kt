@@ -26,10 +26,10 @@ object DatabaseModule {
             db.execSQL(
                 """INSERT INTO loans
                    (name, type, principalAmount, interestRate, tenureMonths, emiAmount,
-                    startDate, isActive, notes, bankName, accountNumber, interestType, emiDueDay)
+                    startDate, isActive, notes, bankName, accountNumber, interestType, emiDueDay, upiVpa)
                    VALUES
                    ('Personal Loan ICICI', 'PERSONAL', 300000.0, 12.5, 36, 10056.0,
-                    ${System.currentTimeMillis()}, 1, '', 'ICICI Bank', '', 'REDUCING', 5)"""
+                    ${System.currentTimeMillis()}, 1, '', 'ICICI Bank', '', 'REDUCING', 5, '')"""
             )
             // Seed a matching reminder for the demo loan (loanId = 1 from autoGenerate).
             db.execSQL(
@@ -51,7 +51,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             "emi_reminder.db"
         )
-        .addMigrations(AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4)
+        .addMigrations(AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5)
         .addCallback(seedCallback)
         .fallbackToDestructiveMigration()
         .fallbackToDestructiveMigrationOnDowngrade()
