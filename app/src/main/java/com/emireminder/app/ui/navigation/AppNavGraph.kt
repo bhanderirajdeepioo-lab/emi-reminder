@@ -38,7 +38,6 @@ import com.emireminder.app.ui.screens.calculator.*
 import com.emireminder.app.ui.screens.finance.*
 import com.emireminder.app.ui.screens.home.HomeScreen
 import com.emireminder.app.ui.screens.loan.*
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.ui.screens.onboarding.CountrySelectScreen
 import com.emireminder.app.ui.screens.onboarding.LanguageSelectScreen
 import com.emireminder.app.ui.screens.onboarding.OnboardingScreen
@@ -361,8 +360,16 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 ComparisonCalculatorScreen(onBack = { navController.popBackStack() })
             }
 
-            // 13 — Prepayment Calculator
+            // 13 — Prepayment Calculator (generic)
             composable(NavRoutes.PREPAYMENT_CALCULATOR) {
+                PrepaymentCalculatorScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 13b — Prepayment Calculator seeded with a specific loan (from Analytics insight card)
+            composable(
+                NavRoutes.PREPAYMENT_CALCULATOR_LOAN,
+                arguments = listOf(navArgument("loanId") { type = NavType.IntType }),
+            ) {
                 PrepaymentCalculatorScreen(onBack = { navController.popBackStack() })
             }
 
@@ -418,7 +425,11 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             composable(NavRoutes.LOAN_ANALYTICS) {
                 LoanAnalyticsScreen(
                     onBack = { navController.popBackStack() },
-                    onNavigateToPrepayment = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR) { launchSingleTop = true } },
+                    onNavigateToLoanDetail = { id -> navController.navigate(NavRoutes.loanDetail(id)) },
+                    onNavigateToReminders = { navController.navigate(NavRoutes.REMINDERS) },
+                    onNavigateToPrepayment = { loanId ->
+                        navController.navigate(NavRoutes.prepaymentCalculatorForLoan(loanId)) { launchSingleTop = true }
+                    },
                 )
             }
 

@@ -14,9 +14,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sms
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -55,6 +55,7 @@ fun RemindersScreen(
     val onAddReminder: () -> Unit = remember { { showAddSheet = true } }
     val reminders by viewModel.reminders.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
+    val smsPermission = rememberPermissionState(android.Manifest.permission.READ_SMS)
     val today = remember { LocalDate.now() }
     val todayDay = today.dayOfMonth
 
@@ -97,7 +98,7 @@ fun RemindersScreen(
                     }
                     if (smsPermission.status.isGranted) {
                         IconButton(onClick = onNavigateToSmsImport) {
-                            Icon(Icons.Default.Sms, contentDescription = "Import from SMS", tint = Color.White.copy(alpha = 0.8f))
+                            Icon(Icons.Default.Message, contentDescription = "Import from SMS", tint = Color.White.copy(alpha = 0.8f))
                         }
                     }
                     IconButton(onClick = onNavigateToNotificationPreview) {
@@ -402,15 +403,23 @@ private fun ReminderCard(
                     }
                 }
             }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(end = 4.dp),
+            ) {
                 Switch(
                     checked = reminder.isActive,
                     onCheckedChange = { onToggle() },
-                    modifier = Modifier.padding(end = 8.dp).height(28.dp),
-                    colors = SwitchDefaults.colors(checkedThumbColor = Indigo600, checkedTrackColor = Indigo600.copy(alpha = 0.3f)),
+                    modifier = Modifier.padding(top = 4.dp),
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Indigo600,
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
                 )
-                IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(15.dp))
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                 }
                 IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
                     Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(15.dp))

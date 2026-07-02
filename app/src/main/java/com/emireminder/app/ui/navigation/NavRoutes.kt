@@ -25,12 +25,13 @@ object NavRoutes {
     const val NOTIFICATION       = "notification"
 
     // --- Calculator screens ---
-    const val EMI_CALCULATOR         = "emi_calculator"
-    const val CALCULATOR_RESULTS     = "calculator_results/{principal}/{rate}/{tenure}/{loanType}"
-    const val COMPARISON_CALCULATOR  = "comparison_calculator"
-    const val PREPAYMENT_CALCULATOR  = "prepayment_calculator"
-    const val INTEREST_TYPE_SELECTOR = "interest_type/{principal}/{rate}/{tenure}/{currentType}"
-    const val AMORTIZATION_SCHEDULE  = "amortization/{principal}/{rate}/{tenure}"
+    const val EMI_CALCULATOR              = "emi_calculator"
+    const val CALCULATOR_RESULTS          = "calculator_results/{principal}/{rate}/{tenure}/{loanType}"
+    const val COMPARISON_CALCULATOR       = "comparison_calculator"
+    const val PREPAYMENT_CALCULATOR       = "prepayment_calculator"
+    const val PREPAYMENT_CALCULATOR_LOAN  = "prepayment_calculator_loan/{loanId}"
+    const val INTEREST_TYPE_SELECTOR      = "interest_type/{principal}/{rate}/{tenure}/{currentType}"
+    const val AMORTIZATION_SCHEDULE       = "amortization/{principal}/{rate}/{tenure}"
 
     // --- Finance sub-screens ---
     const val LOAN_CATEGORIES         = "loan_categories"
@@ -41,7 +42,8 @@ object NavRoutes {
     const val EMI_CALCULATOR_PREFILL  = "emi_calculator_prefill/{label}"
 
     // --- Helpers ---
-    fun loanDetail(loanId: Int)         = "loan_detail/$loanId"
+    fun loanDetail(loanId: Int)                = "loan_detail/$loanId"
+    fun prepaymentCalculatorForLoan(loanId: Int) = "prepayment_calculator_loan/$loanId"
     fun calculatorResults(p: Double, r: Double, t: Int, loanType: String = "HOME") = "calculator_results/$p/$r/$t/$loanType"
     fun interestTypeSelector(p: Double, r: Double, t: Int, type: String) =
         "interest_type/$p/$r/$t/$type"

@@ -1,5 +1,6 @@
 package com.emireminder.app.ui.screens.calculator
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,14 +17,20 @@ import kotlin.math.pow
 class CalculatorViewModel @Inject constructor(
     loanRepository: LoanRepository,
     prefsRepository: UserPreferencesRepository,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     val currencySymbol = prefsRepository.userPreferences
         .map { it.currencySymbol }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "₹")
 
+    private val seedLoanId: Int = savedStateHandle.get<Int>("loanId") ?: -1
+
     val firstActiveLoan = loanRepository.getActiveLoans()
-        .map { it.firstOrNull() }
+        .map { loans ->
+            if (seedLoanId > 0) loans.firstOrNull { it.id == seedLoanId } ?: loans.firstOrNull()
+            else loans.firstOrNull()
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     fun calculateEmi(principal: Double, annualRate: Double, tenureMonths: Int): Double {
