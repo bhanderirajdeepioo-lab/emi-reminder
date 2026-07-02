@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.permissions.*
 import com.emireminder.app.ui.theme.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private data class OnboardingPage(
     val icon: ImageVector,
@@ -75,6 +77,28 @@ fun OnboardingScreen(onComplete: () -> Unit, onSkip: () -> Unit) {
     var smsPermissionRequested by remember { mutableStateOf(false) }
     var notifPermissionRequested by remember { mutableStateOf(false) }
 
+    // Debounce guard: buttons outside AnimatedContent re-render instantly on page change while the
+    // 400ms slide animation is still running. Without this lock the incoming p2 "Skip for now"
+    // (onSkip) can receive a lingering touch from the p1 page++ tap (HEL-387).
+    var navigationLocked by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    val lockAndAdvancePage: () -> Unit = {
+        if (!navigationLocked) {
+            navigationLocked = true
+            page = (page + 1).coerceAtMost(pages.lastIndex)
+            coroutineScope.launch {
+                delay(450)
+                navigationLocked = false
+            }
+        }
+    }
+
+    // Guard onSkip behind the same lock so it cannot fire within 450 ms of a page advance.
+    val lockAndSkip: () -> Unit = {
+        if (!navigationLocked) onSkip()
+    }
+
     // Advance page only after SMS permission dialog resolves (granted or denied)
     LaunchedEffect(smsPermission.status) {
         if (smsPermissionRequested) {
@@ -108,7 +132,7 @@ fun OnboardingScreen(onComplete: () -> Unit, onSkip: () -> Unit) {
         // Skip button
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             if (page < pages.lastIndex) {
-                TextButton(onClick = onSkip) {
+                TextButton(onClick = lockAndSkip) {
                     Text("Skip", color = Color(0xFFB0AEC0))
                 }
             }
@@ -218,7 +242,7 @@ fun OnboardingScreen(onComplete: () -> Unit, onSkip: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = { page++ }) { Text("Skip for now", color = Color(0xFFB0AEC0)) }
+            TextButton(onClick = lockAndAdvancePage) { Text("Skip for now", color = Color(0xFFB0AEC0)) }
         } else if (current.permissionLabel != null && page == 2) {
             Button(
                 onClick = {
@@ -236,11 +260,11 @@ fun OnboardingScreen(onComplete: () -> Unit, onSkip: () -> Unit) {
                 colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
             ) { Text(current.permissionLabel, fontSize = 16.sp, fontWeight = FontWeight.SemiBold) }
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = onSkip) { Text("Skip for now", color = Color(0xFFB0AEC0)) }
+            TextButton(onClick = lockAndSkip) { Text("Skip for now", color = Color(0xFFB0AEC0)) }
         } else {
             // Only page 0 reaches this branch — always move forward, never call onComplete()
             Button(
-                onClick = { page = page + 1 },
+                onClick = lockAndAdvancePage,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
