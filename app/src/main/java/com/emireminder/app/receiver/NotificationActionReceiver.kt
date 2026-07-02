@@ -1,13 +1,14 @@
 package com.emireminder.app.receiver
 
 import android.app.NotificationManager
+import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import dagger.hilt.android.AndroidEntryPoint
-import com.emireminder.app.MainActivity
-import com.emireminder.app.data.repository.LoanRepository
+import com.emireminder.app.R
 import com.emireminder.app.data.repository.ReminderRepository
 import com.emireminder.app.notification.NotificationScheduler
 import kotlinx.coroutines.CoroutineScope
@@ -21,7 +22,6 @@ class NotificationActionReceiver : BroadcastReceiver() {
 
     @Inject lateinit var reminderRepository: ReminderRepository
     @Inject lateinit var notificationScheduler: NotificationScheduler
-    @Inject lateinit var loanRepository: LoanRepository
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -31,35 +31,31 @@ class NotificationActionReceiver : BroadcastReceiver() {
         val loanId         = intent.getIntExtra(NotificationScheduler.EXTRA_LOAN_ID, -1)
         val loanName       = intent.getStringExtra(NotificationScheduler.EXTRA_LOAN_NAME) ?: ""
         val emiAmount      = intent.getDoubleExtra(NotificationScheduler.EXTRA_EMI_AMOUNT, 0.0)
+        val upiVpa         = intent.getStringExtra(NotificationScheduler.EXTRA_UPI_VPA) ?: ""
 
         val notificationManager = context.getSystemService(NotificationManager::class.java)
 
         when (intent.action) {
             ACTION_PAY_NOW -> {
-                val pendingResult = goAsync()
-                scope.launch {
-                    try {
-                        val upiVpa = if (loanId != -1) {
-                            loanRepository.getLoanById(loanId)?.upiVpa?.takeIf { it.isNotBlank() }
-                        } else null
-
-                        val activityIntent = if (upiVpa != null) {
-                            Intent(Intent.ACTION_VIEW, Uri.parse(
-                                "upi://pay?pa=${Uri.encode(upiVpa)}&am=%.2f&cu=INR&tn=${Uri.encode("EMI Payment")}".format(emiAmount)
-                            )).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
-                        } else {
-                            // No UPI VPA configured — open Loan Detail so user can set it up.
-                            Intent(context, MainActivity::class.java).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                putExtra(NotificationScheduler.EXTRA_LOAN_ID, loanId)
-                            }
-                        }
-                        context.startActivity(activityIntent)
-                    } finally {
-                        notificationManager.cancel(notificationId)
-                        pendingResult.finish()
-                    }
+                val uriString = "upi://pay?pa=%s&pn=%s&am=%.2f&cu=INR&tn=%s".format(
+                    Uri.encode(upiVpa),
+                    Uri.encode(loanName),
+                    emiAmount,
+                    Uri.encode("EMI Payment"),
+                )
+                val payIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uriString)).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
+                try {
+                    context.startActivity(payIntent)
+                } catch (e: ActivityNotFoundException) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.no_upi_app_found),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+                notificationManager.cancel(notificationId)
             }
             ACTION_MARK_PAID -> {
                 val pendingResult = goAsync()
@@ -82,7 +78,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
             }
             ACTION_SNOOZE -> {
                 val snoozeTrigger = System.currentTimeMillis() + 24 * 60 * 60 * 1_000L
-                notificationScheduler.scheduleSnooze(reminderId, loanName, emiAmount, snoozeTrigger)
+                notificationScheduler.scheduleSnooze(reminderId, loanName, emiAmount, snoozeTrigger, upiVpa)
                 notificationManager.cancel(notificationId)
             }
         }

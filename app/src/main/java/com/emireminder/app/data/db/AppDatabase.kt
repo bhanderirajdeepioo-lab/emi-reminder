@@ -43,6 +43,9 @@ abstract class AppDatabase : RoomDatabase() {
                 database.execSQL(
                     "ALTER TABLE loans ADD COLUMN upiVpa TEXT NOT NULL DEFAULT ''"
                 )
+                database.execSQL(
+                    "ALTER TABLE reminders ADD COLUMN upiVpa TEXT NOT NULL DEFAULT ''"
+                )
             }
         }
     }

@@ -35,10 +35,10 @@ object DatabaseModule {
             db.execSQL(
                 """INSERT INTO reminders
                    (loanId, loanName, bankName, emiAmount, dueDayOfMonth,
-                    frequency, isActive, notificationEnabled, notes)
+                    frequency, isActive, notificationEnabled, notes, upiVpa)
                    VALUES
                    (1, 'Personal Loan ICICI', 'ICICI Bank', 10056.0, 5,
-                    'MONTHLY', 1, 1, '')"""
+                    'MONTHLY', 1, 1, '', '')"""
             )
         }
     }

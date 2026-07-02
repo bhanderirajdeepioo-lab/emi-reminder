@@ -34,6 +34,8 @@ class AddReminderViewModel @Inject constructor(
         private set
     var notes by mutableStateOf("")
         private set
+    var upiVpa by mutableStateOf("")
+        private set
     var notificationEnabled by mutableStateOf(true)
         private set
     var isSaving by mutableStateOf(false)
@@ -56,6 +58,7 @@ class AddReminderViewModel @Inject constructor(
             dueDay = reminder.dueDayOfMonth.toString()
             repeatFrequency = reminder.frequency.lowercase().replaceFirstChar { it.uppercase() }
             notes = reminder.notes
+            upiVpa = reminder.upiVpa
             notificationEnabled = reminder.notificationEnabled
         }
     }
@@ -71,6 +74,7 @@ class AddReminderViewModel @Inject constructor(
     }
     fun onRepeatFrequencyChange(v: String) { repeatFrequency = v }
     fun onNotesChange(value: String) { notes = value }
+    fun onUpiVpaChange(v: String) { upiVpa = v }
     fun onNotificationToggle() { notificationEnabled = !notificationEnabled }
 
     fun prefillFromCalculator(emiAmount: Double, loanName: String) {
@@ -87,6 +91,7 @@ class AddReminderViewModel @Inject constructor(
         dueDay = "1"
         repeatFrequency = "Monthly"
         notes = ""
+        upiVpa = ""
         notificationEnabled = true
         isSaving = false
     }
@@ -108,6 +113,7 @@ class AddReminderViewModel @Inject constructor(
                     dueDayOfMonth = day,
                     frequency = repeatFrequency.uppercase(),
                     notes = notes,
+                    upiVpa = upiVpa.trim(),
                     notificationEnabled = notificationEnabled,
                 )
                 reminderRepository.updateReminder(updated)
@@ -124,6 +130,7 @@ class AddReminderViewModel @Inject constructor(
                     dueDayOfMonth = day,
                     frequency = repeatFrequency.uppercase(),
                     notes = notes,
+                    upiVpa = upiVpa.trim(),
                     notificationEnabled = notificationEnabled,
                 )
                 val insertedId = reminderRepository.insertReminder(reminder)
