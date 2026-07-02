@@ -42,9 +42,3 @@
 # Kotlin metadata (needed for reflection-based libs)
 -keepattributes *Annotation*, Signature, InnerClasses, EnclosingMethod
 -keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
-
-# Remove verbose logging in release
--assumenosideeffects class android.util.Log {
-    public static *** d(...);
-    public static *** v(...);
-}
