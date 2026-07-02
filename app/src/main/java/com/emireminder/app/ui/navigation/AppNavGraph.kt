@@ -270,6 +270,7 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             // firing two navigate() calls back-to-back and landing on the wrong screen (BUG-1/BUG-3).
             composable(NavRoutes.FINANCE_TOOLS_HUB) {
                 FinanceToolsHubScreen(
+                    onNavigateBack             = { navController.popBackStack() },
                     onNavigateToEmiCalculator  = { navController.navigate(NavRoutes.EMI_CALCULATOR)       { launchSingleTop = true } },
                     onNavigateToComparison     = { navController.navigate(NavRoutes.COMPARISON_CALCULATOR) { launchSingleTop = true } },
                     onNavigateToPrepayment     = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR) { launchSingleTop = true } },
