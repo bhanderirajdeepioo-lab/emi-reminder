@@ -212,7 +212,7 @@ fun RemindersScreen(
                         ReminderCard(
                             reminder = r,
                             daysText = if (daysLeft == 0) "Due today!" else "Due in ${daysLeft}d",
-                            chipColor = if (daysLeft <= 2) WarnOrange else SafeGreen,
+                            chipColor = if (daysLeft <= 3) UrgentRed else SafeGreen,
                             isOverdue = false,
                             isPaid = false,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
