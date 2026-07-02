@@ -3,6 +3,7 @@ package com.emireminder.app.ui.screens.finance
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +21,8 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -316,6 +319,7 @@ fun FinanceMonthlyEMIScreen(
                         YearlyBarChart(
                             selectedMonth = selectedMonth,
                             monthlyTotal = totalEmi,
+                            onMonthSelected = { selectedMonth = it },
                             modifier = Modifier.fillMaxWidth().height(100.dp),
                         )
                         Spacer(Modifier.height(4.dp))
@@ -412,20 +416,21 @@ private fun EmiRow(item: LoanEmiItem, selectedMonth: Int, selectedYear: Int, cur
                     val statusLabel = when {
                         item.isPaid -> "PAID ✓"
                         item.isOverdue -> "OVERDUE"
-                        else -> "DUE ${MONTHS[selectedMonth]} ${item.dueDay}"
+                        else -> "UPCOMING"
                     }
                     val statusBg = when {
                         item.isPaid -> Color(0xFFDCFCE7)
                         item.isOverdue -> Color(0xFFFEE2E2)
-                        else -> Color(0xFFFFF7ED)
+                        else -> Color(0xFF64748B)
                     }
+                    val chipTextColor = if (!item.isPaid && !item.isOverdue) Color.White else item.statusColor
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(11.dp))
                             .background(statusBg)
                             .padding(horizontal = 8.dp, vertical = 3.dp),
                     ) {
-                        Text(statusLabel, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = item.statusColor)
+                        Text(statusLabel, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = chipTextColor)
                     }
                 }
             }
@@ -434,10 +439,22 @@ private fun EmiRow(item: LoanEmiItem, selectedMonth: Int, selectedYear: Int, cur
 }
 
 @Composable
-private fun YearlyBarChart(selectedMonth: Int, monthlyTotal: Double, modifier: Modifier = Modifier) {
+private fun YearlyBarChart(
+    selectedMonth: Int,
+    monthlyTotal: Double,
+    onMonthSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val indigo = Indigo600
     val indigoLight = Indigo100
-    Canvas(modifier = modifier) {
+    Canvas(
+        modifier = modifier.pointerInput(Unit) {
+            detectTapGestures { offset ->
+                val barIndex = (offset.x / (size.width.toFloat() / 12)).toInt().coerceIn(0, 11)
+                onMonthSelected(barIndex)
+            }
+        },
+    ) {
         if (monthlyTotal <= 0) return@Canvas
         val w = size.width
         val h = size.height
@@ -448,8 +465,6 @@ private fun YearlyBarChart(selectedMonth: Int, monthlyTotal: Double, modifier: M
 
         for (i in 0 until barCount) {
             val x = i * spacing + (spacing - barWidth) / 2
-            // All months carry the same fixed EMI total; use uniform height with the
-            // selected month standing taller so it reads as the active period.
             val barH = if (i == selectedMonth) maxH else maxH * 0.75f
             val color = if (i == selectedMonth) indigo else if (i < selectedMonth) indigoLight else Color(0xFFE0E7FF)
             drawRoundRect(
@@ -458,6 +473,15 @@ private fun YearlyBarChart(selectedMonth: Int, monthlyTotal: Double, modifier: M
                 size = Size(barWidth, barH),
                 cornerRadius = CornerRadius(3.dp.toPx()),
             )
+            if (i == selectedMonth) {
+                drawRoundRect(
+                    color = Color(0xFF4338CA),
+                    topLeft = Offset(x - 1.5f, h - barH - 1.5f),
+                    size = Size(barWidth + 3f, barH + 1.5f),
+                    cornerRadius = CornerRadius(4.dp.toPx()),
+                    style = Stroke(width = 2.dp.toPx()),
+                )
+            }
         }
     }
 }
