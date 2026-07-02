@@ -39,6 +39,9 @@ import com.emireminder.app.ui.theme.Indigo600
 import com.emireminder.app.ui.theme.Slate800
 import com.emireminder.app.ui.theme.UrgentRed
 import com.emireminder.app.ui.theme.Violet600
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -242,10 +245,13 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit, reminderCount: Int
 // ── Empty state ───────────────────────────────────────────────────────────────
 
 @Composable
+@OptIn(ExperimentalPermissionsApi::class)
 private fun EmptyState(
     onAddLoan: () -> Unit,
     onSmsImport: () -> Unit,
 ) {
+    val smsPermissionState = rememberPermissionState(android.Manifest.permission.READ_SMS)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -342,28 +348,30 @@ private fun EmptyState(
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        if (smsPermissionState.status.isGranted) {
+            Spacer(Modifier.height(12.dp))
 
-        // SMS import banner
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onSmsImport),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            // SMS import banner — only shown when READ_SMS is granted
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onSmsImport),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             ) {
-                Text("💬", fontSize = 20.sp)
-                Spacer(Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Detect from SMS", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Slate800)
-                    Text("Auto-import EMIs from bank messages", fontSize = 12.sp, color = Color(0xFF64748B))
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("💬", fontSize = 20.sp)
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Detect from SMS", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Slate800)
+                        Text("Auto-import EMIs from bank messages", fontSize = 12.sp, color = Color(0xFF64748B))
+                    }
+                    Text("›", fontSize = 22.sp, color = Indigo600)
                 }
-                Text("›", fontSize = 22.sp, color = Indigo600)
             }
         }
     }
