@@ -89,6 +89,7 @@ fun HomeScreen(
             item {
                 DashboardHeader(
                     onNavigateToSettings = onNavigateToSettings,
+                    onNavigateToReminders = onNavigateToReminders,
                     reminderCount = reminderCount,
                 )
             }
@@ -132,7 +133,7 @@ fun HomeScreen(
 // ── Header ────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun DashboardHeader(onNavigateToSettings: () -> Unit, reminderCount: Int = 0) {
+private fun DashboardHeader(onNavigateToSettings: () -> Unit, onNavigateToReminders: () -> Unit, reminderCount: Int = 0) {
     val dateText = remember {
         LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.ENGLISH))
     }
