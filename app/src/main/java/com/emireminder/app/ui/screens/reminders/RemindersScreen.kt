@@ -55,7 +55,6 @@ fun RemindersScreen(
     val onAddReminder: () -> Unit = remember { { showAddSheet = true } }
     val reminders by viewModel.reminders.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
-    val smsPermission = rememberPermissionState(android.Manifest.permission.READ_SMS)
     val today = remember { LocalDate.now() }
     val todayDay = today.dayOfMonth
 
