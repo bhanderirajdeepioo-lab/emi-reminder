@@ -2,6 +2,8 @@ package com.emireminder.app.ui.screens.settings
 
 import android.content.Context
 import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,6 +50,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val prefs by viewModel.prefs.collectAsStateWithLifecycle()
+    val driveBackupState by viewModel.driveBackupState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -57,6 +60,30 @@ fun SettingsScreen(
     var showThemePicker by remember { mutableStateOf(false) }
     var showCurrencyPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
+
+    val dateTag = remember { SimpleDateFormat("yyyyMMdd_HHmm", Locale.US).format(Date()) }
+
+    val backupLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri -> uri?.let { viewModel.performBackup(it) } }
+
+    val restoreLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri -> uri?.let { viewModel.performRestore(it) } }
+
+    LaunchedEffect(driveBackupState) {
+        when (val state = driveBackupState) {
+            is DriveBackupUiState.Success -> {
+                snackbarHostState.showSnackbar(state.message)
+                viewModel.clearDriveBackupState()
+            }
+            is DriveBackupUiState.Error -> {
+                snackbarHostState.showSnackbar("Error: ${state.message}")
+                viewModel.clearDriveBackupState()
+            }
+            else -> Unit
+        }
+    }
 
     val notifPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
         rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -408,9 +435,34 @@ fun SettingsScreen(
                         iconBg = Color(0xFFF0FDF4),
                         iconTint = SafeGreen,
                         label = "Backup to Google Drive",
-                        subtitle = "Auto-backup enabled",
-                        value = "Backup",
-                        onClick = { /* future */ },
+                        subtitle = when (driveBackupState) {
+                            is DriveBackupUiState.BackingUp -> "Saving backup…"
+                            else -> "Save all loans & reminders as JSON"
+                        },
+                        value = if (driveBackupState is DriveBackupUiState.BackingUp) null else "Backup",
+                        onClick = {
+                            if (driveBackupState !is DriveBackupUiState.BackingUp) {
+                                backupLauncher.launch("emi_reminder_backup_$dateTag.json")
+                            }
+                        },
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
+
+                    NavigableSettingRow(
+                        icon = Icons.Default.CloudDownload,
+                        iconBg = Color(0xFFF3E8FF),
+                        iconTint = Violet600,
+                        label = "Restore from Backup",
+                        subtitle = when (driveBackupState) {
+                            is DriveBackupUiState.Restoring -> "Importing data…"
+                            else -> "Import loans & reminders from JSON"
+                        },
+                        value = if (driveBackupState is DriveBackupUiState.Restoring) null else "Restore",
+                        onClick = {
+                            if (driveBackupState !is DriveBackupUiState.Restoring) {
+                                restoreLauncher.launch(arrayOf("application/json", "application/octet-stream"))
+                            }
+                        },
                     )
                 }
             }

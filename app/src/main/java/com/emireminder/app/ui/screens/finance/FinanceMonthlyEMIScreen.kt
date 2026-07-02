@@ -293,7 +293,7 @@ fun FinanceMonthlyEMIScreen(
             } else {
                 item { Spacer(Modifier.height(8.dp)) }
                 items(filteredItems, key = { it.loan.id }) { item ->
-                    EmiRow(item = item, selectedMonth = selectedMonth, selectedYear = selectedYear, onClick = { onNavigateToLoanDetail(item.loan.id) })
+                    EmiRow(item = item, selectedMonth = selectedMonth, selectedYear = selectedYear, currencySymbol = currencySymbol, onClick = { onNavigateToLoanDetail(item.loan.id) })
                     Spacer(Modifier.height(8.dp))
                 }
             }
@@ -348,7 +348,7 @@ private fun FilterChipItem(label: String, selected: Boolean, onClick: () -> Unit
 }
 
 @Composable
-private fun EmiRow(item: LoanEmiItem, selectedMonth: Int, selectedYear: Int, onClick: () -> Unit) {
+private fun EmiRow(item: LoanEmiItem, selectedMonth: Int, selectedYear: Int, currencySymbol: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
