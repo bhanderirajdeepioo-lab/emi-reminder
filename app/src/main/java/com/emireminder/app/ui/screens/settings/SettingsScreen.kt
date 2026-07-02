@@ -19,6 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -259,6 +260,7 @@ fun SettingsScreen(
                         subtitle = "Days before due date",
                         value = "${prefs.advanceReminderDays} days",
                         onClick = { showAdvanceDaysPicker = true },
+                        enabled = prefs.emiRemindersEnabled,
                     )
                     HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
 
@@ -274,6 +276,7 @@ fun SettingsScreen(
                             if (prefs.reminderTimeHour < 12) "AM" else "PM",
                         ),
                         onClick = { showTimePicker = true },
+                        enabled = prefs.emiRemindersEnabled,
                     )
                     HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
 
@@ -285,6 +288,7 @@ fun SettingsScreen(
                         subtitle = "Alert if payment missed",
                         checked = prefs.overdueAlertsEnabled,
                         onCheckedChange = { viewModel.setOverdueAlertsEnabled(it) },
+                        enabled = prefs.emiRemindersEnabled,
                     )
                     HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
 
@@ -470,9 +474,13 @@ private fun ToggleSettingRow(
     subtitle: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(if (enabled) 1f else 0.38f)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -489,7 +497,7 @@ private fun ToggleSettingRow(
         }
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange,
+            onCheckedChange = if (enabled) onCheckedChange else null,
             colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Indigo600),
         )
     }
@@ -504,9 +512,13 @@ private fun NavigableSettingRow(
     subtitle: String,
     value: String?,
     onClick: () -> Unit,
+    enabled: Boolean = true,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(if (enabled) 1f else 0.38f)
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
