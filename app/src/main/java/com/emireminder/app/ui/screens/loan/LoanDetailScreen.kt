@@ -1,5 +1,6 @@
 package com.emireminder.app.ui.screens.loan
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,8 +14,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -117,6 +122,7 @@ private fun LoanDetailContent(
     val tenureRemaining = (loan.tenureMonths - monthsElapsed).coerceAtLeast(0)
     val progressFraction = if (loan.tenureMonths > 0) monthsElapsed.toFloat() / loan.tenureMonths else 0f
     val outstandingBalance = remember(loan, monthsElapsed) { calcOutstandingBalance(loan, monthsElapsed) }
+    val (principalPaid, interestPaid) = remember(loan, monthsElapsed) { calcPaidSoFar(loan, monthsElapsed) }
 
     Column(
         modifier = Modifier
@@ -207,33 +213,15 @@ private fun LoanDetailContent(
                 )
             }
 
-            // Loan progress bar
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Repayment Progress", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("$monthsElapsed / ${loan.tenureMonths} months", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Indigo600)
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(Indigo50),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(progressFraction)
-                            .fillMaxHeight()
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(Brush.horizontalGradient(listOf(Indigo600, Violet600))),
-                    )
-                }
-                Text(
-                    "%.1f%% repaid".format(progressFraction * 100),
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            // Circular repayment ring
+            RepaymentRingCard(
+                progressFraction = progressFraction,
+                monthsElapsed = monthsElapsed,
+                tenureMonths = loan.tenureMonths,
+                principalPaid = principalPaid,
+                interestPaid = interestPaid,
+                fmt = fmt,
+            )
 
             // Loan details
             SectionLabel("LOAN DETAILS")
@@ -413,6 +401,127 @@ private fun DetailRow(icon: ImageVector, label: String, value: String, highlight
 @Composable
 private fun SectionLabel(text: String) {
     Text(text, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF64748B), letterSpacing = 0.5.sp)
+}
+
+@Composable
+private fun RepaymentRingCard(
+    progressFraction: Float,
+    monthsElapsed: Int,
+    tenureMonths: Int,
+    principalPaid: Double,
+    interestPaid: Double,
+    fmt: NumberFormat,
+) {
+    val ringColor = Indigo600
+    val trackColor = Indigo50
+    val pctText = "%.0f%%".format(progressFraction * 100)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            // Donut ring
+            Box(
+                modifier = Modifier.size(112.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Canvas(modifier = Modifier.matchParentSize()) {
+                    val strokeWidth = 12.dp.toPx()
+                    val inset = strokeWidth / 2f
+                    val arcSize = Size(size.width - strokeWidth, size.height - strokeWidth)
+                    val topLeft = Offset(inset, inset)
+
+                    // Track (background arc)
+                    drawArc(
+                        color = trackColor,
+                        startAngle = -90f,
+                        sweepAngle = 360f,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+                    )
+                    // Progress arc
+                    if (progressFraction > 0f) {
+                        drawArc(
+                            color = ringColor,
+                            startAngle = -90f,
+                            sweepAngle = 360f * progressFraction,
+                            useCenter = false,
+                            topLeft = topLeft,
+                            size = arcSize,
+                            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+                        )
+                    }
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        pctText,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Indigo600,
+                    )
+                    Text(
+                        "paid",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            // Right-side stats
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(
+                    "$monthsElapsed / $tenureMonths months",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Indigo600,
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Principal Paid", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(fmt.format(principalPaid.toLong()), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = SafeGreen)
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Interest Paid", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(fmt.format(interestPaid.toLong()), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = WarnOrange)
+                }
+            }
+        }
+    }
+}
+
+private fun calcPaidSoFar(loan: Loan, monthsElapsed: Int): Pair<Double, Double> {
+    if (monthsElapsed <= 0) return Pair(0.0, 0.0)
+    val r = loan.interestRate / (12 * 100)
+    val emi = if (r > 0) {
+        (loan.principalAmount * r * (1 + r).pow(loan.tenureMonths)) / ((1 + r).pow(loan.tenureMonths) - 1)
+    } else {
+        loan.principalAmount / loan.tenureMonths
+    }
+    var balance = loan.principalAmount
+    var totalPrincipal = 0.0
+    var totalInterest = 0.0
+    repeat(monthsElapsed) {
+        val interestM = balance * r
+        val principalM = (emi - interestM).coerceAtLeast(0.0)
+        totalInterest += interestM
+        totalPrincipal += principalM
+        balance -= principalM
+    }
+    return Pair(totalPrincipal, totalInterest)
 }
 
 private fun calcTotalInterest(loan: Loan): Double {
