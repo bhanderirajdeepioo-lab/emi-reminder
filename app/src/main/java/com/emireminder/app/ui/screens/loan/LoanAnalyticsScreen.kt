@@ -3,6 +3,7 @@ package com.emireminder.app.ui.screens.loan
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,8 +22,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,8 +40,17 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.Locale
+import kotlin.math.atan2
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.sqrt
+
+private data class DonutSlice(
+    val loanType: LoanType,
+    val color: Color,
+    val emiAmount: Double,
+    val sweepAngle: Float,
+)
 
 private enum class AnalyticsPeriod(val label: String, val months: Int?) {
     SIX_M("6M", 6), ONE_Y("1Y", 12), THREE_Y("3Y", 36), ALL("All", null)
@@ -47,6 +59,8 @@ private enum class AnalyticsPeriod(val label: String, val months: Int?) {
 @Composable
 fun LoanAnalyticsScreen(
     onBack: () -> Unit,
+    onNavigateToLoanDetail: (Int) -> Unit = {},
+    onNavigateToReminders: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val loans by viewModel.activeLoans.collectAsState()
@@ -97,6 +111,24 @@ fun LoanAnalyticsScreen(
         loans.groupBy { it.type }
             .mapValues { (_, list) -> list.sumOf { it.emiAmount } }
             .entries.sortedByDescending { it.value }
+    }
+
+    val loansForType = remember(loans) { loans.groupBy { it.loanType } }
+
+    val donutSlices = remember(loans) {
+        val total = loans.sumOf { it.emiAmount }
+        loans.groupBy { it.loanType }
+            .entries
+            .sortedByDescending { it.value.sumOf { l -> l.emiAmount } }
+            .map { (type, typeLoans) ->
+                val emi = typeLoans.sumOf { it.emiAmount }
+                DonutSlice(
+                    loanType = type,
+                    color = loanTypeColor(type),
+                    emiAmount = emi,
+                    sweepAngle = if (total > 0) (emi / total * 360f).toFloat() else 360f,
+                )
+            }
     }
 
     val categoryColors = listOf(HomeLoanColor, CarLoanColor, PersonalLoanColor, OtherLoanColor, Indigo600, Violet600, Color(0xFF059669), WarnOrange)
@@ -195,10 +227,10 @@ fun LoanAnalyticsScreen(
                     }
                 }
 
-                // Donut chart: Principal vs Interest
+                // Donut chart: Portfolio by loan type
                 item {
                     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                        SectionLabel("PRINCIPAL vs INTEREST")
+                        SectionLabel("PORTFOLIO BY LOAN TYPE")
                         Spacer(Modifier.height(8.dp))
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -210,19 +242,39 @@ fun LoanAnalyticsScreen(
                                 modifier = Modifier.padding(16.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                DonutChart(
-                                    principal = totalPrincipal,
-                                    interest = totalInterest,
-                                    modifier = Modifier.size(120.dp),
+                                LoanTypeDonut(
+                                    slices = donutSlices,
+                                    onSliceTapped = { tappedType ->
+                                        val typeLoans = loansForType[tappedType] ?: return@LoanTypeDonut
+                                        if (typeLoans.size == 1) {
+                                            onNavigateToLoanDetail(typeLoans.first().id)
+                                        } else {
+                                            onNavigateToReminders()
+                                        }
+                                    },
+                                    modifier = Modifier.size(140.dp),
                                 )
                                 Spacer(Modifier.width(16.dp))
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    LegendItem("Principal", totalPrincipal, totalPrincipal + totalInterest, Indigo600, fmt)
-                                    LegendItem("Interest", totalInterest, totalPrincipal + totalInterest, WarnOrange, fmt)
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    donutSlices.forEach { slice ->
+                                        LoanTypeDonutLegendRow(
+                                            type = slice.loanType,
+                                            emi = slice.emiAmount,
+                                            total = totalEmi,
+                                            color = slice.color,
+                                            fmt = fmt,
+                                        )
+                                    }
                                     Divider()
-                                    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                                        Text("Total", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                                        Text(fmt.format(totalPrincipal + totalInterest), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                    ) {
+                                        Text("Total EMI", fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                                        Text(fmt.format(totalEmi.toLong()), fontWeight = FontWeight.Bold, fontSize = 11.sp)
                                     }
                                 }
                             }
@@ -314,6 +366,108 @@ fun LoanAnalyticsScreen(
 }
 
 @Composable
+private fun LoanTypeDonut(
+    slices: List<DonutSlice>,
+    onSliceTapped: (LoanType) -> Unit,
+    modifier: Modifier,
+) {
+    var canvasSize by remember { mutableStateOf(IntSize.Zero) }
+    val slicesState by rememberUpdatedState(slices)
+
+    Canvas(
+        modifier = modifier
+            .onSizeChanged { canvasSize = it }
+            .pointerInput(Unit) {
+                detectTapGestures { tapOffset ->
+                    val w = canvasSize.width.toFloat()
+                    val h = canvasSize.height.toFloat()
+                    if (w == 0f || h == 0f) return@detectTapGestures
+                    val cx = w / 2f
+                    val cy = h / 2f
+                    val strokeW = min(w, h) * 0.18f
+                    val inset = strokeW / 2 + 4.dp.toPx()
+                    val radius = min(w, h) / 2f - inset
+                    val outerR = radius + strokeW / 2
+                    val innerR = (radius - strokeW / 2).coerceAtLeast(0f)
+
+                    val dx = tapOffset.x - cx
+                    val dy = tapOffset.y - cy
+                    val dist = sqrt(dx * dx + dy * dy)
+                    if (dist < innerR || dist > outerR) return@detectTapGestures
+
+                    // angle from positive-x axis, clockwise positive (screen coords)
+                    var tapAngleDeg = (atan2(dy.toDouble(), dx.toDouble()) * (180.0 / Math.PI)).toFloat()
+                    if (tapAngleDeg < 0f) tapAngleDeg += 360f
+
+                    // re-zero relative to donut start at 270° (12 o'clock = -90° = 270°)
+                    val relAngle = (tapAngleDeg - 270f + 360f) % 360f
+
+                    var cumSweep = 0f
+                    for (slice in slicesState) {
+                        if (relAngle >= cumSweep && relAngle < cumSweep + slice.sweepAngle) {
+                            onSliceTapped(slice.loanType)
+                            break
+                        }
+                        cumSweep += slice.sweepAngle
+                    }
+                }
+            },
+    ) {
+        val strokeWidth = size.minDimension * 0.18f
+        val stroke = Stroke(width = strokeWidth, cap = StrokeCap.Butt)
+        val inset = strokeWidth / 2 + 4.dp.toPx()
+        val arcSize = Size(size.width - inset * 2, size.height - inset * 2)
+        val topLeft = Offset(inset, inset)
+
+        // Background track
+        drawArc(
+            color = Color(0xFFEEF2FF),
+            startAngle = -90f,
+            sweepAngle = 360f,
+            useCenter = false,
+            topLeft = topLeft,
+            size = arcSize,
+            style = stroke,
+        )
+
+        var startAngle = -90f
+        slices.forEach { slice ->
+            drawArc(
+                color = slice.color,
+                startAngle = startAngle,
+                sweepAngle = slice.sweepAngle,
+                useCenter = false,
+                topLeft = topLeft,
+                size = arcSize,
+                style = stroke,
+            )
+            startAngle += slice.sweepAngle
+        }
+    }
+}
+
+@Composable
+private fun LoanTypeDonutLegendRow(type: LoanType, emi: Double, total: Double, color: Color, fmt: NumberFormat) {
+    val pct = if (total > 0) "%.0f".format(emi / total * 100) else "0"
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
+        Spacer(Modifier.width(5.dp))
+        Text(
+            text = type.displayName,
+            fontSize = 10.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+        )
+        Spacer(Modifier.width(4.dp))
+        Column(horizontalAlignment = Alignment.End) {
+            Text(fmt.format(emi.toLong()), fontSize = 10.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+            Text("$pct%", fontSize = 9.sp, color = color, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
 private fun StackedBarChart(loans: List<Loan>, period: AnalyticsPeriod, colors: List<Color>, modifier: Modifier) {
     val byCategory = loans.groupBy { it.type }.entries.sortedByDescending { it.value.sumOf { l -> l.emiAmount } }
     val barCount = when (period) {
@@ -365,38 +519,6 @@ private fun InlineSummaryCard(modifier: Modifier, label: String, value: String, 
             Text(label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(value, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = color, maxLines = 1)
         }
-    }
-}
-
-@Composable
-private fun DonutChart(principal: Double, interest: Double, modifier: Modifier) {
-    val total = principal + interest
-    val principalAngle = if (total > 0) (principal / total * 300f).toFloat() else 150f
-    val interestAngle = 300f - principalAngle
-
-    Canvas(modifier = modifier) {
-        val stroke = Stroke(width = size.minDimension * 0.18f, cap = StrokeCap.Round)
-        val inset = stroke.width / 2 + 4.dp.toPx()
-        val arcSize = Size(size.width - inset * 2, size.height - inset * 2)
-        val topLeft = Offset(inset, inset)
-
-        drawArc(color = Color(0xFFEEF2FF), startAngle = -210f, sweepAngle = 300f, useCenter = false, topLeft = topLeft, size = arcSize, style = stroke)
-        drawArc(color = Color(0xFF4F46E5), startAngle = -210f, sweepAngle = principalAngle, useCenter = false, topLeft = topLeft, size = arcSize, style = stroke)
-        drawArc(color = Color(0xFFD97706), startAngle = -210f + principalAngle, sweepAngle = interestAngle, useCenter = false, topLeft = topLeft, size = arcSize, style = stroke)
-    }
-}
-
-@Composable
-private fun LegendItem(label: String, value: Double, total: Double, color: Color, fmt: NumberFormat) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(color))
-        Spacer(Modifier.width(6.dp))
-        Column {
-            Text(label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(fmt.format(value), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-        }
-        Spacer(Modifier.weight(1f))
-        Text("${if (total > 0) "%.0f".format(value / total * 100) else "0"}%", fontSize = 11.sp, color = color, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -462,6 +584,15 @@ private fun formatLakh(value: Double): String = when {
     value >= 10_00_000 -> "%.1fL".format(value / 1_00_000)
     value >= 1_000 -> "%.0fK".format(value / 1_000)
     else -> "%.0f".format(value)
+}
+
+private fun loanTypeColor(type: LoanType): Color = when (type) {
+    LoanType.HOME -> HomeLoanColor
+    LoanType.CAR -> CarLoanColor
+    LoanType.PERSONAL -> PersonalLoanColor
+    LoanType.EDUCATION -> Violet600
+    LoanType.BUSINESS -> Indigo600
+    LoanType.OTHER -> OtherLoanColor
 }
 
 private fun loanEmoji(type: String) = when (type.toLoanType()) {

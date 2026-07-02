@@ -414,7 +414,11 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
 
             // 17 — Loan Analytics
             composable(NavRoutes.LOAN_ANALYTICS) {
-                LoanAnalyticsScreen(onBack = { navController.popBackStack() })
+                LoanAnalyticsScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToLoanDetail = { id -> navController.navigate(NavRoutes.loanDetail(id)) },
+                    onNavigateToReminders = { navController.navigate(NavRoutes.REMINDERS) },
+                )
             }
 
             // 18 — Loan Detail
