@@ -61,6 +61,7 @@ fun LoanAnalyticsScreen(
     onBack: () -> Unit,
     onNavigateToLoanDetail: (Int) -> Unit = {},
     onNavigateToReminders: () -> Unit = {},
+    onNavigateToPrepayment: (loanId: Int) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val loans by viewModel.activeLoans.collectAsState()
@@ -105,6 +106,40 @@ fun LoanAnalyticsScreen(
             val remainingEmi = if (r > 0) (balance * r * (1 + r).pow(remainingMonths)) / ((1 + r).pow(remainingMonths) - 1) else loan.emiAmount
             (remainingEmi * remainingMonths) - balance
         }
+    }
+
+    // Loan with the most remaining EMIs — drives the foreclosure insight card
+    val forecastLoan: Loan? = remember(loans) {
+        loans.mapNotNull { loan ->
+            val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
+            val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
+            val remaining = loan.tenureMonths - monthsElapsed
+            if (remaining > 0) loan to remaining else null
+        }.maxByOrNull { it.second }?.first
+    }
+    val forecastRemainingEMIs: Int = remember(forecastLoan) {
+        forecastLoan?.let { loan ->
+            val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
+            val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
+            loan.tenureMonths - monthsElapsed
+        } ?: 0
+    }
+    val forecastSavings: Double = remember(forecastLoan) {
+        forecastLoan?.let { loan ->
+            val r = loan.interestRate / (12 * 100)
+            val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
+            val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
+            if (r == 0.0 || monthsElapsed >= loan.tenureMonths) return@let 0.0
+            val remainingMonths = loan.tenureMonths - monthsElapsed
+            var balance = loan.principalAmount
+            repeat(monthsElapsed) {
+                val interest = balance * r
+                balance -= (loan.emiAmount - interest)
+            }
+            balance = maxOf(0.0, balance)
+            val remainingEmi = (balance * r * (1 + r).pow(remainingMonths)) / ((1 + r).pow(remainingMonths) - 1)
+            (remainingEmi * remainingMonths) - balance
+        } ?: 0.0
     }
 
     val byCategory = remember(loans) {
@@ -310,40 +345,70 @@ fun LoanAnalyticsScreen(
                     }
                 }
 
-                // Foreclosure savings card
-                item {
-                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
-                        SectionLabel("FORECLOSURE SAVINGS")
-                        Spacer(Modifier.height(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Brush.linearGradient(listOf(Color(0xFF1E1B4B), Color(0xFF312E81))))
-                                .padding(20.dp),
-                        ) {
-                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                    Column {
-                                        Text("If you close all loans today", fontSize = 12.sp, color = Color.White.copy(alpha = 0.7f))
-                                        Text("Interest savings potential", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                                    }
-                                    Box(
-                                        modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color(0xFF059669).copy(alpha = 0.25f)).padding(horizontal = 10.dp, vertical = 6.dp),
+                // Foreclosure insight card — loan-specific, hidden when no remaining EMIs
+                if (forecastLoan != null) {
+                    item {
+                        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                            SectionLabel("FORECLOSURE SAVINGS")
+                            Spacer(Modifier.height(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Brush.linearGradient(listOf(Color(0xFF1E1B4B), Color(0xFF312E81))))
+                                    .padding(20.dp),
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
-                                        Text("SAVE", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6EE7B7))
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                "${forecastLoan.name} has $forecastRemainingEMIs EMIs left",
+                                                fontSize = 12.sp,
+                                                color = Color.White.copy(alpha = 0.7f),
+                                            )
+                                            Text(
+                                                "Foreclosure today saves",
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White,
+                                            )
+                                        }
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(Color(0xFF059669).copy(alpha = 0.25f))
+                                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                                        ) {
+                                            Text("SAVE", fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6EE7B7))
+                                        }
                                     }
-                                }
-                                Divider(color = Color.White.copy(alpha = 0.15f))
-                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Column {
-                                        Text("Remaining Interest", fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
-                                        Text(fmt.format(remainingInterest.toLong()), fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF6EE7B7))
-                                    }
-                                    Column(horizontalAlignment = Alignment.End) {
-                                        Text("EMIs Saved", fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
-                                        val avgEmiSaved = if (totalEmi > 0) (remainingInterest / totalEmi).toInt() else 0
-                                        Text("~$avgEmiSaved months", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFFA5B4FC))
+                                    Divider(color = Color.White.copy(alpha = 0.15f))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.Bottom,
+                                    ) {
+                                        Column {
+                                            Text("Interest Savings", fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
+                                            Text(
+                                                fmt.format(forecastSavings.toLong()),
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                color = Color(0xFF6EE7B7),
+                                            )
+                                        }
+                                        Button(
+                                            onClick = { onNavigateToPrepayment(forecastLoan.id) },
+                                            shape = RoundedCornerShape(10.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669)),
+                                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                        ) {
+                                            Text("Prepay", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                        }
                                     }
                                 }
                             }
