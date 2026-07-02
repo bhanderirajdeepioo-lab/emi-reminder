@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.emireminder.app.ui.theme.*
+import kotlinx.coroutines.launch
 
 private data class ListTool(
     val icon: ImageVector,
@@ -49,6 +50,9 @@ fun FinanceToolsHubScreen(
     onNavigateToSip: () -> Unit,
     onNavigateToLoanCategories: () -> Unit,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     val loanTools = remember(
         onNavigateToLoanCategories, onNavigateToEmiCalculator,
         onNavigateToComparison, onNavigateToPrepayment,
@@ -87,7 +91,7 @@ fun FinanceToolsHubScreen(
             label = "Step-up EMI",
             subtitle = "Increase EMI with salary growth",
             isNew = true,
-            onClick = { /* coming soon */ },
+            onClick = { scope.launch { snackbarHostState.showSnackbar("Coming soon") } },
         ),
         ListTool(
             icon = Icons.Default.SwapHoriz,
@@ -95,7 +99,7 @@ fun FinanceToolsHubScreen(
             label = "Balance Transfer",
             subtitle = "Check savings on switching lender",
             isNew = true,
-            onClick = { /* coming soon */ },
+            onClick = { scope.launch { snackbarHostState.showSnackbar("Coming soon") } },
         ),
     ) }
 
@@ -149,6 +153,7 @@ fun FinanceToolsHubScreen(
     } }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Finance Tools", fontWeight = FontWeight.Bold) },
