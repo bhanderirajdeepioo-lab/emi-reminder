@@ -149,16 +149,7 @@ fun SettingsScreen(
                         Text("Tap to set up name & photo", fontSize = 13.sp, color = Color(0xFFC7D2FE))
                         Text("EMI Reminder App", fontSize = 11.sp, color = Color(0xFFA5B4FC))
                     }
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF312E81)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit profile",
-                            tint = Color(0xFFE0E7FF), modifier = Modifier.size(16.dp))
-                    }
+                    // Edit icon hidden until profile-edit feature is implemented (HEL-452)
                 }
             }
 
