@@ -18,10 +18,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.ui.theme.*
 import java.text.NumberFormat
 import java.util.Locale
-import kotlin.math.pow
 import kotlin.math.roundToLong
 
 private val Amber700 = Color(0xFFD97706)
@@ -29,78 +29,15 @@ private val Amber50  = Color(0xFFFFFBEB)
 private val Amber100 = Color(0xFFFEF3C7)
 private val Amber900 = Color(0xFF92400E)
 
-private enum class FdTab { FD, RD }
-private enum class CompoundFreq(val label: String, val n: Int) {
-    MONTHLY("Monthly", 12),
-    QUARTERLY("Quarterly", 4),
-    ANNUALLY("Annually", 1),
-    AT_MATURITY("At Maturity", 0),
-}
-
-/** FD = P*(1+r/n)^(n*t) ; RD = M*((1+r/n)^(n*t)-1)/(r/n)*(1+r/n) */
-private fun calcFD(principal: Double, ratePercent: Double, tenureYears: Double, freq: CompoundFreq): Double {
-    val r = ratePercent / 100.0
-    return if (freq == CompoundFreq.AT_MATURITY) {
-        principal * (1 + r * tenureYears)
-    } else {
-        val n = freq.n.toDouble()
-        principal * (1 + r / n).pow(n * tenureYears)
-    }
-}
-
-private fun calcRD(monthly: Double, ratePercent: Double, tenureYears: Double, freq: CompoundFreq): Double {
-    val r = ratePercent / 100.0
-    val totalMonths = (tenureYears * 12).toInt()
-    var maturity = 0.0
-    if (freq == CompoundFreq.AT_MATURITY) {
-        // Each installment earns simple interest for its remaining term, matching
-        // how calcFD handles AT_MATURITY (no intermediate compounding).
-        for (m in 1..totalMonths) {
-            val remainingYears = (totalMonths - m + 1) / 12.0
-            maturity += monthly * (1 + r * remainingYears)
-        }
-    } else {
-        val n = freq.n.toDouble()
-        val rPerPeriod = r / n
-        val monthsPerPeriod = 12.0 / n
-        for (m in 1..totalMonths) {
-            val periodsRemaining = (totalMonths - m + 1).toDouble() / monthsPerPeriod
-            maturity += monthly * (1 + rPerPeriod).pow(periodsRemaining)
-        }
-    }
-    return maturity
-}
-
 private val _fdFmt = NumberFormat.getNumberInstance(Locale("en", "IN")).also { it.maximumFractionDigits = 0 }
 private fun fmt(amount: Double): String = "₹${_fdFmt.format(amount.roundToLong())}"
 
 @Composable
-fun FDRDCalculatorScreen(onBack: () -> Unit) {
-    var selectedTab by remember { mutableStateOf(FdTab.FD) }
-    var principal by remember { mutableStateOf(100_000f) }
-    var monthly by remember { mutableStateOf(10_000f) }
-    var ratePercent by remember { mutableStateOf(7.25f) }
-    var tenureYears by remember { mutableStateOf(3) }
-    var tenureInMonths by remember { mutableStateOf(false) }
-    var compoundFreq by remember { mutableStateOf(CompoundFreq.QUARTERLY) }
-
-    val tenureDecimal by remember { derivedStateOf {
-        if (tenureInMonths) tenureYears / 12.0 else tenureYears.toDouble()
-    }}
-
-    val maturityValue by remember { derivedStateOf {
-        if (selectedTab == FdTab.FD)
-            calcFD(principal.toDouble(), ratePercent.toDouble(), tenureDecimal, compoundFreq)
-        else
-            calcRD(monthly.toDouble(), ratePercent.toDouble(), tenureDecimal, compoundFreq)
-    }}
-    val principalForCalc by remember { derivedStateOf {
-        if (selectedTab == FdTab.FD) principal.toDouble() else monthly * (tenureYears * if (tenureInMonths) 1 else 12).toDouble()
-    }}
-    val interest by remember { derivedStateOf { maturityValue - principalForCalc } }
-    val effectiveRate by remember { derivedStateOf {
-        if (tenureDecimal > 0) ((maturityValue / principalForCalc - 1) / tenureDecimal * 100) else 0.0
-    }}
+fun FDRDCalculatorScreen(
+    onBack: () -> Unit,
+    viewModel: FDRDCalculatorViewModel = hiltViewModel(),
+) {
+    val state by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -134,13 +71,13 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
             ) {
                 Row {
                     FdTab.entries.forEach { tab ->
-                        val selected = tab == selectedTab
+                        val selected = tab == state.selectedTab
                         Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(if (selected) Color.White else Color.Transparent)
-                                .clickable { selectedTab = tab }
+                                .clickable { viewModel.selectTab(tab) }
                                 .padding(vertical = 8.dp),
                             contentAlignment = Alignment.Center,
                         ) {
@@ -163,19 +100,19 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        if (selectedTab == FdTab.FD) "Deposit Amount" else "Monthly Deposit",
+                        if (state.selectedTab == FdTab.FD) "Deposit Amount" else "Monthly Deposit",
                         fontSize = 11.sp, color = Color(0xFF64748B),
                     )
                     Spacer(Modifier.height(4.dp))
-                    val display = if (selectedTab == FdTab.FD) principal else monthly
+                    val display = if (state.selectedTab == FdTab.FD) state.principal else state.monthly
                     Text(
                         fmt(display.toDouble()),
                         fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Slate800,
                     )
-                    if (selectedTab == FdTab.FD) {
+                    if (state.selectedTab == FdTab.FD) {
                         Slider(
-                            value = principal,
-                            onValueChange = { principal = it },
+                            value = state.principal,
+                            onValueChange = { viewModel.setPrincipal(it) },
                             valueRange = 10_000f..5_000_000f,
                             colors = SliderDefaults.colors(
                                 thumbColor = Amber700,
@@ -185,8 +122,8 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                         )
                     } else {
                         Slider(
-                            value = monthly,
-                            onValueChange = { monthly = it },
+                            value = state.monthly,
+                            onValueChange = { viewModel.setMonthly(it) },
                             valueRange = 500f..200_000f,
                             colors = SliderDefaults.colors(
                                 thumbColor = Amber700,
@@ -220,11 +157,13 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(Amber50)
-                                    .clickable { if (ratePercent > 1f) ratePercent = (ratePercent - 0.25f).coerceAtLeast(0.25f) }
+                                    .clickable {
+                                        viewModel.setRate((state.ratePercent - 0.25f).coerceAtLeast(0.25f))
+                                    }
                                     .padding(horizontal = 10.dp, vertical = 6.dp),
                             ) { Text("−", fontSize = 16.sp, color = Amber700, fontWeight = FontWeight.Bold) }
                             Text(
-                                "%.2f".format(ratePercent),
+                                "%.2f".format(state.ratePercent),
                                 modifier = Modifier.weight(1f),
                                 textAlign = TextAlign.Center,
                                 fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Slate800,
@@ -233,7 +172,9 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(Amber50)
-                                    .clickable { ratePercent = (ratePercent + 0.25f).coerceAtMost(20f) }
+                                    .clickable {
+                                        viewModel.setRate((state.ratePercent + 0.25f).coerceAtMost(20f))
+                                    }
                                     .padding(horizontal = 10.dp, vertical = 6.dp),
                             ) { Text("+", fontSize = 16.sp, color = Amber700, fontWeight = FontWeight.Bold) }
                         }
@@ -251,7 +192,7 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                         Spacer(Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                if (tenureInMonths) "$tenureYears mo" else "$tenureYears yr",
+                                if (state.tenureInMonths) "${state.tenureValue} mo" else "${state.tenureValue} yr",
                                 fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Slate800,
                                 modifier = Modifier.weight(1f),
                             )
@@ -268,24 +209,24 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                                     modifier = Modifier
                                         .weight(1f)
                                         .clip(RoundedCornerShape(10.dp))
-                                        .background(if (tenureInMonths == isMonths) Amber700 else Color.Transparent)
-                                        .clickable { tenureInMonths = isMonths }
+                                        .background(if (state.tenureInMonths == isMonths) Amber700 else Color.Transparent)
+                                        .clickable { viewModel.setTenureInMonths(isMonths) }
                                         .padding(vertical = 4.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text(
                                         label,
                                         fontSize = 10.sp,
-                                        color = if (tenureInMonths == isMonths) Color.White else Amber700,
+                                        color = if (state.tenureInMonths == isMonths) Color.White else Amber700,
                                         fontWeight = FontWeight.Bold,
                                     )
                                 }
                             }
                         }
                         Slider(
-                            value = tenureYears.toFloat(),
-                            onValueChange = { tenureYears = it.toInt().coerceAtLeast(1) },
-                            valueRange = 1f..if (tenureInMonths) 120f else 10f,
+                            value = state.tenureValue.toFloat(),
+                            onValueChange = { viewModel.setTenureValue(it.toInt().coerceAtLeast(1)) },
+                            valueRange = 1f..if (state.tenureInMonths) 120f else 10f,
                             colors = SliderDefaults.colors(thumbColor = Amber700, activeTrackColor = Amber700, inactiveTrackColor = Amber100),
                         )
                     }
@@ -303,12 +244,12 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         CompoundFreq.entries.forEach { freq ->
-                            val selected = freq == compoundFreq
+                            val selected = freq == state.compoundFreq
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(6.dp))
                                     .background(if (selected) Amber700 else Amber100)
-                                    .clickable { compoundFreq = freq }
+                                    .clickable { viewModel.setCompoundFreq(freq) }
                                     .padding(horizontal = 8.dp, vertical = 5.dp),
                             ) {
                                 Text(freq.label, fontSize = 10.sp, fontWeight = FontWeight.Bold,
@@ -330,7 +271,7 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                 Column {
                     Text("Maturity Value", fontSize = 12.sp, color = Color(0xFF94A3B8))
                     Spacer(Modifier.height(8.dp))
-                    Text(fmt(maturityValue), fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                    Text(fmt(state.maturityValue), fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                 }
             }
 
@@ -339,13 +280,13 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                ResultCard(label = "Principal", value = fmt(principalForCalc), color = Slate800, modifier = Modifier.weight(1f))
-                ResultCard(label = "Total Interest", value = fmt(interest), color = Amber700, modifier = Modifier.weight(1f))
-                ResultCard(label = "Eff. Rate", value = "${"%.2f".format(effectiveRate)}%", color = SafeGreen, modifier = Modifier.weight(1f))
+                ResultCard(label = "Principal", value = fmt(state.principalForCalc), color = Slate800, modifier = Modifier.weight(1f))
+                ResultCard(label = "Total Interest", value = fmt(state.interest), color = Amber700, modifier = Modifier.weight(1f))
+                ResultCard(label = "Eff. Rate", value = "${"%.2f".format(state.effectiveRate)}%", color = SafeGreen, modifier = Modifier.weight(1f))
             }
 
             // Bank comparison (FD only)
-            if (selectedTab == FdTab.FD) {
+            if (state.selectedTab == FdTab.FD) {
                 val bestIdx = FD_BANK_RATES.indices.maxByOrNull { FD_BANK_RATES[it].ratePercent } ?: 0
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -354,7 +295,7 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            "Bank FD Rate Comparison (${tenureYears}${if (tenureInMonths) " mo" else " yr"})",
+                            "Bank FD Rate Comparison (${state.tenureValue}${if (state.tenureInMonths) " mo" else " yr"})",
                             fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Slate800,
                         )
                         Spacer(Modifier.height(4.dp))
@@ -379,15 +320,13 @@ fun FDRDCalculatorScreen(onBack: () -> Unit) {
                         }
                         Spacer(Modifier.height(4.dp))
                         FD_BANK_RATES.forEachIndexed { idx, entry ->
-                            val bankMaturity = calcFD(
-                                principal.toDouble(), entry.ratePercent, tenureDecimal, compoundFreq,
-                            )
+                            val bankMaturity = state.bankMaturities.getOrElse(idx) { 0.0 }
                             val isBest = idx == bestIdx
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(6.dp))
-                                    .clickable { ratePercent = entry.ratePercent.toFloat() }
+                                    .clickable { viewModel.setRate(entry.ratePercent.toFloat()) }
                                     .padding(vertical = 6.dp, horizontal = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
