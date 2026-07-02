@@ -29,16 +29,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.data.db.entity.Loan
 import com.emireminder.app.domain.model.LoanType
 import com.emireminder.app.domain.model.toLoanType
-import com.emireminder.app.ui.screens.home.HomeViewModel
 import com.emireminder.app.ui.theme.*
 import java.text.NumberFormat
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.temporal.ChronoUnit
 import java.util.Locale
-import kotlin.math.min
-import kotlin.math.pow
 
 private enum class AnalyticsPeriod(val label: String, val months: Int?) {
     SIX_M("6M", 6), ONE_Y("1Y", 12), THREE_Y("3Y", 36), ALL("All", null)
@@ -47,57 +40,19 @@ private enum class AnalyticsPeriod(val label: String, val months: Int?) {
 @Composable
 fun LoanAnalyticsScreen(
     onBack: () -> Unit,
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewModel: LoanAnalyticsViewModel = hiltViewModel(),
 ) {
-    val loans by viewModel.activeLoans.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val loans = uiState.loans
     val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
     var period by remember { mutableStateOf(AnalyticsPeriod.ONE_Y) }
 
-    val totalEmi = remember(loans) { loans.sumOf { it.emiAmount } }
-    val totalPrincipal = remember(loans) { loans.sumOf { it.principalAmount } }
-
-    val totalInterest = remember(loans) {
-        loans.sumOf {
-            val r = it.interestRate / (12 * 100)
-            if (r == 0.0) 0.0 else {
-                val emi = (it.principalAmount * r * Math.pow(1 + r, it.tenureMonths.toDouble())) /
-                    (Math.pow(1 + r, it.tenureMonths.toDouble()) - 1)
-                (emi * it.tenureMonths) - it.principalAmount
-            }
-        }
-    }
-
-    val today = remember { LocalDate.now() }
-    val totalPaid = remember(loans) {
-        loans.sumOf { loan ->
-            val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
-            val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
-            loan.emiAmount * monthsElapsed
-        }
-    }
-    val remainingInterest = remember(loans) {
-        loans.sumOf { loan ->
-            val r = loan.interestRate / (12 * 100)
-            val startDate = Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate()
-            val monthsElapsed = ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths)
-            if (r == 0.0 || monthsElapsed >= loan.tenureMonths) return@sumOf 0.0
-            val remainingMonths = loan.tenureMonths - monthsElapsed
-            var balance = loan.principalAmount
-            repeat(monthsElapsed) {
-                val interest = balance * r
-                balance -= (loan.emiAmount - interest)
-            }
-            balance = maxOf(0.0, balance)
-            val remainingEmi = if (r > 0) (balance * r * (1 + r).pow(remainingMonths)) / ((1 + r).pow(remainingMonths) - 1) else loan.emiAmount
-            (remainingEmi * remainingMonths) - balance
-        }
-    }
-
-    val byCategory = remember(loans) {
-        loans.groupBy { it.type }
-            .mapValues { (_, list) -> list.sumOf { it.emiAmount } }
-            .entries.sortedByDescending { it.value }
-    }
+    val totalEmi = uiState.totalEmi
+    val totalPrincipal = uiState.totalPrincipal
+    val totalInterest = uiState.totalInterest
+    val totalPaid = uiState.totalPaid
+    val remainingInterest = uiState.remainingInterest
+    val byCategory = uiState.byCategory
 
     val categoryColors = listOf(HomeLoanColor, CarLoanColor, PersonalLoanColor, OtherLoanColor, Indigo600, Violet600, Color(0xFF059669), WarnOrange)
 
