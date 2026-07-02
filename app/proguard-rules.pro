@@ -1,8 +1,3 @@
-# Workaround for R8 8.5.10 ConcurrentModificationException in shaking phase (AGP 8.5.0 bug)
-# -dontshrink bypasses the crashing shaking phase; APK is larger but functional for beta testing
--dontoptimize
--dontshrink
-
 # Keep app entry points
 -keep class com.emireminder.app.** { *; }
 
@@ -47,5 +42,3 @@
 # Kotlin metadata (needed for reflection-based libs)
 -keepattributes *Annotation*, Signature, InnerClasses, EnclosingMethod
 -keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
-
-# Logging removal disabled — requires shrinking which is off due to R8 8.5.0 bug workaround
