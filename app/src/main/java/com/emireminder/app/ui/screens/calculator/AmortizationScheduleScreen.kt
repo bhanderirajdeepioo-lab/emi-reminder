@@ -20,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -40,9 +41,15 @@ import java.io.File
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 private data class AmortRow(val month: Int, val emi: Double, val principal: Double, val interest: Double, val balance: Double)
+
+private sealed interface AmortListItem {
+    data class Row(val index: Int, val row: AmortRow) : AmortListItem
+    data class YearlySummary(val year: Int, val totalEmi: Double, val totalInterest: Double, val totalPrincipal: Double) : AmortListItem
+}
 
 @Composable
 fun AmortizationScheduleScreen(
@@ -76,6 +83,29 @@ fun AmortizationScheduleScreen(
     val totalYears = (tenureMonths + 11) / 12
     val startDate = remember { LocalDate.now() }
     val monthFmt = DateTimeFormatter.ofPattern("MMM ''yy")
+
+    // Months elapsed since loan start — 0-indexed into rows list
+    val currentMonthIndex = remember(startDate) {
+        ChronoUnit.MONTHS.between(startDate, LocalDate.now()).toInt().coerceIn(0, rows.size - 1)
+    }
+
+    // Interleave yearly summary cards after every 12 data rows
+    val combinedItems: List<AmortListItem> = remember(rows) {
+        buildList {
+            rows.forEachIndexed { idx, row ->
+                add(AmortListItem.Row(idx, row))
+                if ((idx + 1) % 12 == 0) {
+                    val yearRows = rows.subList(idx - 11, idx + 1)
+                    add(AmortListItem.YearlySummary(
+                        year = (idx + 1) / 12,
+                        totalEmi = yearRows.sumOf { it.emi },
+                        totalInterest = yearRows.sumOf { it.interest },
+                        totalPrincipal = yearRows.sumOf { it.principal },
+                    ))
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -111,7 +141,7 @@ fun AmortizationScheduleScreen(
             modifier = Modifier.fillMaxSize().padding(padding),
             contentPadding = PaddingValues(bottom = 24.dp),
         ) {
-            // Summary banner
+            // Summary banner — LazyColumn index 0
             item {
                 Box(
                     modifier = Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Indigo600, Violet600))).padding(16.dp),
@@ -124,7 +154,7 @@ fun AmortizationScheduleScreen(
                 }
             }
 
-            // Interest vs Principal area chart
+            // Interest vs Principal area chart — LazyColumn index 1
             item {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Interest vs Principal", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF64748B), letterSpacing = 0.5.sp)
@@ -143,7 +173,7 @@ fun AmortizationScheduleScreen(
                 }
             }
 
-            // Jump to year pills
+            // Jump to year pills — LazyColumn index 2 (only when totalYears > 1)
             if (totalYears > 1) {
                 item {
                     Row(
@@ -155,17 +185,15 @@ fun AmortizationScheduleScreen(
                     ) {
                         repeat(totalYears) { yearIdx ->
                             val yearLabel = "Y${yearIdx + 1}"
-                            val firstMonthIdx = yearIdx * 12
-                            // +2 offset: 1 for summary banner, 1 for chart, 1 for pills themselves
+                            // Each year block in combinedItems = 12 data rows + 1 summary card = 13 items.
+                            // Jump to the first data row of this year; 4 header items precede combinedItems.
+                            val targetIndex = 4 + yearIdx * 13
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(20.dp))
                                     .background(Indigo600)
                                     .clickable {
-                                        scope.launch {
-                                            // 4 header items before data rows
-                                            listState.animateScrollToItem(4 + firstMonthIdx)
-                                        }
+                                        scope.launch { listState.animateScrollToItem(targetIndex) }
                                     }
                                     .padding(horizontal = 14.dp, vertical = 6.dp),
                             ) {
@@ -176,7 +204,7 @@ fun AmortizationScheduleScreen(
                 }
             }
 
-            // Header row
+            // Header row — LazyColumn index 3
             item {
                 Row(
                     modifier = Modifier
@@ -192,42 +220,108 @@ fun AmortizationScheduleScreen(
                 }
             }
 
-            // Data rows
-            itemsIndexed(rows) { idx, row ->
-                val bgColor = if (idx % 2 == 0) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background
-                val monthName = startDate.plusMonths(row.month.toLong()).format(monthFmt)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(bgColor)
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    // Month: show year badge at start of each year, month name otherwise
-                    Box(modifier = Modifier.width(72.dp), contentAlignment = Alignment.CenterStart) {
-                        if (row.month % 12 == 1) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(4.dp))
-                                        .background(Indigo600)
-                                        .padding(horizontal = 4.dp, vertical = 2.dp),
-                                ) {
-                                    Text("Y${(row.month - 1) / 12 + 1}", fontSize = 9.sp, color = Color.White, fontWeight = FontWeight.Bold)
+            // Data rows and yearly summary cards — LazyColumn index 4 onwards
+            itemsIndexed(combinedItems) { _, listItem ->
+                when (listItem) {
+                    is AmortListItem.Row -> {
+                        val idx = listItem.index
+                        val row = listItem.row
+                        val isCurrent = idx == currentMonthIndex
+                        val bgColor = if (idx % 2 == 0) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.background
+                        val monthName = startDate.plusMonths(row.month.toLong()).format(monthFmt)
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .then(
+                                    if (isCurrent) {
+                                        Modifier.drawBehind {
+                                            drawRect(Indigo50)
+                                            drawRect(Indigo600, size = size.copy(width = 4.dp.toPx()))
+                                        }
+                                    } else {
+                                        Modifier.background(bgColor)
+                                    }
+                                )
+                                .padding(
+                                    start = if (isCurrent) 20.dp else 16.dp,
+                                    end = 16.dp,
+                                    top = 8.dp,
+                                    bottom = 8.dp,
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Box(modifier = Modifier.width(72.dp), contentAlignment = Alignment.CenterStart) {
+                                Column {
+                                    if (row.month % 12 == 1) {
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(4.dp))
+                                                    .background(Indigo600)
+                                                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                                            ) {
+                                                Text("Y${(row.month - 1) / 12 + 1}", fontSize = 9.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                                            }
+                                            Text(monthName, fontSize = 9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                    } else {
+                                        Text(monthName, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                    if (isCurrent) {
+                                        Text(
+                                            "Month ${idx + 1} of $tenureMonths",
+                                            fontSize = 8.sp,
+                                            color = Indigo600,
+                                            fontWeight = FontWeight.Medium,
+                                        )
+                                    }
                                 }
-                                Text(monthName, fontSize = 9.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                        } else {
-                            Text(monthName, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            TableCell(fmt(row.emi), Modifier.weight(1f), MaterialTheme.colorScheme.onSurface)
+                            TableCell(fmt(row.principal), Modifier.weight(1f), Indigo600)
+                            TableCell(fmt(row.interest), Modifier.weight(1f), WarnOrange)
+                            TableCell(fmt(row.balance), Modifier.weight(1.3f))
                         }
                     }
-                    TableCell(fmt(row.emi), Modifier.weight(1f), MaterialTheme.colorScheme.onSurface)
-                    TableCell(fmt(row.principal), Modifier.weight(1f), Indigo600)
-                    TableCell(fmt(row.interest), Modifier.weight(1f), WarnOrange)
-                    TableCell(fmt(row.balance), Modifier.weight(1.3f))
+                    is AmortListItem.YearlySummary -> YearlySummaryCard(listItem, ::fmt)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun YearlySummaryCard(summary: AmortListItem.YearlySummary, fmt: (Double) -> String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Slate800),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                "Year ${summary.year} Summary",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+            )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                YearSummaryStatCol("Total EMI", fmt(summary.totalEmi), Modifier.weight(1f))
+                YearSummaryStatCol("Interest", fmt(summary.totalInterest), Modifier.weight(1f))
+                YearSummaryStatCol("Principal", fmt(summary.totalPrincipal), Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun YearSummaryStatCol(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text(label, fontSize = 9.sp, color = Color(0xFF94A3B8))
+        Text(value, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
     }
 }
 
