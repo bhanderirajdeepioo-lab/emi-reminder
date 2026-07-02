@@ -114,6 +114,9 @@ private fun LoanDetailContent(
     val startDate = remember(loan.startDate) { Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate() }
     val today = remember { LocalDate.now() }
     val monthsElapsed = remember(startDate, loan.tenureMonths) { ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths) }
+    val paidMonths = remember(monthsElapsed, today, loan.emiDueDay) {
+        if (today.dayOfMonth < loan.emiDueDay) (monthsElapsed - 1).coerceAtLeast(0) else monthsElapsed
+    }
     val tenureRemaining = (loan.tenureMonths - monthsElapsed).coerceAtLeast(0)
     val progressFraction = if (loan.tenureMonths > 0) monthsElapsed.toFloat() / loan.tenureMonths else 0f
     val outstandingBalance = remember(loan, monthsElapsed) { calcOutstandingBalance(loan, monthsElapsed) }
@@ -265,16 +268,19 @@ private fun LoanDetailContent(
 
             // EMI payment history (estimated)
             if (monthsElapsed > 0) {
-                val paymentHistory = remember(loan, monthsElapsed, startDate) {
+                val currentMonthLabel = remember(startDate, monthsElapsed) {
+                    startDate.plusMonths(monthsElapsed.toLong()).format(DateTimeFormatter.ofPattern("MMM yyyy"))
+                }
+                val paymentHistory = remember(loan, paidMonths, startDate) {
                     val r = loan.interestRate / (12 * 100)
                     var bal = loan.principalAmount
-                    val historyCount = minOf(monthsElapsed, 4)
+                    val historyCount = minOf(paidMonths, 4)
                     val mFmt = DateTimeFormatter.ofPattern("MMM yyyy")
                     val history = mutableListOf<Triple<String, Double, Double>>()
-                    for (m in 1..monthsElapsed) {
+                    for (m in 1..paidMonths) {
                         val interest = bal * r
                         bal -= (loan.emiAmount - interest)
-                        if (m > monthsElapsed - historyCount) {
+                        if (m > paidMonths - historyCount) {
                             history.add(Triple(startDate.plusMonths(m.toLong()).format(mFmt), loan.emiAmount, interest))
                         }
                     }
@@ -288,12 +294,15 @@ private fun LoanDetailContent(
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 ) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        if (paidMonths < monthsElapsed) {
+                            PendingEmiRow(currentMonthLabel, loan.emiAmount, fmt)
+                        }
                         paymentHistory.forEach { (label, emi, interest) ->
                             PaymentHistoryRow(label, emi, interest, fmt)
                         }
-                        if (monthsElapsed > 4) {
+                        if (paidMonths > 4) {
                             Text(
-                                "... and ${monthsElapsed - 4} more payments",
+                                "... and ${paidMonths - 4} more payments",
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 4.dp),
@@ -374,6 +383,31 @@ private fun PaymentHistoryRow(monthLabel: String, emi: Double, interest: Double,
                 fontSize = 11.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+        Text(fmt.format(emi.toLong()), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Indigo600)
+    }
+}
+
+@Composable
+private fun PendingEmiRow(monthLabel: String, emi: Double, fmt: NumberFormat) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier.size(32.dp).clip(CircleShape).background(WarnOrange.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Default.Schedule, null, tint = WarnOrange, modifier = Modifier.size(16.dp))
+        }
+        Spacer(Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(monthLabel, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(WarnOrange.copy(alpha = 0.12f))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            ) {
+                Text("PENDING", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = WarnOrange)
+            }
         }
         Text(fmt.format(emi.toLong()), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Indigo600)
     }
