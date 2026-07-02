@@ -22,4 +22,6 @@ class LoanRepository @Inject constructor(private val loanDao: LoanDao) {
     suspend fun deleteLoan(loan: Loan) = loanDao.deleteLoan(loan)
 
     suspend fun deleteLoanById(id: Int) = loanDao.deleteLoanById(id)
+
+    suspend fun getActiveLoansOnce(): List<Loan> = loanDao.getActiveLoansOnce()
 }

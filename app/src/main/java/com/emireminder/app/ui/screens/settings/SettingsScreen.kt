@@ -1,5 +1,7 @@
 package com.emireminder.app.ui.screens.settings
 
+import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,16 +21,25 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.emireminder.app.data.db.entity.Loan
 import com.emireminder.app.ui.theme.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -37,6 +48,9 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val prefs by viewModel.prefs.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     var testSent by remember { mutableStateOf(false) }
     var showAdvanceDaysPicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -112,6 +126,7 @@ fun SettingsScreen(
                 ),
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -359,7 +374,20 @@ fun SettingsScreen(
                         label = "Export data (CSV)",
                         subtitle = "Download all loan data",
                         value = null,
-                        onClick = { /* future */ },
+                        onClick = {
+                            scope.launch {
+                                val loans = viewModel.getActiveLoansForExport()
+                                if (loans.isEmpty()) {
+                                    snackbarHostState.showSnackbar("No loans to export")
+                                } else {
+                                    try {
+                                        exportLoansCsv(context, loans)
+                                    } catch (e: Exception) {
+                                        snackbarHostState.showSnackbar("Export failed: ${e.message}")
+                                    }
+                                }
+                            }
+                        },
                     )
                     HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
 
@@ -574,6 +602,40 @@ private fun ThemePickerDialog(current: String, onDismiss: () -> Unit, onConfirm:
         confirmButton = { TextButton(onClick = { onConfirm(selected) }) { Text("Apply") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
+}
+
+private fun String.escapeCsv(): String {
+    return if (contains(',') || contains('"') || contains('\n')) {
+        "\"${replace("\"", "\"\"")}\""
+    } else this
+}
+
+private suspend fun exportLoansCsv(context: Context, loans: List<Loan>) {
+    val file = withContext(Dispatchers.IO) {
+        val dateStr = SimpleDateFormat("yyyyMMdd", Locale.US).format(Date())
+        val csv = buildString {
+            appendLine("Loan Name,Type,Principal,Interest Rate,Tenure (months),EMI Amount,Due Day,Bank Name,Start Date,Status")
+            val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+            loans.forEach { loan ->
+                val startDate = dateFmt.format(Date(loan.startDate))
+                val status = if (loan.isActive) "Active" else "Closed"
+                appendLine(
+                    "${loan.name.escapeCsv()},${loan.type},${loan.principalAmount}," +
+                    "${loan.interestRate},${loan.tenureMonths},${loan.emiAmount}," +
+                    "${loan.emiDueDay},${loan.bankName.escapeCsv()},$startDate,$status"
+                )
+            }
+        }
+        File(context.cacheDir, "emi_reminder_export_$dateStr.csv").also { it.writeText(csv, Charsets.UTF_8) }
+    }
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/csv"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        putExtra(Intent.EXTRA_SUBJECT, "EMI Reminder — Loan Export")
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, "Export Loan Data"))
 }
 
 private data class LanguageOption(val displayName: String, val tag: String)

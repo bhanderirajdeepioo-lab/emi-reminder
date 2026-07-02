@@ -12,6 +12,9 @@ interface LoanDao {
     @Query("SELECT * FROM loans WHERE isActive = 1 ORDER BY startDate DESC")
     fun getActiveLoans(): Flow<List<Loan>>
 
+    @Query("SELECT * FROM loans WHERE isActive = 1 ORDER BY startDate DESC")
+    suspend fun getActiveLoansOnce(): List<Loan>
+
     @Query("SELECT * FROM loans WHERE id = :id")
     suspend fun getLoanById(id: Int): Loan?
 

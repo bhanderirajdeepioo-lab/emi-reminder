@@ -3,8 +3,10 @@ package com.emireminder.app.ui.screens.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.emireminder.app.data.db.entity.Loan
 import com.emireminder.app.data.preferences.UserPreferences
 import com.emireminder.app.data.preferences.UserPreferencesRepository
+import com.emireminder.app.data.repository.LoanRepository
 import com.emireminder.app.notification.NotificationScheduler
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -15,6 +17,7 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val notificationScheduler: NotificationScheduler,
     private val prefsRepository: UserPreferencesRepository,
+    private val loanRepository: LoanRepository,
 ) : ViewModel() {
 
     val prefs = prefsRepository.userPreferences
@@ -53,4 +56,6 @@ class SettingsViewModel @Inject constructor(
     fun setSmsImportEnabled(enabled: Boolean) = viewModelScope.launch {
         prefsRepository.setSmsImportEnabled(enabled)
     }
+
+    suspend fun getActiveLoansForExport(): List<Loan> = loanRepository.getActiveLoansOnce()
 }
