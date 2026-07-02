@@ -14,8 +14,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,10 +40,12 @@ import java.time.format.DateTimeFormatter
 import java.text.NumberFormat
 import java.util.Locale
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun RemindersScreen(
     onReminderClick: (Int) -> Unit,
     onNavigateToNotificationPreview: () -> Unit = {},
+    onNavigateToSmsImport: () -> Unit = {},
     viewModel: RemindersViewModel = hiltViewModel(),
 ) {
     var showAddSheet by remember { mutableStateOf(false) }
@@ -47,6 +53,7 @@ fun RemindersScreen(
     val onAddReminder: () -> Unit = remember { { showAddSheet = true } }
     val reminders by viewModel.reminders.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
+    val smsPermission = rememberPermissionState(android.Manifest.permission.READ_SMS)
     val today = remember { LocalDate.now() }
     val todayDay = today.dayOfMonth
 
@@ -86,6 +93,11 @@ fun RemindersScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text("Reminders", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                         Text("${reminders.size} active EMI reminders", fontSize = 13.sp, color = Indigo100)
+                    }
+                    if (smsPermission.status.isGranted) {
+                        IconButton(onClick = onNavigateToSmsImport) {
+                            Icon(Icons.Default.Message, contentDescription = "Import from SMS", tint = Color.White.copy(alpha = 0.8f))
+                        }
                     }
                     IconButton(onClick = onNavigateToNotificationPreview) {
                         Icon(Icons.Default.Notifications, contentDescription = "Preview notification", tint = Color.White.copy(alpha = 0.8f))
@@ -198,6 +210,7 @@ fun RemindersScreen(
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
                             onAction = { viewModel.markAsPaid(r) },
+                            onToggle = { viewModel.toggleReminder(r) },
                         )
                     }
                 }
@@ -234,6 +247,7 @@ fun RemindersScreen(
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
                             onAction = { viewModel.remindNow(r) },
+                            onToggle = { viewModel.toggleReminder(r) },
                         )
                     }
                 }
@@ -254,6 +268,7 @@ fun RemindersScreen(
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
                             onAction = { viewModel.reactivate(r) },
+                            onToggle = { viewModel.toggleReminder(r) },
                         )
                     }
                 }
@@ -307,6 +322,7 @@ private fun ReminderCard(
     onDelete: () -> Unit,
     onEdit: () -> Unit,
     onAction: () -> Unit,
+    onToggle: () -> Unit,
 ) {
     val numFmt = remember { NumberFormat.getNumberInstance(Locale("en", "IN")).apply { minimumFractionDigits = 2; maximumFractionDigits = 2 } }
     val today = remember { LocalDate.now() }
@@ -383,7 +399,21 @@ private fun ReminderCard(
                     }
                 }
             }
-            Column {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(end = 4.dp),
+            ) {
+                Switch(
+                    checked = reminder.isActive,
+                    onCheckedChange = { onToggle() },
+                    modifier = Modifier.padding(top = 4.dp),
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Indigo600,
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
+                )
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                 }

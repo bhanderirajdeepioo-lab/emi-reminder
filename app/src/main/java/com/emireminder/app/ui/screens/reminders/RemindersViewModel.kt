@@ -39,6 +39,16 @@ class RemindersViewModel @Inject constructor(
         reminderRepository.updateReminder(reminder.copy(isActive = true))
     }
 
+    fun toggleReminder(reminder: Reminder) = viewModelScope.launch {
+        val updated = reminder.copy(isActive = !reminder.isActive)
+        reminderRepository.updateReminder(updated)
+        if (updated.isActive) {
+            notificationScheduler.scheduleReminder(updated)
+        } else {
+            notificationScheduler.cancelReminder(updated.id)
+        }
+    }
+
     fun remindNow(reminder: Reminder) {
         notificationScheduler.showImmediateReminder(
             loanId   = reminder.loanId ?: reminder.id,

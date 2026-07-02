@@ -261,6 +261,7 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 RemindersScreen(
                     onReminderClick = { loanId -> navController.navigate(NavRoutes.loanDetail(loanId)) },
                     onNavigateToNotificationPreview = { navController.navigate(NavRoutes.NOTIFICATION) },
+                    onNavigateToSmsImport = { navController.navigate(NavRoutes.SMS_IMPORT) },
                 )
             }
 
