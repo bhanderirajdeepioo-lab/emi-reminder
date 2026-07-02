@@ -29,12 +29,13 @@ class ReminderReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        val markPaidPending = actionPending(
+        val payNowPending = actionPending(
             context,
             requestCode = reminderId * 10 + 1,
-            action = NotificationActionReceiver.ACTION_MARK_PAID,
+            action = NotificationActionReceiver.ACTION_PAY_NOW,
             reminderId = reminderId,
             notificationId = reminderId,
+            loanId = loanId,
             loanName = loanName,
             emiAmount = emiAmount,
         )
@@ -44,6 +45,7 @@ class ReminderReceiver : BroadcastReceiver() {
             action = NotificationActionReceiver.ACTION_SNOOZE,
             reminderId = reminderId,
             notificationId = reminderId,
+            loanId = loanId,
             loanName = loanName,
             emiAmount = emiAmount,
         )
@@ -55,8 +57,8 @@ class ReminderReceiver : BroadcastReceiver() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(launchPending)
-            .addAction(android.R.drawable.ic_menu_send, "Mark Paid", markPaidPending)
-            .addAction(android.R.drawable.ic_media_pause, "Snooze 1 Day", snoozePending)
+            .addAction(android.R.drawable.ic_menu_send, "Pay Now", payNowPending)
+            .addAction(android.R.drawable.ic_media_pause, "Remind Later", snoozePending)
             .build()
 
         context.getSystemService(NotificationManager::class.java).notify(reminderId, notification)
@@ -68,6 +70,7 @@ class ReminderReceiver : BroadcastReceiver() {
         action: String,
         reminderId: Int,
         notificationId: Int,
+        loanId: Int,
         loanName: String,
         emiAmount: Double,
     ): PendingIntent {
@@ -75,6 +78,7 @@ class ReminderReceiver : BroadcastReceiver() {
             this.action = action
             putExtra(NotificationScheduler.EXTRA_REMINDER_ID, reminderId)
             putExtra(NotificationActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+            putExtra(NotificationScheduler.EXTRA_LOAN_ID, loanId)
             putExtra(NotificationScheduler.EXTRA_LOAN_NAME, loanName)
             putExtra(NotificationScheduler.EXTRA_EMI_AMOUNT, emiAmount)
         }
