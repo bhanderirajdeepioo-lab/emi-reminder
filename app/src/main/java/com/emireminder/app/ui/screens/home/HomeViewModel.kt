@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.emireminder.app.data.db.entity.Loan
+import com.emireminder.app.data.preferences.UserPreferencesRepository
 import com.emireminder.app.data.repository.LoanRepository
 import com.emireminder.app.data.repository.ReminderRepository
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,6 +16,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     loanRepository: LoanRepository,
     reminderRepository: ReminderRepository,
+    prefsRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
     val activeLoans = loanRepository.getActiveLoans()
@@ -23,4 +25,8 @@ class HomeViewModel @Inject constructor(
     val activeReminderCount = reminderRepository.getActiveReminders()
         .map { it.size }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+
+    val currencySymbol = prefsRepository.userPreferences
+        .map { it.currencySymbol }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "₹")
 }

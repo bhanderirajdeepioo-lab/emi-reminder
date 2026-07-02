@@ -1,5 +1,8 @@
 package com.emireminder.app.ui.screens.loan
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -21,6 +24,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,6 +35,7 @@ import com.emireminder.app.data.db.entity.Loan
 import com.emireminder.app.domain.model.LoanType
 import com.emireminder.app.domain.model.toLoanType
 import com.emireminder.app.ui.theme.*
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -47,10 +54,33 @@ fun LoanDetailScreen(
     viewModel: LoanDetailViewModel = hiltViewModel(),
 ) {
     val loan by viewModel.loan.collectAsState()
+    val currencySymbol by viewModel.currencySymbol.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
-    val fmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+    var showVpaDialog by remember { mutableStateOf(false) }
+    var vpaInput by remember { mutableStateOf("") }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
+    val numFmt = remember { NumberFormat.getNumberInstance(Locale("en", "IN")).apply { minimumFractionDigits = 2; maximumFractionDigits = 2 } }
+    fun fmtAmt(amount: Number): String = "$currencySymbol${numFmt.format(amount)}"
 
     LaunchedEffect(loanId) { viewModel.loadLoan(loanId) }
+
+    fun launchUpiPayment(vpa: String, emiAmount: Double) {
+        val uri = Uri.parse(
+            "upi://pay?pa=${Uri.encode(vpa)}" +
+            "&am=${"%.2f".format(emiAmount)}" +
+            "&cu=INR" +
+            "&tn=${Uri.encode("EMI Payment")}"
+        )
+        try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+        } catch (_: ActivityNotFoundException) {
+            clipboardManager.setText(AnnotatedString(vpa))
+            scope.launch { snackbarHostState.showSnackbar("VPA copied — open your bank app") }
+        }
+    }
 
     if (showDeleteDialog) {
         AlertDialog(
@@ -64,6 +94,43 @@ fun LoanDetailScreen(
                 ) { Text("Delete") }
             },
             dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") } },
+        )
+    }
+
+    if (showVpaDialog) {
+        AlertDialog(
+            onDismissRequest = { showVpaDialog = false },
+            title = { Text("Enter UPI VPA to pay") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        "Enter your UPI VPA (e.g. name@bank) for this loan.",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    OutlinedTextField(
+                        value = vpaInput,
+                        onValueChange = { vpaInput = it },
+                        placeholder = { Text("yourname@bank") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val vpa = vpaInput.trim()
+                        viewModel.saveUpiVpa(vpa)
+                        showVpaDialog = false
+                        loan?.let { launchUpiPayment(vpa, it.emiAmount) }
+                    },
+                    enabled = vpaInput.isNotBlank(),
+                ) { Text("Save & Pay") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showVpaDialog = false }) { Text("Skip") }
+            },
         )
     }
 
@@ -85,6 +152,7 @@ fun LoanDetailScreen(
                 ),
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background,
     ) { padding ->
         val currentLoan = loan
@@ -95,10 +163,18 @@ fun LoanDetailScreen(
         } else {
             LoanDetailContent(
                 loan = currentLoan,
-                fmt = fmt,
+                fmtAmt = { fmtAmt(it) },
                 padding = padding,
                 onViewAmortization = onViewAmortization,
                 onPrepay = onPrepay,
+                onPayNow = {
+                    if (currentLoan.upiVpa.isBlank()) {
+                        vpaInput = ""
+                        showVpaDialog = true
+                    } else {
+                        launchUpiPayment(currentLoan.upiVpa, currentLoan.emiAmount)
+                    }
+                },
             )
         }
     }
@@ -107,10 +183,11 @@ fun LoanDetailScreen(
 @Composable
 private fun LoanDetailContent(
     loan: Loan,
-    fmt: NumberFormat,
+    fmtAmt: (Number) -> String,
     padding: PaddingValues,
     onViewAmortization: (Double, Double, Int) -> Unit,
     onPrepay: () -> Unit,
+    onPayNow: () -> Unit,
 ) {
     val totalInterest = remember(loan) { calcTotalInterest(loan) }
     val totalPayment = loan.principalAmount + totalInterest
@@ -182,16 +259,29 @@ private fun LoanDetailContent(
                 val nextDue = if (!candidate.isBefore(t)) candidate else candidate.plusMonths(1)
                 nextDue.format(java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy"))
             }
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                EmiStatColumn("Monthly EMI", fmt.format(loan.emiAmount), Indigo600)
-                Box(modifier = Modifier.width(1.dp).height(48.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)))
-                EmiStatColumn("Next Due", nextDueText, UrgentRed)
-                Box(modifier = Modifier.width(1.dp).height(48.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)))
-                EmiStatColumn("Tenure", "${loan.tenureMonths} mo", SafeGreen)
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    EmiStatColumn("Monthly EMI", fmtAmt(loan.emiAmount), Indigo600)
+                    Box(modifier = Modifier.width(1.dp).height(48.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)))
+                    EmiStatColumn("Next Due", nextDueText, UrgentRed)
+                    Box(modifier = Modifier.width(1.dp).height(48.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)))
+                    EmiStatColumn("Tenure", "${loan.tenureMonths} mo", SafeGreen)
+                }
+                Spacer(Modifier.height(16.dp))
+                Button(
+                    onClick = onPayNow,
+                    modifier = Modifier.fillMaxWidth().height(44.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SafeGreen),
+                ) {
+                    Icon(Icons.Default.Payments, null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Pay Now", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
 
@@ -202,7 +292,7 @@ private fun LoanDetailContent(
                 GridStatCard(
                     modifier = Modifier.weight(1f),
                     label = "Outstanding Balance",
-                    value = fmt.format(outstandingBalance.toLong()),
+                    value = fmtAmt(outstandingBalance.toLong()),
                     valueColor = UrgentRed,
                 )
                 GridStatCard(
@@ -220,27 +310,28 @@ private fun LoanDetailContent(
                 tenureMonths = loan.tenureMonths,
                 principalPaid = principalPaid,
                 interestPaid = interestPaid,
-                fmt = fmt,
+                fmtAmt = fmtAmt,
             )
 
             // Loan details
             SectionLabel("LOAN DETAILS")
             DetailCard {
-                DetailRow(Icons.Default.AccountBalance, "Principal", fmt.format(loan.principalAmount))
+                DetailRow(Icons.Default.AccountBalance, "Principal", fmtAmt(loan.principalAmount))
                 DetailRow(Icons.Default.Percent, "Interest Rate", "%.2f%% per annum".format(loan.interestRate))
                 DetailRow(Icons.Default.Schedule, "Tenure", "${loan.tenureMonths} months")
                 if (loan.bankName.isNotBlank()) DetailRow(Icons.Default.Business, "Bank / Lender", loan.bankName)
                 if (loan.accountNumber.isNotBlank()) DetailRow(Icons.Default.CreditCard, "Account Number", "xxxx${loan.accountNumber.takeLast(4)}")
                 DetailRow(Icons.Default.CalendarToday, "Start Date", startDate.format(DateTimeFormatter.ofPattern("d MMM yyyy")))
+                if (loan.upiVpa.isNotBlank()) DetailRow(Icons.Default.AccountBalanceWallet, "UPI VPA", loan.upiVpa)
                 if (loan.notes.isNotBlank()) DetailRow(Icons.Default.Note, "Notes", loan.notes)
             }
 
             // Payment summary
             SectionLabel("PAYMENT SUMMARY")
             DetailCard {
-                DetailRow(Icons.Default.CurrencyRupee, "Total Principal", fmt.format(loan.principalAmount))
-                DetailRow(Icons.Default.TrendingUp, "Total Interest", fmt.format(totalInterest))
-                DetailRow(Icons.Default.Payments, "Total Payment", fmt.format(totalPayment), highlight = true)
+                DetailRow(Icons.Default.CurrencyRupee, "Total Principal", fmtAmt(loan.principalAmount))
+                DetailRow(Icons.Default.TrendingUp, "Total Interest", fmtAmt(totalInterest))
+                DetailRow(Icons.Default.Payments, "Total Payment", fmtAmt(totalPayment), highlight = true)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text("Interest Burden", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Box(
@@ -277,7 +368,7 @@ private fun LoanDetailContent(
                 ) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         paymentHistory.forEach { (label, emi, interest) ->
-                            PaymentHistoryRow(label, emi, interest, fmt)
+                            PaymentHistoryRow(label, emi, interest, fmtAmt)
                         }
                         if (monthsElapsed > 4) {
                             Text(
@@ -348,7 +439,7 @@ private fun GridStatCard(modifier: Modifier, label: String, value: String, value
 }
 
 @Composable
-private fun PaymentHistoryRow(monthLabel: String, emi: Double, interest: Double, fmt: NumberFormat) {
+private fun PaymentHistoryRow(monthLabel: String, emi: Double, interest: Double, fmtAmt: (Number) -> String) {
     val principalPaid = emi - interest
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.size(32.dp).clip(CircleShape).background(Indigo50), contentAlignment = Alignment.Center) {
@@ -358,12 +449,12 @@ private fun PaymentHistoryRow(monthLabel: String, emi: Double, interest: Double,
         Column(modifier = Modifier.weight(1f)) {
             Text(monthLabel, fontSize = 13.sp, fontWeight = FontWeight.Medium)
             Text(
-                "Principal: ${fmt.format(principalPaid.toLong())} · Interest: ${fmt.format(interest.toLong())}",
+                "Principal: ${fmtAmt(principalPaid.toLong())} · Interest: ${fmtAmt(interest.toLong())}",
                 fontSize = 11.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Text(fmt.format(emi.toLong()), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Indigo600)
+        Text(fmtAmt(emi.toLong()), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Indigo600)
     }
 }
 
@@ -410,7 +501,7 @@ private fun RepaymentRingCard(
     tenureMonths: Int,
     principalPaid: Double,
     interestPaid: Double,
-    fmt: NumberFormat,
+    fmtAmt: (Number) -> String,
 ) {
     val ringColor = Indigo600
     val trackColor = Indigo50
@@ -492,11 +583,11 @@ private fun RepaymentRingCard(
                 )
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("Principal Paid", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(fmt.format(principalPaid.toLong()), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = SafeGreen)
+                    Text(fmtAmt(principalPaid.toLong()), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = SafeGreen)
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("Interest Paid", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(fmt.format(interestPaid.toLong()), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = WarnOrange)
+                    Text(fmtAmt(interestPaid.toLong()), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = WarnOrange)
                 }
             }
         }

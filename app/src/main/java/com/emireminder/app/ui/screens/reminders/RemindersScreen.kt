@@ -46,6 +46,7 @@ fun RemindersScreen(
     var editingReminderId by remember { mutableStateOf<Int?>(null) }
     val onAddReminder: () -> Unit = remember { { showAddSheet = true } }
     val reminders by viewModel.reminders.collectAsState()
+    val currencySymbol by viewModel.currencySymbol.collectAsState()
     val today = remember { LocalDate.now() }
     val todayDay = today.dayOfMonth
 
@@ -192,6 +193,7 @@ fun RemindersScreen(
                             chipColor = UrgentRed,
                             isOverdue = true,
                             isPaid = false,
+                            currencySymbol = currencySymbol,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
@@ -227,6 +229,7 @@ fun RemindersScreen(
                             chipColor = urgencyColor,
                             isOverdue = false,
                             isPaid = false,
+                            currencySymbol = currencySymbol,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
@@ -246,6 +249,7 @@ fun RemindersScreen(
                             chipColor = Color(0xFFE5E7EB),
                             isOverdue = false,
                             isPaid = true,
+                            currencySymbol = currencySymbol,
                             onClick = { r.loanId?.let { onReminderClick(it) } },
                             onDelete = { viewModel.deleteReminder(r) },
                             onEdit = { editingReminderId = r.id; showAddSheet = true },
@@ -298,12 +302,13 @@ private fun ReminderCard(
     chipColor: Color,
     isOverdue: Boolean,
     isPaid: Boolean,
+    currencySymbol: String,
     onClick: () -> Unit,
     onDelete: () -> Unit,
     onEdit: () -> Unit,
     onAction: () -> Unit,
 ) {
-    val fmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+    val numFmt = remember { NumberFormat.getNumberInstance(Locale("en", "IN")).apply { minimumFractionDigits = 2; maximumFractionDigits = 2 } }
     val today = remember { LocalDate.now() }
     val dueDateFmt = remember { DateTimeFormatter.ofPattern("d MMM yyyy") }
     val dueDate = remember(reminder.dueDayOfMonth) {
@@ -366,7 +371,7 @@ private fun ReminderCard(
                     }
                 }
                 Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(fmt.format(reminder.emiAmount), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                    Text("$currencySymbol${numFmt.format(reminder.emiAmount)}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))

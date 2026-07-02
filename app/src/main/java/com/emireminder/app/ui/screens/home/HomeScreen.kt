@@ -67,6 +67,7 @@ fun HomeScreen(
 ) {
     val loans by viewModel.activeLoans.collectAsState()
     val reminderCount by viewModel.activeReminderCount.collectAsState()
+    val currencySymbol by viewModel.currencySymbol.collectAsState()
 
     Scaffold(
         floatingActionButton = {
@@ -95,7 +96,7 @@ fun HomeScreen(
             if (loans.isEmpty()) {
                 item { EmptyState(onNavigateToAddLoan, onNavigateToSmsImport) }
             } else {
-                item { LoanSummarySection(loans) }
+                item { LoanSummarySection(loans, currencySymbol) }
                 item { QuickActionsSection(onNavigateToAddLoan, onNavigateToAnalytics, onNavigateToCalculator) }
                 item {
                     Row(
@@ -121,7 +122,7 @@ fun HomeScreen(
                     }
                 }
                 items(loans.take(5), key = { it.id }) { loan ->
-                    LoanReminderCard(loan = loan, onClick = { onNavigateToLoanDetail(loan.id) })
+                    LoanReminderCard(loan = loan, currencySymbol = currencySymbol, onClick = { onNavigateToLoanDetail(loan.id) })
                 }
             }
         }
@@ -380,9 +381,9 @@ private fun EmptyState(
 // ── Loan summary section ──────────────────────────────────────────────────────
 
 @Composable
-private fun LoanSummarySection(loans: List<Loan>) {
+private fun LoanSummarySection(loans: List<Loan>, currencySymbol: String) {
     val totalEmi = remember(loans) { loans.sumOf { it.emiAmount } }
-    val currencyFmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+    val numFmt = remember { NumberFormat.getNumberInstance(Locale("en", "IN")).apply { minimumFractionDigits = 2; maximumFractionDigits = 2 } }
     val minDaysRemaining = remember(loans) {
         loans.minOfOrNull { daysUntilNextDue(it.emiDueDay) }
     }
@@ -457,7 +458,7 @@ private fun LoanSummarySection(loans: List<Loan>) {
                 Text("Total EMI / Month", fontSize = 11.sp, color = Color(0xFF94A3B8))
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    currencyFmt.format(totalEmi),
+                    "$currencySymbol${numFmt.format(totalEmi)}",
                     fontSize = 26.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White,
@@ -554,7 +555,7 @@ private fun QuickActionTile(
 // ── EMI reminder card ─────────────────────────────────────────────────────────
 
 @Composable
-private fun LoanReminderCard(loan: Loan, onClick: () -> Unit) {
+private fun LoanReminderCard(loan: Loan, currencySymbol: String, onClick: () -> Unit) {
     val loanAmountFmt = remember { NumberFormat.getNumberInstance(Locale("en", "IN")) }
     val urgentColor = UrgentRed
     val normalColor = Indigo600
@@ -619,7 +620,7 @@ private fun LoanReminderCard(loan: Loan, onClick: () -> Unit) {
 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        "₹${loanAmountFmt.format(loan.emiAmount.toLong())}",
+                        "$currencySymbol${loanAmountFmt.format(loan.emiAmount.toLong())}",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Slate800,

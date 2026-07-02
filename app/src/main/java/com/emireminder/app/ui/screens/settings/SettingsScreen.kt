@@ -55,6 +55,7 @@ fun SettingsScreen(
     var showAdvanceDaysPicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var showThemePicker by remember { mutableStateOf(false) }
+    var showCurrencyPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
 
     val notifPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
@@ -91,6 +92,17 @@ fun SettingsScreen(
             onConfirm = { theme ->
                 viewModel.setTheme(theme)
                 showThemePicker = false
+            },
+        )
+    }
+
+    if (showCurrencyPicker) {
+        CurrencyPickerDialog(
+            current = prefs.currency,
+            onDismiss = { showCurrencyPicker = false },
+            onConfirm = { currency ->
+                viewModel.setCurrency(currency)
+                showCurrencyPicker = false
             },
         )
     }
@@ -312,8 +324,8 @@ fun SettingsScreen(
                         iconTint = SafeGreen,
                         label = "Currency",
                         subtitle = "Symbol shown in amounts",
-                        value = "₹ ${prefs.currency}",
-                        onClick = { /* future */ },
+                        value = "${prefs.currencySymbol} ${prefs.currency}",
+                        onClick = { showCurrencyPicker = true },
                     )
                     HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
 
@@ -678,6 +690,53 @@ private fun LanguagePickerDialog(
             }
         },
         confirmButton = { TextButton(onClick = { onConfirm(selected.displayName, selected.tag) }) { Text("Apply") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
+}
+
+private data class CurrencyOption(val code: String, val symbol: String, val name: String)
+
+@Composable
+private fun CurrencyPickerDialog(
+    current: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit,
+) {
+    val options = remember {
+        listOf(
+            CurrencyOption("INR", "₹", "Indian Rupee"),
+            CurrencyOption("USD", "$", "US Dollar"),
+            CurrencyOption("EUR", "€", "Euro"),
+            CurrencyOption("GBP", "£", "British Pound"),
+            CurrencyOption("AED", "د.إ", "UAE Dirham"),
+            CurrencyOption("SGD", "S$", "Singapore Dollar"),
+        )
+    }
+    var selected by remember { mutableStateOf(options.firstOrNull { it.code == current } ?: options[0]) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Currency") },
+        text = {
+            Column {
+                options.forEach { option ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selected = option }
+                            .padding(vertical = 8.dp),
+                    ) {
+                        RadioButton(selected = option == selected, onClick = { selected = option })
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "${option.symbol}  ${option.name} (${option.code})",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = { onConfirm(selected.code) }) { Text("Apply") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
 }

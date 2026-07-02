@@ -47,7 +47,7 @@ private val _emiAmountFmt = NumberFormat.getNumberInstance(Locale("en", "IN")).a
     maximumFractionDigits = 0
 }
 
-private fun fmtAmt(amount: Double): String = "₹${_emiAmountFmt.format(amount.toLong())}"
+private fun fmtAmt(amount: Double, currencySymbol: String): String = "$currencySymbol${_emiAmountFmt.format(amount.toLong())}"
 
 private val MONTHS = listOf("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 
@@ -58,6 +58,7 @@ fun FinanceMonthlyEMIScreen(
     viewModel: FinanceViewModel = hiltViewModel(),
 ) {
     val activeLoans by viewModel.activeLoans.collectAsState()
+    val currencySymbol by viewModel.currencySymbol.collectAsState()
     val today = remember { Calendar.getInstance() }
     var selectedYear by remember { mutableStateOf(today.get(Calendar.YEAR)) }
     var selectedMonth by remember { mutableStateOf(today.get(Calendar.MONTH)) } // 0-indexed
@@ -227,7 +228,7 @@ fun FinanceMonthlyEMIScreen(
                                 fontSize = 11.sp, color = Color(0xFF94A3B8),
                             )
                             Spacer(Modifier.height(4.dp))
-                            Text(fmtAmt(totalEmi), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                            Text(fmtAmt(totalEmi, currencySymbol), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                         }
                         Column(horizontalAlignment = Alignment.End) {
                             Text("Paid", fontSize = 10.sp, color = Color(0xFF64748B))
@@ -248,7 +249,7 @@ fun FinanceMonthlyEMIScreen(
                                 )
                             }
                             Spacer(Modifier.height(4.dp))
-                            Text("${fmtAmt(paidEmi)} / ${fmtAmt(totalEmi)}", fontSize = 9.sp, color = Color(0xFF64748B))
+                            Text("${fmtAmt(paidEmi, currencySymbol)} / ${fmtAmt(totalEmi, currencySymbol)}", fontSize = 9.sp, color = Color(0xFF64748B))
                             Spacer(Modifier.height(4.dp))
                             Box(
                                 modifier = Modifier
@@ -308,7 +309,7 @@ fun FinanceMonthlyEMIScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Total per Month", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Slate800)
                         Text(
-                            "Annual outflow: ${fmtAmt(totalEmi * 12)}",
+                            "Annual outflow: ${fmtAmt(totalEmi * 12, currencySymbol)}",
                             fontSize = 11.sp, color = Color(0xFF64748B),
                         )
                         Spacer(Modifier.height(12.dp))
@@ -406,7 +407,7 @@ private fun EmiRow(item: LoanEmiItem, selectedMonth: Int, selectedYear: Int, onC
                     Text("EMI #$emiNum of ${item.loan.tenureMonths}", fontSize = 11.sp, color = Color(0xFF64748B))
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(fmtAmt(item.loan.emiAmount), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Slate800)
+                    Text(fmtAmt(item.loan.emiAmount, currencySymbol), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Slate800)
                     Spacer(Modifier.height(4.dp))
                     val statusLabel = when {
                         item.isPaid -> "PAID ✓"
