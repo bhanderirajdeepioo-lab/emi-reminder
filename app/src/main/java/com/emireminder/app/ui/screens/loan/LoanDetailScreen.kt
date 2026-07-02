@@ -114,8 +114,9 @@ private fun LoanDetailContent(
     val startDate = remember(loan.startDate) { Instant.ofEpochMilli(loan.startDate).atZone(ZoneId.systemDefault()).toLocalDate() }
     val today = remember { LocalDate.now() }
     val monthsElapsed = remember(startDate, loan.tenureMonths) { ChronoUnit.MONTHS.between(startDate, today).toInt().coerceIn(0, loan.tenureMonths) }
-    // Current month is only PAID once the due day has passed; before that it's PENDING.
-    val paidMonths = if (today.dayOfMonth < loan.emiDueDay) (monthsElapsed - 1).coerceAtLeast(0) else monthsElapsed
+    val paidMonths = remember(monthsElapsed, today, loan.emiDueDay) {
+        if (today.dayOfMonth < loan.emiDueDay) (monthsElapsed - 1).coerceAtLeast(0) else monthsElapsed
+    }
     val tenureRemaining = (loan.tenureMonths - monthsElapsed).coerceAtLeast(0)
     val progressFraction = if (loan.tenureMonths > 0) monthsElapsed.toFloat() / loan.tenureMonths else 0f
     val outstandingBalance = remember(loan, monthsElapsed) { calcOutstandingBalance(loan, monthsElapsed) }
