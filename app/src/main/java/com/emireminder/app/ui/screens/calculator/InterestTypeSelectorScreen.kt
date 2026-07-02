@@ -1,5 +1,6 @@
 package com.emireminder.app.ui.screens.calculator
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,6 +16,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -91,6 +95,8 @@ fun InterestTypeSelectorScreen(
                 fmt = fmt,
                 onClick = { selected = "REDUCING" },
                 description = "Each month your interest is calculated only on the remaining loan balance. As you pay EMIs, the principal reduces and so does the interest component.",
+                barFractions = listOf(0.28f, 0.38f, 0.50f, 0.63f, 0.78f, 0.94f),
+                barColor = Indigo600,
             )
 
             // Flat Rate card
@@ -106,6 +112,8 @@ fun InterestTypeSelectorScreen(
                 fmt = fmt,
                 onClick = { selected = "FLAT" },
                 description = "Interest is calculated on the full original loan amount throughout the entire tenure, regardless of how much you've repaid.",
+                barFractions = listOf(0.60f, 0.60f, 0.60f, 0.60f, 0.60f, 0.60f),
+                barColor = WarnOrange,
             )
 
             // Comparison summary
@@ -150,6 +158,8 @@ private fun InterestTypeCard(
     fmt: NumberFormat,
     onClick: () -> Unit,
     description: String,
+    barFractions: List<Float>,
+    barColor: Color,
 ) {
     val borderColor = if (isSelected) Indigo600 else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
     val bgColor = if (isSelected) Indigo50 else MaterialTheme.colorScheme.surface
@@ -182,6 +192,16 @@ private fun InterestTypeCard(
                 }
             }
 
+            // Mini bar chart
+            MiniBarChart(
+                barFractions = barFractions,
+                barColor = barColor,
+                trackColor = barColor.copy(alpha = 0.12f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+            )
+
             // Numbers
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 MetricPill("Monthly EMI", fmt.format(emi), modifier = Modifier.weight(1f))
@@ -209,5 +229,41 @@ private fun CompareRow(label: String, value: String, color: Color) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(value, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = color)
+    }
+}
+
+@Composable
+private fun MiniBarChart(
+    barFractions: List<Float>,
+    barColor: Color,
+    trackColor: Color,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier = modifier) {
+        val count = barFractions.size
+        val gapPx = size.width * 0.035f
+        val totalGaps = gapPx * (count - 1)
+        val barWidth = (size.width - totalGaps) / count
+        val maxH = size.height
+        val radius = CornerRadius(6f, 6f)
+
+        barFractions.forEachIndexed { i, fraction ->
+            val left = i * (barWidth + gapPx)
+            // track (full height background)
+            drawRoundRect(
+                color = trackColor,
+                topLeft = Offset(left, 0f),
+                size = Size(barWidth, maxH),
+                cornerRadius = radius,
+            )
+            // bar
+            val barH = maxH * fraction.coerceIn(0f, 1f)
+            drawRoundRect(
+                color = barColor,
+                topLeft = Offset(left, maxH - barH),
+                size = Size(barWidth, barH),
+                cornerRadius = radius,
+            )
+        }
     }
 }
