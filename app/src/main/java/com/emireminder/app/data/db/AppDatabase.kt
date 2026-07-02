@@ -13,7 +13,7 @@ import com.emireminder.app.data.db.entity.SMSImport
 
 @Database(
     entities = [Loan::class, Reminder::class, SMSImport::class],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -46,6 +46,12 @@ abstract class AppDatabase : RoomDatabase() {
                 database.execSQL(
                     "ALTER TABLE reminders ADD COLUMN upiVpa TEXT NOT NULL DEFAULT ''"
                 )
+            }
+        }
+
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // upiVpa already added in MIGRATION_4_5; no schema changes in v6.
             }
         }
     }
