@@ -10,8 +10,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -33,6 +33,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.data.db.entity.Loan
 import com.emireminder.app.domain.model.LoanType
 import com.emireminder.app.domain.model.toLoanType
+import com.emireminder.app.ui.screens.reminders.AddReminderSheet
 import com.emireminder.app.ui.theme.Indigo100
 import com.emireminder.app.ui.theme.Indigo50
 import com.emireminder.app.ui.theme.Indigo600
@@ -68,6 +69,11 @@ fun HomeScreen(
     val loans by viewModel.activeLoans.collectAsState()
     val reminderCount by viewModel.activeReminderCount.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
+    var showAddReminderSheet by remember { mutableStateOf(false) }
+
+    if (showAddReminderSheet) {
+        AddReminderSheet(onDismiss = { showAddReminderSheet = false })
+    }
 
     Scaffold(
         floatingActionButton = {
@@ -98,7 +104,13 @@ fun HomeScreen(
                 item { EmptyState(onNavigateToAddLoan, onNavigateToSmsImport, onNavigateToCalculator) }
             } else {
                 item { LoanSummarySection(loans, currencySymbol) }
-                item { QuickActionsSection(onNavigateToAddLoan, onNavigateToAnalytics, onNavigateToCalculator) }
+                item {
+                    QuickActionsSection(
+                        onAddReminder = { showAddReminderSheet = true },
+                        onViewAll = onNavigateToReminders,
+                        onCalculator = onNavigateToCalculator,
+                    )
+                }
                 item {
                     Row(
                         modifier = Modifier
@@ -486,7 +498,7 @@ private fun LoanSummarySection(loans: List<Loan>, currencySymbol: String) {
 // ── Quick actions ─────────────────────────────────────────────────────────────
 
 @Composable
-private fun QuickActionsSection(onAddLoan: () -> Unit, onAnalytics: () -> Unit, onCalculator: () -> Unit) {
+private fun QuickActionsSection(onAddReminder: () -> Unit, onViewAll: () -> Unit, onCalculator: () -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Spacer(Modifier.height(16.dp))
         SectionLabel("QUICK ACTIONS")
@@ -505,20 +517,20 @@ private fun QuickActionsSection(onAddLoan: () -> Unit, onAnalytics: () -> Unit, 
                 onClick = onCalculator,
             )
             QuickActionTile(
-                icon = Icons.Default.Add,
-                label = "Add Loan",
+                icon = Icons.Default.Notifications,
+                label = "Add Reminder",
                 bgColor = Color(0xFFF0FDF4),
                 iconColor = Color(0xFF059669),
                 modifier = Modifier.weight(1f),
-                onClick = onAddLoan,
+                onClick = onAddReminder,
             )
             QuickActionTile(
-                icon = Icons.Default.Analytics,
-                label = "Analytics",
+                icon = Icons.Default.List,
+                label = "View All",
                 bgColor = Color(0xFFFFF7ED),
                 iconColor = Color(0xFFD97706),
                 modifier = Modifier.weight(1f),
-                onClick = onAnalytics,
+                onClick = onViewAll,
             )
         }
     }
