@@ -19,18 +19,18 @@ import org.junit.Test
 class PayNowUriTest {
 
     /** Mirrors the production Uri.encode() semantics for pure-JVM testing. */
-    private fun encodeVpa(vpa: String): String = vpa.map { c ->
+    private fun encode(s: String): String = s.map { c ->
         if (c.isLetterOrDigit() || c in "-._~@") c.toString()
         else "%${c.code.toString(16).uppercase()}"
     }.joinToString("")
 
     private fun buildUri(vpa: String, amount: Double) =
-        "upi://pay?pa=${encodeVpa(vpa)}&am=%.2f&cu=INR".format(amount)
+        "upi://pay?pa=${encode(vpa)}&am=%.2f&cu=INR&tn=${encode("EMI Payment")}".format(amount)
 
     @Test
     fun `plain vpa without special chars is passed through unchanged`() {
         assertEquals(
-            "upi://pay?pa=user@sbi&am=5000.00&cu=INR",
+            "upi://pay?pa=user@sbi&am=5000.00&cu=INR&tn=EMI%20Payment",
             buildUri("user@sbi", 5000.0),
         )
     }
@@ -58,6 +58,12 @@ class PayNowUriTest {
 
     @Test
     fun `currency code is always INR`() {
-        assertTrue(buildUri("a@b", 1.0).endsWith("cu=INR"))
+        assertTrue(buildUri("a@b", 1.0).contains("cu=INR"))
+    }
+
+    @Test
+    fun `transaction note is always EMI Payment URL-encoded`() {
+        val uri = buildUri("user@sbi", 1000.0)
+        assertTrue("tn parameter must be present and encoded", uri.contains("&tn=EMI%20Payment"))
     }
 }

@@ -45,7 +45,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
 
                         val activityIntent = if (upiVpa != null) {
                             Intent(Intent.ACTION_VIEW, Uri.parse(
-                                "upi://pay?pa=${Uri.encode(upiVpa)}&am=%.2f&cu=INR".format(emiAmount)
+                                "upi://pay?pa=${Uri.encode(upiVpa)}&am=%.2f&cu=INR&tn=${Uri.encode("EMI Payment")}".format(emiAmount)
                             )).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
                         } else {
                             // No UPI VPA configured — open Loan Detail so user can set it up.
