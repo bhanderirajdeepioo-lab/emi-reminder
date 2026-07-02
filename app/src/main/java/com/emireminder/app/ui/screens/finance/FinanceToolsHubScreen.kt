@@ -42,6 +42,7 @@ private data class GridTool(
 
 @Composable
 fun FinanceToolsHubScreen(
+    onBack: () -> Unit,
     onNavigateToEmiCalculator: () -> Unit,
     onNavigateToComparison: () -> Unit,
     onNavigateToPrepayment: () -> Unit,
@@ -152,9 +153,19 @@ fun FinanceToolsHubScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Finance Tools", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White,
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Indigo600,
                     titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
                 ),
             )
         },
