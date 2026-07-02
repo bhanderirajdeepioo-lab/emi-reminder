@@ -1,5 +1,6 @@
 package com.emireminder.app.ui.screens.loan
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,6 +36,8 @@ fun AddLoanScreen(
     var saving by remember { mutableStateOf(false) }
     var typeDropdownOpen by remember { mutableStateOf(false) }
     val fmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
+
+    BackHandler { onBack() }
 
     Scaffold(
         topBar = {
