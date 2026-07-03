@@ -75,6 +75,19 @@ class TransactionDetailViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(editSheetOpen = false, editSaveError = null)
     }
 
+    fun saveNotes(notes: String) {
+        val txn = _uiState.value.transaction ?: return
+        viewModelScope.launch {
+            try {
+                val updated = txn.copy(notes = notes.takeIf { it.isNotBlank() })
+                transactionDao.update(updated)
+                _uiState.value = _uiState.value.copy(transaction = updated)
+            } catch (_: Exception) {
+                // notes save is best-effort; silently ignore
+            }
+        }
+    }
+
     fun saveEdit(
         amount: Double,
         category: TransactionCategory,

@@ -17,8 +17,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -41,7 +43,7 @@ private val txnAmtFmt = NumberFormat.getNumberInstance(Locale("en", "IN")).apply
 private fun fmtTxnAmt(amount: Double): String = txnAmtFmt.format(amount.toLong())
 
 private fun fmtTxnDate(epochMs: Long): String {
-    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a")
+    val formatter = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy · hh:mm a")
     return Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()).format(formatter)
 }
 
@@ -74,7 +76,7 @@ fun TransactionDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Transaction", fontWeight = FontWeight.Bold) },
+                title = { Text("Transaction Detail", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -107,7 +109,7 @@ fun TransactionDetailScreen(
             val txn = uiState.transaction
             if (txn != null) {
                 Surface(shadowElevation = 8.dp) {
-                    Column {
+                    Column(modifier = Modifier.imePadding()) {
                         BottomActionBar(
                             isVerified = txn.userVerified,
                             onToggleVerified = viewModel::toggleVerified,
@@ -133,17 +135,21 @@ fun TransactionDetailScreen(
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(uiState.error ?: "Unknown error", color = Color(0xFFEF4444), textAlign = TextAlign.Center)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(uiState.error ?: "Unknown error", color = Color(0xFFEF4444), textAlign = TextAlign.Center)
+                    Spacer(Modifier.height(12.dp))
+                    Button(
+                        onClick = viewModel::retry,
+                        colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
+                    ) { Text("Retry") }
+                }
             }
 
             uiState.transaction == null -> Box(
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentAlignment = Alignment.Center,
             ) {
-                TransactionNotFoundContent(
-                    onBack = onBack,
-                    onRetry = viewModel::retry,
-                )
+                TransactionNotFoundContent(onBack = onBack, onRetry = viewModel::retry)
             }
 
             else -> {
@@ -162,7 +168,12 @@ fun TransactionDetailScreen(
                         ExpandableSmsSection(rawBody = txn.rawSmsBody)
                     }
                     Spacer(Modifier.height(12.dp))
-                    NotesSection(notes = txn.notes)
+                    key(txn.id, txn.notes) {
+                        NotesSection(
+                            initialNotes = txn.notes,
+                            onSave = viewModel::saveNotes,
+                        )
+                    }
                     Spacer(Modifier.height(16.dp))
                 }
             }
@@ -188,7 +199,6 @@ private fun buildShareText(txn: ParsedTransaction): String {
 private fun HeroSection(txn: ParsedTransaction) {
     val meta = txn.category.meta()
     val isCredit = txn.direction == TransactionDirection.CREDIT
-    val amtColor = if (isCredit) SafeGreen else UrgentRed
     val prefix = if (isCredit) "+" else "-"
 
     Column(
@@ -201,14 +211,20 @@ private fun HeroSection(txn: ParsedTransaction) {
         Box(
             modifier = Modifier
                 .size(64.dp)
-                .clip(CircleShape)
+                .clip(RoundedCornerShape(18.dp))
                 .background(Color.White.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(meta.icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(32.dp))
         }
         Spacer(Modifier.height(8.dp))
-        Text(meta.label, fontSize = 14.sp, color = Color.White.copy(alpha = 0.8f), fontWeight = FontWeight.Medium)
+        Text(
+            meta.label.uppercase(),
+            fontSize = 10.sp,
+            color = Color.White.copy(alpha = 0.7f),
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp,
+        )
         Spacer(Modifier.height(4.dp))
         Text(
             "${prefix}₹${fmtTxnAmt(txn.amount)}",
@@ -217,16 +233,28 @@ private fun HeroSection(txn: ParsedTransaction) {
             color = if (isCredit) Color(0xFF86EFAC) else Color(0xFFFCA5A5),
         )
         Spacer(Modifier.height(4.dp))
-        Text(fmtTxnDateShort(txn.transactionDate), fontSize = 13.sp, color = Color.White.copy(alpha = 0.7f))
-        if (txn.isEmi) {
-            Spacer(Modifier.height(8.dp))
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White.copy(alpha = 0.2f))
-                    .padding(horizontal = 10.dp, vertical = 4.dp),
-            ) {
-                Text("EMI", fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
+        Text(fmtTxnDate(txn.transactionDate), fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
+        Spacer(Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (txn.isEmi) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.White.copy(alpha = 0.2f))
+                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                ) {
+                    Text("EMI", fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
+            if (txn.userVerified) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFF16A34A).copy(alpha = 0.3f))
+                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                ) {
+                    Text("✓ Verified", fontSize = 10.sp, color = Color(0xFF4ADE80), fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
@@ -245,18 +273,18 @@ private fun DetailsCard(txn: ParsedTransaction, onReassign: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Details", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF64748B))
-            Spacer(Modifier.height(12.dp))
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+            Text("Details", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF94A3B8))
+            Spacer(Modifier.height(8.dp))
 
             if (!txn.merchantName.isNullOrBlank()) {
                 DetailRow(label = "Merchant", value = txn.merchantName)
+                RowDivider()
             }
             DetailRow(label = "Bank", value = txn.bankName)
-            DetailRow(
-                label = "Account",
-                value = "${txn.bankName} ···· ${txn.accountLast4}",
-            )
+            RowDivider()
+            DetailRow(label = "Account", value = "···· ···· ···· ${txn.accountLast4}")
+            RowDivider()
             // Category with re-assign chip
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
@@ -277,9 +305,7 @@ private fun DetailsCard(txn: ParsedTransaction, onReassign: () -> Unit) {
                         containerColor = meta.color.copy(alpha = 0.1f),
                         contentColor = meta.color,
                     ),
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp, meta.color.copy(alpha = 0.3f),
-                    ),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, meta.color.copy(alpha = 0.3f)),
                     shape = RoundedCornerShape(8.dp),
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(12.dp))
@@ -288,18 +314,26 @@ private fun DetailsCard(txn: ParsedTransaction, onReassign: () -> Unit) {
                 }
             }
             if (!txn.subCategory.isNullOrBlank()) {
+                RowDivider()
                 DetailRow(label = "Sub-category", value = txn.subCategory)
             }
             if (!txn.vpa.isNullOrBlank()) {
+                RowDivider()
                 DetailRow(label = "VPA", value = txn.vpa)
             }
             if (!txn.utrRef.isNullOrBlank()) {
+                RowDivider()
                 DetailRow(label = "UTR/Ref", value = txn.utrRef)
             }
-            DetailRow(label = "Confidence", value = "${txn.confidenceScore}%")
-            DetailRow(label = "Direction", value = if (txn.direction == TransactionDirection.CREDIT) "CREDIT" else "DEBIT")
+            RowDivider()
+            ConfidenceRow(score = txn.confidenceScore)
         }
     }
+}
+
+@Composable
+private fun RowDivider() {
+    HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 1.dp)
 }
 
 @Composable
@@ -316,6 +350,39 @@ private fun DetailRow(label: String, value: String) {
             color = Slate800,
             modifier = Modifier.weight(1f),
         )
+    }
+}
+
+@Composable
+private fun ConfidenceRow(score: Int) {
+    val (label, barColor) = when {
+        score >= 80 -> "High" to SafeGreen
+        score >= 50 -> "Medium" to Amber700
+        else -> "Low" to UrgentRed
+    }
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Confidence", fontSize = 13.sp, color = Color(0xFF94A3B8), modifier = Modifier.width(100.dp))
+            Text(
+                "$score% — $label",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                color = barColor,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Row {
+            Spacer(Modifier.width(100.dp))
+            LinearProgressIndicator(
+                progress = { score / 100f },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp)),
+                color = barColor,
+                trackColor = Color(0xFFF1F5F9),
+            )
+        }
     }
 }
 
@@ -348,11 +415,15 @@ private fun ExpandableSmsSection(rawBody: String) {
                     color = Color(0xFF92400E),
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(
+                IconButton(
                     onClick = { expanded = !expanded },
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                    modifier = Modifier.size(32.dp),
                 ) {
-                    Text(if (expanded) "Hide" else "Show", fontSize = 12.sp, color = Color(0xFFD97706))
+                    Icon(
+                        if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (expanded) "Collapse SMS" else "Expand SMS",
+                        tint = Color(0xFF94A3B8),
+                    )
                 }
             }
             AnimatedVisibility(
@@ -360,16 +431,19 @@ private fun ExpandableSmsSection(rawBody: String) {
                 enter = expandVertically(),
                 exit = shrinkVertically(),
             ) {
-                HorizontalDivider(color = Color(0xFFFDE68A))
-                Text(
-                    rawBody,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    fontSize = 12.sp,
-                    color = Color(0xFF78350F),
-                    lineHeight = 18.sp,
-                )
+                Column {
+                    HorizontalDivider(color = Color(0xFFFDE68A))
+                    Text(
+                        rawBody,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = Color(0xFF78350F),
+                        lineHeight = 18.sp,
+                    )
+                }
             }
         }
     }
@@ -378,7 +452,9 @@ private fun ExpandableSmsSection(rawBody: String) {
 // ─── Notes section ─────────────────────────────────────────────────────────────
 
 @Composable
-private fun NotesSection(notes: String?) {
+private fun NotesSection(initialNotes: String?, onSave: (String) -> Unit) {
+    var noteText by remember { mutableStateOf(initialNotes ?: "") }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -391,19 +467,32 @@ private fun NotesSection(notes: String?) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Notes, contentDescription = null, tint = Color(0xFF94A3B8), modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Notes", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF64748B))
+                Text("Notes", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF64748B))
             }
             Spacer(Modifier.height(8.dp))
-            if (notes.isNullOrBlank()) {
-                Text(
-                    "No notes added.",
-                    fontSize = 13.sp,
-                    color = Color(0xFFCBD5E1),
-                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                )
-            } else {
-                Text(notes, fontSize = 14.sp, color = Slate800, lineHeight = 20.sp)
-            }
+            OutlinedTextField(
+                value = noteText,
+                onValueChange = { noteText = it },
+                placeholder = {
+                    Text("Add a note…", fontSize = 13.sp, color = Color(0xFFCBD5E1))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { if (!it.isFocused) onSave(noteText) },
+                minLines = 2,
+                textStyle = LocalTextStyle.current.copy(
+                    fontSize = 14.sp,
+                    color = Slate800,
+                    lineHeight = 20.sp,
+                ),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = Color(0xFFE2E8F0),
+                    focusedBorderColor = Indigo600,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                ),
+                shape = RoundedCornerShape(8.dp),
+            )
         }
     }
 }
@@ -477,40 +566,38 @@ private fun BottomActionBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        OutlinedButton(
-            onClick = onToggleVerified,
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(12.dp),
-            colors = if (isVerified)
-                ButtonDefaults.outlinedButtonColors(
-                    containerColor = SafeGreen.copy(alpha = 0.08f),
-                    contentColor = SafeGreen,
-                )
-            else ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF64748B)),
-            border = androidx.compose.foundation.BorderStroke(
-                1.dp,
-                if (isVerified) SafeGreen.copy(alpha = 0.4f) else Color(0xFFE2E8F0),
+        Switch(
+            checked = isVerified,
+            onCheckedChange = { onToggleVerified() },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = SafeGreen,
+                uncheckedThumbColor = Color.White,
+                uncheckedTrackColor = Color(0xFFE2E8F0),
+                uncheckedBorderColor = Color(0xFFCBD5E1),
             ),
-        ) {
-            Icon(
-                if (isVerified) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-            )
-            Spacer(Modifier.width(6.dp))
+        )
+        Spacer(Modifier.width(10.dp))
+        Column {
             Text(
-                if (isVerified) "Verified" else "Mark Verified",
+                "Mark Verified",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
+                color = Slate800,
+            )
+            Text(
+                if (isVerified) "✓ Verified" else "Not verified",
+                fontSize = 11.sp,
+                color = if (isVerified) SafeGreen else Color(0xFF94A3B8),
+                fontWeight = FontWeight.Medium,
             )
         }
-
+        Spacer(Modifier.weight(1f))
         Button(
             onClick = onEdit,
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
         ) {
             Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
