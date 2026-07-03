@@ -3,13 +3,16 @@ package com.emireminder.app.ui.screens.smsdashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.emireminder.app.data.db.dao.ParsedTransactionDao
+import com.emireminder.app.data.db.entity.BankAccount
 import com.emireminder.app.data.db.entity.ParsedTransaction
 import com.emireminder.app.data.preferences.UserPreferencesRepository
+import com.emireminder.app.data.repository.BankAccountRepository
 import com.emireminder.app.domain.model.TransactionCategory
 import com.emireminder.app.domain.model.TransactionDirection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -18,6 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SmsDashboardViewModel @Inject constructor(
     private val transactionDao: ParsedTransactionDao,
+    private val bankAccountRepository: BankAccountRepository,
     private val prefsRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
@@ -34,18 +38,37 @@ class SmsDashboardViewModel @Inject constructor(
             transactionDao.getByMonth(prev)
         }
 
+    private val allAccounts: Flow<List<BankAccount>> = bankAccountRepository.getAllAccounts()
+    private val pendingLabelAccounts: Flow<List<BankAccount>> = bankAccountRepository.getAccountsNeedingPrompt()
+
     val uiState: StateFlow<SmsDashboardUiState> = combine(
         _yearMonth,
         currentTxns,
         previousTxns,
-        prefsRepository.userPreferences.map { it.currencySymbol },
-    ) { ym, current, previous, currency ->
+        allAccounts,
+        pendingLabelAccounts,
+    ) { args ->
+        val ym = args[0] as String
+        @Suppress("UNCHECKED_CAST")
+        val current = args[1] as List<ParsedTransaction>
+        @Suppress("UNCHECKED_CAST")
+        val previous = args[2] as List<ParsedTransaction>
+        @Suppress("UNCHECKED_CAST")
+        val accounts = args[3] as List<BankAccount>
+        @Suppress("UNCHECKED_CAST")
+        val pending = args[4] as List<BankAccount>
+        Triple(ym, current to previous, accounts to pending)
+    }.combine(prefsRepository.userPreferences.map { it.currencySymbol }) { (ym, txPair, acctPair), currency ->
+        val (current, previous) = txPair
+        val (accounts, pending) = acctPair
         SmsDashboardUiState(
             selectedYearMonth = ym,
             isLoading = false,
             summary = computeSummary(current),
             previousSummary = if (previous.isNotEmpty()) computeSummary(previous) else null,
             categorySummaries = buildCategories(current),
+            accountsNeedingLabel = pending,
+            accountSummaries = buildAccountSummaries(current, accounts),
             currencySymbol = currency,
             hasTransactions = current.isNotEmpty(),
         )
@@ -63,6 +86,27 @@ class SmsDashboardViewModel @Inject constructor(
         val next = YearMonth.parse(_yearMonth.value, fmt).plusMonths(1)
         if (!next.isAfter(YearMonth.now())) {
             _yearMonth.value = next.format(fmt)
+        }
+    }
+
+    /** Call when the prompt card for [account] is first rendered. Sets label_prompted_at. */
+    fun onPromptShown(account: BankAccount) {
+        viewModelScope.launch {
+            bankAccountRepository.markPromptShown(account.id)
+        }
+    }
+
+    /** User selected a pre-defined or custom label for [account]. */
+    fun applyLabel(account: BankAccount, label: String) {
+        viewModelScope.launch {
+            bankAccountRepository.applyLabel(account.id, label)
+        }
+    }
+
+    /** User tapped Skip on the labelling prompt. */
+    fun skipLabel(account: BankAccount) {
+        viewModelScope.launch {
+            bankAccountRepository.skipLabel(account.id)
         }
     }
 
@@ -90,4 +134,23 @@ class SmsDashboardViewModel @Inject constructor(
                 )
             }
             .sortedByDescending { it.totalAmount }
+
+    private fun buildAccountSummaries(
+        txns: List<ParsedTransaction>,
+        accounts: List<BankAccount>,
+    ): List<AccountSummary> {
+        val accountMap = accounts.associateBy { it.id }
+        return txns
+            .filter { it.direction == TransactionDirection.DEBIT }
+            .groupBy { it.bankAccountId }
+            .mapNotNull { (accountId, list) ->
+                val account = accountMap[accountId] ?: return@mapNotNull null
+                AccountSummary(
+                    account = account,
+                    totalAmount = list.sumOf { it.amount },
+                    transactionCount = list.size,
+                )
+            }
+            .sortedByDescending { it.totalAmount }
+    }
 }

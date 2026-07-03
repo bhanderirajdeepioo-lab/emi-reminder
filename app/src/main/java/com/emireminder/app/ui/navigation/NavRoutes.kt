@@ -22,6 +22,7 @@ object NavRoutes {
     const val LOAN_DETAIL        = "loan_detail/{loanId}"
     const val SMS_IMPORT                    = "sms_import"
     const val SMS_INTELLIGENCE_ONBOARDING   = "sms_intelligence_onboarding"
+    const val SMS_HISTORICAL_SCAN           = "sms_historical_scan"
     const val SETTINGS           = "settings"
     const val NOTIFICATION       = "notification"
 
@@ -44,6 +45,9 @@ object NavRoutes {
 
     // --- SMS Finance Dashboard (HEL-569) ---
     const val SMS_MONTHLY_REPORT      = "sms_monthly_report/{yearMonth}"
+
+    // --- Finance Accounts (HEL-570) ---
+    const val FINANCE_ACCOUNTS        = "finance_accounts"
 
     // --- New Finance Tools (HEL-538) ---
     const val PPF_CALCULATOR          = "ppf_calculator"

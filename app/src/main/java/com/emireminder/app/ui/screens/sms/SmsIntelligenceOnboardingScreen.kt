@@ -32,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.emireminder.app.service.SmsMonitorController
 import com.emireminder.app.ui.theme.*
 
 private data class BenefitItem(
@@ -72,6 +73,7 @@ fun SmsIntelligenceOnboardingScreen(
 
     LaunchedEffect(uiState) {
         if (uiState is SmsIntelligenceUiState.Granted) {
+            SmsMonitorController.start(context)
             onGranted()
         }
     }

@@ -31,6 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.emireminder.app.data.db.entity.BankAccount
 import com.emireminder.app.data.db.entity.ParsedTransaction
 import com.emireminder.app.domain.model.TransactionDirection
 import com.emireminder.app.ui.theme.*
@@ -67,6 +68,7 @@ private fun displayMonth(yearMonth: String): String = runCatching {
 fun SmsDashboardScreen(
     onNavigateToFinanceToolsHub: () -> Unit,
     onNavigateToMonthlyReport: (String) -> Unit,
+    onNavigateToFinanceAccounts: () -> Unit = {},
     viewModel: SmsDashboardViewModel = hiltViewModel(),
 ) {
     val smsPermissions = rememberMultiplePermissionsState(
@@ -137,6 +139,19 @@ fun SmsDashboardScreen(
                 }
 
                 else -> {
+                    // Account labelling prompt — shown first when a new account needs a label
+                    if (uiState.accountsNeedingLabel.isNotEmpty()) {
+                        item(key = "label_prompt") {
+                            Spacer(Modifier.height(12.dp))
+                            AccountLabelPromptCard(
+                                account = uiState.accountsNeedingLabel.first(),
+                                onPromptShown = viewModel::onPromptShown,
+                                onLabel = { acc, label -> viewModel.applyLabel(acc, label) },
+                                onSkip = viewModel::skipLabel,
+                            )
+                        }
+                    }
+
                     item {
                         Spacer(Modifier.height(12.dp))
                         MonthlySummaryCard(
@@ -165,6 +180,53 @@ fun SmsDashboardScreen(
                     ) { catSummary ->
                         CategoryRow(summary = catSummary, currencySymbol = uiState.currencySymbol)
                         Spacer(Modifier.height(8.dp))
+                    }
+
+                    // By Account section
+                    if (uiState.accountSummaries.isNotEmpty()) {
+                        item {
+                            Spacer(Modifier.height(8.dp))
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    "By Account",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF64748B),
+                                )
+                                TextButton(
+                                    onClick = onNavigateToFinanceAccounts,
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                ) {
+                                    Text(
+                                        "Manage",
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF818CF8),
+                                        fontWeight = FontWeight.SemiBold,
+                                    )
+                                    Icon(
+                                        Icons.Default.ChevronRight,
+                                        contentDescription = null,
+                                        tint = Color(0xFF818CF8),
+                                        modifier = Modifier.size(14.dp),
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.height(8.dp))
+                        }
+
+                        items(
+                            items = uiState.accountSummaries,
+                            key = { it.account.id },
+                        ) { acctSummary ->
+                            AccountSummaryRow(summary = acctSummary, currencySymbol = uiState.currencySymbol)
+                            Spacer(Modifier.height(8.dp))
+                        }
                     }
                 }
             }
@@ -487,6 +549,185 @@ private fun EmptyStateContent(month: String) {
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
         )
+    }
+}
+
+// ─── Account label prompt card ─────────────────────────────────────────────────
+
+@Composable
+private fun AccountLabelPromptCard(
+    account: BankAccount,
+    onPromptShown: (BankAccount) -> Unit,
+    onLabel: (BankAccount, String) -> Unit,
+    onSkip: (BankAccount) -> Unit,
+) {
+    var showCustomInput by remember { mutableStateOf(false) }
+    var customText by remember { mutableStateOf("") }
+
+    LaunchedEffect(account.id) {
+        onPromptShown(account)
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFBEB)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFFDE68A)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(Icons.Default.AccountBalance, contentDescription = null, tint = Color(0xFF92400E), modifier = Modifier.size(18.dp))
+                }
+                Spacer(Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "New account detected",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF92400E),
+                    )
+                    Text(
+                        "${account.bankName} account ·· ${account.accountLast4}",
+                        fontSize = 12.sp,
+                        color = Color(0xFFB45309),
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            Text(
+                "What is this account?",
+                fontSize = 13.sp,
+                color = Color(0xFF78350F),
+                fontWeight = FontWeight.Medium,
+            )
+
+            if (showCustomInput) {
+                Spacer(Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = customText,
+                    onValueChange = { customText = it },
+                    placeholder = { Text("e.g. Business Account", fontSize = 13.sp) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFFD97706),
+                        unfocusedBorderColor = Color(0xFFFCD34D),
+                    ),
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                    TextButton(onClick = { showCustomInput = false; customText = "" }) {
+                        Text("Cancel", color = Color(0xFF6B7280))
+                    }
+                    Spacer(Modifier.width(4.dp))
+                    Button(
+                        onClick = { onLabel(account, customText.trim()) },
+                        enabled = customText.isNotBlank(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD97706)),
+                    ) {
+                        Text("Save")
+                    }
+                }
+            } else {
+                Spacer(Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    QuickLabelChip("Salary Account", onClick = { onLabel(account, "Salary Account") }, modifier = Modifier.weight(1f))
+                    QuickLabelChip("Savings Account", onClick = { onLabel(account, "Savings Account") }, modifier = Modifier.weight(1f))
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    OutlinedButton(
+                        onClick = { showCustomInput = true },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFD97706)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFCD34D)),
+                    ) {
+                        Text("Other…", fontSize = 12.sp)
+                    }
+                    OutlinedButton(
+                        onClick = { onSkip(account) },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF6B7280)),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE5E7EB)),
+                    ) {
+                        Text("Skip", fontSize = 12.sp)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun QuickLabelChip(label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(8.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD97706)),
+    ) {
+        Text(label, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+// ─── Account summary row ────────────────────────────────────────────────────────
+
+@Composable
+private fun AccountSummaryRow(summary: AccountSummary, currencySymbol: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Indigo600.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Default.AccountBalance, contentDescription = null, tint = Indigo600, modifier = Modifier.size(20.dp))
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(summary.displayName, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Slate800)
+                Text(
+                    "${summary.transactionCount} transaction${if (summary.transactionCount != 1) "s" else ""}",
+                    fontSize = 12.sp,
+                    color = Color(0xFF94A3B8),
+                )
+            }
+            Text(fmtAmt(currencySymbol, summary.totalAmount), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Slate800)
+        }
     }
 }
 

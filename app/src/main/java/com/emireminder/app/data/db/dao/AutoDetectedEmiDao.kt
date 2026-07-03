@@ -31,4 +31,27 @@ interface AutoDetectedEmiDao {
 
     @Query("DELETE FROM auto_detected_emis WHERE id = :id")
     suspend fun deleteById(id: String)
+
+    @Query("""
+        SELECT * FROM auto_detected_emis
+        WHERE lender_name = :lenderName AND loan_account_last4 = :loanAccountLast4
+        AND status = 'CONFIRMED'
+        ORDER BY detected_date DESC LIMIT 1
+    """)
+    suspend fun findConfirmedByLenderAndAccount(lenderName: String, loanAccountLast4: String): AutoDetectedEmi?
+
+    @Query("""
+        SELECT * FROM auto_detected_emis
+        WHERE lender_name = :lenderName AND loan_account_last4 = :loanAccountLast4
+        AND status = 'PENDING_CONFIRM'
+        ORDER BY detected_date DESC LIMIT 1
+    """)
+    suspend fun findPendingByLenderAndAccount(lenderName: String, loanAccountLast4: String): AutoDetectedEmi?
+
+    @Query("""
+        SELECT detected_date FROM auto_detected_emis
+        WHERE lender_name = :lenderName AND loan_account_last4 = :loanAccountLast4
+        ORDER BY detected_date DESC LIMIT :count
+    """)
+    suspend fun getRecentDetectionDates(lenderName: String, loanAccountLast4: String, count: Int): List<Long>
 }

@@ -49,6 +49,7 @@ import java.util.*
 fun SettingsScreen(
     onBack: () -> Unit,
     onNavigateToSmsIntelligence: () -> Unit = {},
+    onNavigateToFinanceAccounts: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val prefs by viewModel.prefs.collectAsStateWithLifecycle()
@@ -435,6 +436,16 @@ fun SettingsScreen(
                             "Tap to set up SMS Intelligence",
                         value = null,
                         onClick = onNavigateToSmsIntelligence,
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
+                    NavigableSettingRow(
+                        icon = Icons.Default.AccountBalance,
+                        iconBg = Color(0xFFEFF6FF),
+                        iconTint = HomeLoanColor,
+                        label = "Finance Accounts",
+                        subtitle = "Label and manage detected bank accounts",
+                        value = null,
+                        onClick = onNavigateToFinanceAccounts,
                     )
                 }
             }

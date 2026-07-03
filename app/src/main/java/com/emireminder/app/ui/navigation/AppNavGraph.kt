@@ -35,6 +35,7 @@ import androidx.navigation.navArgument
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.ui.screens.calculator.*
 import com.emireminder.app.ui.screens.finance.*
+import com.emireminder.app.ui.screens.financeaccounts.FinanceAccountsScreen
 import com.emireminder.app.ui.screens.home.HomeScreen
 import com.emireminder.app.ui.screens.smsdashboard.MonthlyReportScreen
 import com.emireminder.app.ui.screens.smsdashboard.SmsDashboardScreen
@@ -440,6 +441,9 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                     onNavigateToSmsIntelligence = {
                         navController.navigate(NavRoutes.SMS_INTELLIGENCE_ONBOARDING) { launchSingleTop = true }
                     },
+                    onNavigateToFinanceAccounts = {
+                        navController.navigate(NavRoutes.FINANCE_ACCOUNTS) { launchSingleTop = true }
+                    },
                 )
             }
 
@@ -512,9 +516,15 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             // 20 — Finance Dashboard (bottom tab, SMS Finance Intelligence)
             composable(NavRoutes.FINANCE) {
                 SmsDashboardScreen(
-                    onNavigateToFinanceToolsHub = { navController.navigate(NavRoutes.FINANCE_TOOLS_HUB) },
-                    onNavigateToMonthlyReport   = { ym -> navController.navigate(NavRoutes.smsMonthlyReport(ym)) { launchSingleTop = true } },
+                    onNavigateToFinanceToolsHub  = { navController.navigate(NavRoutes.FINANCE_TOOLS_HUB) },
+                    onNavigateToMonthlyReport    = { ym -> navController.navigate(NavRoutes.smsMonthlyReport(ym)) { launchSingleTop = true } },
+                    onNavigateToFinanceAccounts  = { navController.navigate(NavRoutes.FINANCE_ACCOUNTS) { launchSingleTop = true } },
                 )
+            }
+
+            // 20d — Finance Accounts (Settings → Finance Accounts / "Manage" button in Finance tab)
+            composable(NavRoutes.FINANCE_ACCOUNTS) {
+                FinanceAccountsScreen(onBack = { navController.popBackStack() })
             }
 
             // 20b — SMS Monthly Report (drill-down from Finance Dashboard)

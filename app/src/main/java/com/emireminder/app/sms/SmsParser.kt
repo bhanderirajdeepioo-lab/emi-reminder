@@ -319,6 +319,43 @@ object SmsParser {
         else                                                                   -> TransactionCategory.UNKNOWN
     }
 
+    // ── Public helpers for BankAccount resolution ─────────────────────────────
+
+    /** Strips the 2-char telecom prefix from DLT sender IDs (e.g. "AX-HDFCBK" → "HDFCBK"). */
+    fun normalizeSenderId(address: String): String {
+        val upper = address.uppercase().trim()
+        return if (upper.length > 3 && upper[2] == '-') upper.substring(3) else upper
+    }
+
+    /** Returns a human-readable bank name from the sender ID or body text. */
+    fun extractBankName(senderAddress: String, body: String): String {
+        BODY_BANK_RE.find(body)?.value?.trim()?.let { return it }
+        val upper = senderAddress.uppercase()
+        return when {
+            "HDFC" in upper    -> "HDFC Bank"
+            "SBI" in upper     -> "State Bank of India"
+            "ICICI" in upper   -> "ICICI Bank"
+            "AXIS" in upper || "UTIBOP" in upper -> "Axis Bank"
+            "KOTAK" in upper   -> "Kotak Mahindra Bank"
+            "PNB" in upper     -> "Punjab National Bank"
+            "BOIIND" in upper  -> "Bank of India"
+            "CANARA" in upper  -> "Canara Bank"
+            "UCO" in upper     -> "UCO Bank"
+            "IDBI" in upper    -> "IDBI Bank"
+            "YES" in upper     -> "Yes Bank"
+            "INDUSLND" in upper || "INDUS" in upper -> "IndusInd Bank"
+            "BARODA" in upper  -> "Bank of Baroda"
+            "IDFCFB" in upper  -> "IDFC First Bank"
+            "FEDBK" in upper || "FEDBNK" in upper -> "Federal Bank"
+            "RBLBNK" in upper  -> "RBL Bank"
+            "AUBANK" in upper  -> "AU Small Finance Bank"
+            "PAYTMB" in upper  -> "Paytm Payments Bank"
+            "CENTBNK" in upper -> "Central Bank of India"
+            "INDBNK" in upper  -> "Indian Bank"
+            else -> senderAddress.substringAfter("-").ifBlank { senderAddress }
+        }
+    }
+
     /**
      * PRD §5.4: known sender + amount + date = 90+; < 50 → analytics-only.
      *

@@ -25,6 +25,8 @@ data class UserPreferences(
     val userName: String = "",
     val smsIntelligenceEnabled: Boolean = false,
     val smsNudgeDismissedAt: Long = 0L,
+    val smsHistoricalScanDone: Boolean = false,
+    val smsHistoricalAdShown: Boolean = false,
 ) {
     val currencySymbol: String get() = when (currency) {
         "USD" -> "$"
@@ -53,6 +55,8 @@ class UserPreferencesRepository @Inject constructor(
         val USER_NAME                  = stringPreferencesKey("user_name")
         val SMS_INTELLIGENCE_ENABLED   = booleanPreferencesKey("sms_intelligence_enabled")
         val SMS_NUDGE_DISMISSED_AT     = longPreferencesKey("sms_nudge_dismissed_at")
+        val SMS_HISTORICAL_SCAN_DONE   = booleanPreferencesKey("sms_historical_scan_done")
+        val SMS_HISTORICAL_AD_SHOWN    = booleanPreferencesKey("sms_historical_ad_shown")
     }
 
     val userPreferences: Flow<UserPreferences> = context.dataStore.data
@@ -71,6 +75,8 @@ class UserPreferencesRepository @Inject constructor(
                 userName                 = prefs[Keys.USER_NAME]                  ?: "",
                 smsIntelligenceEnabled   = prefs[Keys.SMS_INTELLIGENCE_ENABLED]   ?: false,
                 smsNudgeDismissedAt      = prefs[Keys.SMS_NUDGE_DISMISSED_AT]     ?: 0L,
+                smsHistoricalScanDone    = prefs[Keys.SMS_HISTORICAL_SCAN_DONE]  ?: false,
+                smsHistoricalAdShown     = prefs[Keys.SMS_HISTORICAL_AD_SHOWN]   ?: false,
             )
         }
 
@@ -109,4 +115,10 @@ class UserPreferencesRepository @Inject constructor(
 
     suspend fun setSmsNudgeDismissedAt(epochMs: Long) =
         context.dataStore.edit { it[Keys.SMS_NUDGE_DISMISSED_AT] = epochMs }
+
+    suspend fun setSmsHistoricalScanDone(done: Boolean) =
+        context.dataStore.edit { it[Keys.SMS_HISTORICAL_SCAN_DONE] = done }
+
+    suspend fun setSmsHistoricalAdShown(shown: Boolean) =
+        context.dataStore.edit { it[Keys.SMS_HISTORICAL_AD_SHOWN] = shown }
 }

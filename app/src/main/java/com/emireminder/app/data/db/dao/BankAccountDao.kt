@@ -30,4 +30,16 @@ interface BankAccountDao {
 
     @Query("SELECT COUNT(*) FROM bank_accounts WHERE sender_id = :senderId")
     suspend fun countBySenderId(senderId: String): Int
+
+    /**
+     * Returns accounts that need a labelling prompt:
+     * - labelPromptedAt is null (prompt not yet shown)
+     * - AND another account from the same sender exists (second account at same bank)
+     */
+    @Query("""
+        SELECT * FROM bank_accounts
+        WHERE label_prompted_at IS NULL
+        AND (SELECT COUNT(*) FROM bank_accounts b2 WHERE b2.sender_id = bank_accounts.sender_id) > 1
+    """)
+    fun getAccountsNeedingPrompt(): Flow<List<BankAccount>>
 }
