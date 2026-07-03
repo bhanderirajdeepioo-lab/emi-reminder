@@ -74,6 +74,10 @@ class SettingsViewModel @Inject constructor(
         prefsRepository.setSmsImportEnabled(enabled)
     }
 
+    fun setUserName(name: String) = viewModelScope.launch {
+        prefsRepository.setUserName(name.trim())
+    }
+
     suspend fun getActiveLoansForExport(): List<Loan> = loanRepository.getActiveLoansOnce()
 
     fun performBackup(uri: Uri) = viewModelScope.launch {

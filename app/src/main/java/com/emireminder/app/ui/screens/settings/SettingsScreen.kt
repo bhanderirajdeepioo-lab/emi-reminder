@@ -61,6 +61,7 @@ fun SettingsScreen(
     var showThemePicker by remember { mutableStateOf(false) }
     var showCurrencyPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
+    var showNameEditor by remember { mutableStateOf(false) }
 
     val dateTag = remember { SimpleDateFormat("yyyyMMdd_HHmm", Locale.US).format(Date()) }
 
@@ -89,6 +90,17 @@ fun SettingsScreen(
     val notifPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
         rememberPermissionState(android.Manifest.permission.POST_NOTIFICATIONS)
     } else null
+
+    if (showNameEditor) {
+        NameEditDialog(
+            current = prefs.userName,
+            onDismiss = { showNameEditor = false },
+            onConfirm = { name ->
+                viewModel.setUserName(name)
+                showNameEditor = false
+            },
+        )
+    }
 
     if (showAdvanceDaysPicker) {
         AdvanceDaysDialog(
@@ -178,9 +190,8 @@ fun SettingsScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        Brush.linearGradient(listOf(Indigo600, Violet600))
-                    )
+                    .background(Brush.linearGradient(listOf(Indigo600, Violet600)))
+                    .clickable { showNameEditor = true }
                     .padding(16.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -191,20 +202,26 @@ fun SettingsScreen(
                             .background(Color(0xFF312E81)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(
-                            Icons.Default.Person,
-                            contentDescription = null,
-                            tint = Color(0xFFA5B4FC),
-                            modifier = Modifier.size(32.dp),
-                        )
+                        if (prefs.userName.isNotBlank()) {
+                            val initials = prefs.userName.trim().split(" ").take(2)
+                                .mapNotNull { it.firstOrNull()?.uppercase() }.joinToString("")
+                            Text(initials, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        } else {
+                            Icon(Icons.Default.Person, contentDescription = null, tint = Color(0xFFA5B4FC), modifier = Modifier.size(32.dp))
+                        }
                     }
                     Spacer(Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Your Profile", fontWeight = FontWeight.Bold, fontSize = 17.sp, color = Color.White)
-                        Text("Tap to set up name & photo", fontSize = 13.sp, color = Color(0xFFC7D2FE))
-                        Text("EMI Reminder App", fontSize = 11.sp, color = Color(0xFFA5B4FC))
+                        Text(
+                            if (prefs.userName.isNotBlank()) prefs.userName else "Your Profile",
+                            fontWeight = FontWeight.Bold, fontSize = 17.sp, color = Color.White,
+                        )
+                        Text(
+                            if (prefs.userName.isNotBlank()) "Tap to edit your name" else "Tap to set up your name",
+                            fontSize = 13.sp, color = Color(0xFFC7D2FE),
+                        )
                     }
-                    // Edit icon hidden until profile-edit feature is implemented
+                    Icon(Icons.Default.Edit, contentDescription = "Edit name", tint = Color(0xFFA5B4FC), modifier = Modifier.size(20.dp))
                 }
             }
 
@@ -678,6 +695,33 @@ private suspend fun exportLoansCsv(context: Context, loans: List<Loan>) {
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
     context.startActivity(Intent.createChooser(intent, "Export Loan Data"))
+}
+
+@Composable
+private fun NameEditDialog(
+    current: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit,
+) {
+    var name by remember { mutableStateOf(current) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Your Name") },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Full name") },
+                placeholder = { Text("e.g. Raj Bhanderi") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) { Text("Save") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
 }
 
 private data class LanguageOption(val displayName: String, val tag: String)
