@@ -215,20 +215,25 @@ private fun CompactField(label: String, value: String, onChange: (String) -> Uni
 private fun CompareRow3(label: String, value1: String, value2: String, good1: Boolean, good2: Boolean) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(label, modifier = Modifier.weight(1.2f), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(
-            value1,
-            modifier = Modifier.weight(1f),
-            fontSize = 12.sp,
-            fontWeight = if (good1) FontWeight.ExtraBold else FontWeight.Normal,
-            color = if (good1) SafeGreen else MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            value2,
-            modifier = Modifier.weight(1f),
-            fontSize = 12.sp,
-            fontWeight = if (good2) FontWeight.ExtraBold else FontWeight.Normal,
-            color = if (good2) SafeGreen else MaterialTheme.colorScheme.onSurface,
-        )
+        CompareValueCell(value1, good1, Modifier.weight(1f))
+        CompareValueCell(value2, good2, Modifier.weight(1f))
     }
     Divider()
+}
+
+@Composable
+private fun CompareValueCell(value: String, isBetter: Boolean, modifier: Modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(value, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+        if (isBetter) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(SafeGreen)
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
+            ) {
+                Text("Better", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+            }
+        }
+    }
 }
