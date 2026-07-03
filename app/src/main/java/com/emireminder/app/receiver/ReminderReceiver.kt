@@ -37,6 +37,7 @@ class ReminderReceiver : BroadcastReceiver() {
             action = NotificationActionReceiver.ACTION_MARK_PAID,
             reminderId = reminderId,
             notificationId = reminderId,
+            loanId = loanId,
             loanName = loanName,
             emiAmount = emiAmount,
             upiVpa = upiVpa,
@@ -50,16 +51,6 @@ class ReminderReceiver : BroadcastReceiver() {
             loanName = loanName,
             emiAmount = emiAmount,
             upiVpa = upiVpa,
-        )
-        val markPaidPending = actionPending(
-            context,
-            requestCode = reminderId * 10 + 4,
-            action = NotificationActionReceiver.ACTION_MARK_PAID,
-            reminderId = reminderId,
-            notificationId = reminderId,
-            loanId = loanId,
-            loanName = loanName,
-            emiAmount = emiAmount,
         )
 
         val notificationBuilder = NotificationCompat.Builder(context, EmiApp.CHANNEL_REMINDERS)
@@ -98,6 +89,7 @@ class ReminderReceiver : BroadcastReceiver() {
         action: String,
         reminderId: Int,
         notificationId: Int,
+        loanId: Int = -1,
         loanName: String,
         emiAmount: Double,
         upiVpa: String = "",
@@ -106,6 +98,7 @@ class ReminderReceiver : BroadcastReceiver() {
             this.action = action
             putExtra(NotificationScheduler.EXTRA_REMINDER_ID, reminderId)
             putExtra(NotificationActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+            putExtra(NotificationScheduler.EXTRA_LOAN_ID, loanId)
             putExtra(NotificationScheduler.EXTRA_LOAN_NAME, loanName)
             putExtra(NotificationScheduler.EXTRA_EMI_AMOUNT, emiAmount)
             putExtra(NotificationScheduler.EXTRA_UPI_VPA, upiVpa)
