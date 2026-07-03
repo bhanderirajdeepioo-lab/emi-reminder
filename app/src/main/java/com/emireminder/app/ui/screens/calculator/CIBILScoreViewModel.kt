@@ -24,6 +24,8 @@ data class CibilUiState(
     val scoreError: String? = null,
     val description: String = "",
     val tips: List<String> = emptyList(),
+    val triggerRewardedAd: Boolean = false,
+    val adShownThisSession: Boolean = false,
 )
 
 @HiltViewModel
@@ -52,6 +54,14 @@ class CIBILScoreViewModel @Inject constructor() : ViewModel() {
                 )
             }
         }
+    }
+
+    fun onRewardedAdTriggered() {
+        _uiState.value = _uiState.value.copy(triggerRewardedAd = true)
+    }
+
+    fun onRewardedAdConsumed() {
+        _uiState.value = _uiState.value.copy(triggerRewardedAd = false, adShownThisSession = true)
     }
 
     fun setNoHistory(value: Boolean) {
