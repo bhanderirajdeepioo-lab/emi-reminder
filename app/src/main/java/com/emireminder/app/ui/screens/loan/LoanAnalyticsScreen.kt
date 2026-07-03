@@ -23,6 +23,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
@@ -53,7 +56,7 @@ private data class DonutSlice(
 )
 
 private enum class AnalyticsPeriod(val label: String, val months: Int?) {
-    SIX_M("6M", 6), ONE_Y("1Y", 12), THREE_Y("3Y", 36), ALL("All", null)
+    THREE_M("3M", 3), SIX_M("6M", 6), ONE_Y("12M", 12), ALL("All", null)
 }
 
 @Composable
@@ -465,24 +468,65 @@ private fun LoanTypeDonutLegendRow(type: LoanType, emi: Double, total: Double, c
 
 @Composable
 private fun StackedBarChart(loans: List<Loan>, period: AnalyticsPeriod, colors: List<Color>, modifier: Modifier) {
-    val byCategory = loans.groupBy { it.type }.entries.sortedByDescending { it.value.sumOf { l -> l.emiAmount } }
-    val barCount = when (period) {
-        AnalyticsPeriod.SIX_M -> 6; AnalyticsPeriod.ONE_Y -> 12; AnalyticsPeriod.THREE_Y -> 36; AnalyticsPeriod.ALL -> 12
-    }.coerceAtMost(12)
-    val maxEmi = loans.sumOf { it.emiAmount }.toFloat().coerceAtLeast(1f)
+    val today = remember { LocalDate.now() }
+
+    val categoryOrder = remember(loans) {
+        loans.groupBy { it.type }
+            .entries.sortedByDescending { it.value.sumOf { l -> l.emiAmount } }
+            .map { it.key }
+    }
+
+    // Each entry: (month 1st-day, emi-per-category) — only loans active that month count
+    val bars: List<Pair<LocalDate, List<Float>>> = remember(loans, period) {
+        val endMonth = today.withDayOfMonth(1)
+        val startMonth = when (val m = period.months) {
+            null -> {
+                val earliest = loans.minOfOrNull { it.startDate }
+                    ?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate().withDayOfMonth(1) }
+                    ?: endMonth.minusMonths(11)
+                if (earliest.isBefore(endMonth.minusMonths(35))) endMonth.minusMonths(35) else earliest
+            }
+            else -> endMonth.minusMonths((m - 1).toLong())
+        }
+        val result = mutableListOf<Pair<LocalDate, List<Float>>>()
+        var month = startMonth
+        while (!month.isAfter(endMonth)) {
+            val amounts = categoryOrder.map { type ->
+                loans.filter { loan ->
+                    if (loan.type != type) return@filter false
+                    val loanStart = Instant.ofEpochMilli(loan.startDate)
+                        .atZone(ZoneId.systemDefault()).toLocalDate().withDayOfMonth(1)
+                    val loanEnd = loanStart.plusMonths(loan.tenureMonths.toLong())
+                    !loanStart.isAfter(month) && month.isBefore(loanEnd)
+                }.sumOf { it.emiAmount }.toFloat()
+            }
+            result.add(month to amounts)
+            month = month.plusMonths(1)
+        }
+        result
+    }
+
+    val maxTotal = (bars.maxOfOrNull { it.second.sum() } ?: 1f).coerceAtLeast(1f)
+    val textMeasurer = rememberTextMeasurer()
 
     Canvas(modifier = modifier) {
+        if (bars.isEmpty()) return@Canvas
+        val barCount = bars.size
+        val labelAreaH = with(drawContext.density) { 18.dp.toPx() }
         val w = size.width
-        val h = size.height - 16.dp.toPx()
-        val barWidth = (w / barCount * 0.6f)
-        val gap = (w / barCount * 0.4f)
+        val h = size.height - labelAreaH
+        val barWidth = (w / barCount * 0.65f).coerceAtLeast(2f)
+        val gap = w / barCount - barWidth
+        val showLabels = barWidth >= 18.dp.toPx()
 
-        for (barIdx in 0 until barCount) {
+        bars.forEachIndexed { barIdx, (_, amounts) ->
             val x = gap / 2 + barIdx * (barWidth + gap)
             var yBottom = h
-            byCategory.forEachIndexed { catIdx, (_, catLoans) ->
-                val catEmi = catLoans.sumOf { it.emiAmount }.toFloat()
-                val barH = (h * catEmi / maxEmi)
+            val total = amounts.sum()
+
+            amounts.forEachIndexed { catIdx, catEmi ->
+                if (catEmi <= 0f) return@forEachIndexed
+                val barH = h * catEmi / maxTotal
                 val color = colors.getOrElse(catIdx) { Indigo600 }
                 drawRect(
                     color = color,
@@ -490,6 +534,21 @@ private fun StackedBarChart(loans: List<Loan>, period: AnalyticsPeriod, colors: 
                     size = Size(barWidth, barH),
                 )
                 yBottom -= barH
+            }
+
+            if (showLabels && total > 0f) {
+                val label = "₹${formatLakh(total.toDouble())}"
+                val measured = textMeasurer.measure(
+                    text = label,
+                    style = TextStyle(fontSize = 9.sp, color = Color(0xFF64748B)),
+                )
+                drawText(
+                    textLayoutResult = measured,
+                    topLeft = Offset(
+                        x = (x + barWidth / 2 - measured.size.width / 2).coerceAtLeast(0f),
+                        y = (yBottom - measured.size.height - 2.dp.toPx()).coerceAtLeast(0f),
+                    ),
+                )
             }
         }
     }
