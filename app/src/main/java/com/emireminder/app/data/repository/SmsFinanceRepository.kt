@@ -175,22 +175,33 @@ class SmsFinanceRepository @Inject constructor(
     }
 
     private fun mapDirection(category: SmsCategory): TransactionDirection = when (category) {
-        SmsCategory.SALARY_CREDIT, SmsCategory.UPI_CREDIT -> TransactionDirection.CREDIT
-        else -> TransactionDirection.DEBIT
+        SmsCategory.SALARY_CREDIT,
+        SmsCategory.UPI_CREDIT,
+        SmsCategory.BANK_TRANSFER_CREDIT,
+        SmsCategory.LOAN_DISBURSAL,
+        SmsCategory.REFUND              -> TransactionDirection.CREDIT
+        else                            -> TransactionDirection.DEBIT
     }
 
     private fun mapCategory(category: SmsCategory): TransactionCategory = when (category) {
-        SmsCategory.EMI_DEBIT        -> TransactionCategory.EMI_AND_LOANS
-        SmsCategory.SALARY_CREDIT    -> TransactionCategory.INCOME
-        SmsCategory.UPI_CREDIT       -> TransactionCategory.INCOME
-        SmsCategory.UPI_DEBIT        -> TransactionCategory.UNCATEGORISED
-        SmsCategory.NEFT_IMPS        -> TransactionCategory.UNCATEGORISED
-        SmsCategory.ATM_WITHDRAWAL   -> TransactionCategory.ATM_AND_CASH
-        SmsCategory.CREDIT_CARD_BILL -> TransactionCategory.CREDIT_CARD
-        SmsCategory.UTILITY_BILL     -> TransactionCategory.UTILITIES
-        SmsCategory.INVESTMENT       -> TransactionCategory.INVESTMENTS
+        SmsCategory.EMI_DEBIT              -> TransactionCategory.EMI_AND_LOANS
+        SmsCategory.SALARY_CREDIT          -> TransactionCategory.INCOME
+        SmsCategory.UPI_CREDIT             -> TransactionCategory.INCOME
+        SmsCategory.UPI_DEBIT              -> TransactionCategory.UNCATEGORISED
+        SmsCategory.BANK_TRANSFER_DEBIT,
+        SmsCategory.BANK_TRANSFER_CREDIT   -> TransactionCategory.UNCATEGORISED
+        SmsCategory.ATM_WITHDRAWAL         -> TransactionCategory.ATM_AND_CASH
+        SmsCategory.CREDIT_CARD_BILL       -> TransactionCategory.CREDIT_CARD
+        SmsCategory.UTILITY_BILL           -> TransactionCategory.UTILITIES
+        SmsCategory.INVESTMENT             -> TransactionCategory.INVESTMENTS
+        SmsCategory.INSURANCE_PREMIUM      -> TransactionCategory.INSURANCE
+        SmsCategory.LOAN_DISBURSAL         -> TransactionCategory.INCOME
+        SmsCategory.TELECOM_RECHARGE       -> TransactionCategory.UTILITIES
+        SmsCategory.SUBSCRIPTION           -> TransactionCategory.ENTERTAINMENT
+        SmsCategory.REFUND                 -> TransactionCategory.INCOME
+        SmsCategory.BALANCE_ALERT,
         SmsCategory.IGNORED,
-        SmsCategory.UNKNOWN          -> TransactionCategory.UNCATEGORISED
+        SmsCategory.UNKNOWN                -> TransactionCategory.UNCATEGORISED
     }
 
     private fun parseTransactionDate(dateStr: String?, fallback: Long): Long {

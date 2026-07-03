@@ -79,14 +79,14 @@ class ParsedTransactionTest {
         assertTrue(result.confidenceScore >= 90)
     }
 
-    /** PRD §5.1 example 5 — NEFT Transfer (HDFC) */
+    /** PRD §5.1 example 5 — NEFT Transfer (HDFC) → BANK_TRANSFER_DEBIT (debit direction) */
     @Test fun prd_example5_neft_hdfc() {
         val result = SmsParser.parseTransaction(
             "HDFCBK",
             "HDFC Bank: Rs.25,000.00 transferred via NEFT from your a/c XX1234 on 01-Jul-2026.",
         )
         assertNotNull(result)
-        assertEquals(TransactionCategory.NEFT_IMPS, result!!.category)
+        assertEquals(TransactionCategory.BANK_TRANSFER_DEBIT, result!!.category)
         assertEquals(25000.0, result.amount, 0.01)
         assertTrue(result.confidenceScore >= 85)
     }
@@ -185,7 +185,7 @@ class ParsedTransactionTest {
     @Test fun unknownSender_noBodyBankMention_returnsNull() {
         val result = SmsParser.parseTransaction(
             "VM-OFFERS",
-            "Your EMI is due this month. Please pay Rs.5,000 immediately.",
+            "Your monthly dues are pending. Please settle Rs.5,000 before the deadline.",
         )
         assertNull("Unknown sender with no bank name in body must return null", result)
     }
@@ -240,7 +240,7 @@ class ParsedTransactionTest {
             "HDFCBK",
             "HDFC Bank: IMPS transfer of Rs.10,000 to beneficiary account on 15-Jul-26 from a/c XX1234.",
         )
-        assertEquals(TransactionCategory.NEFT_IMPS, result?.category)
+        assertEquals(TransactionCategory.BANK_TRANSFER_DEBIT, result?.category)
     }
 
     @Test fun classification_atmWithdrawal() {

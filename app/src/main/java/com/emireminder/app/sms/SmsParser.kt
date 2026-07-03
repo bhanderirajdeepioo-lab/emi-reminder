@@ -157,6 +157,46 @@ object SmsParser {
         "SHRIRAM", "SHRIRAMF",
         // Fullerton India
         "FULLERTONIN", "FULLRTN",
+        // LIC of India
+        "LICIND", "LICOFI", "LICPOL",
+        // HDFC Life Insurance
+        "HDFCLI", "HDFCLIFE",
+        // ICICI Prudential Life
+        "ICICIP", "ICICIPRU",
+        // SBI Life Insurance
+        "SBILI", "SBILIFC", "SBILIFE",
+        // Bajaj Allianz
+        "BAJALZ", "BAJAJAL", "BJALZ",
+        // Tata AIA
+        "TATAAI", "TATAAIG", "TATAAIA",
+        // Max Life Insurance
+        "MAXLIF", "MAXLIFE",
+        // Kotak Life Insurance
+        "KOTAKL", "KOTAKLIF",
+        // Star Health Insurance
+        "STRHLT", "STARHLTH",
+        // HDFC ERGO
+        "HDFCER", "HDFCERG",
+        // ICICI Lombard
+        "ICICILG", "ICINLBR",
+        // New India Assurance
+        "NEWIND", "NIAIND",
+        // United India Insurance
+        "UNIIND",
+        // Reliance General Insurance
+        "RELGEN", "RELGINS",
+        // Jio
+        "JIOIND", "JIOMSG", "RELJI",
+        // Airtel
+        "AIRTEL", "BRTL", "AIRINB",
+        // Vodafone Idea / Vi
+        "VFIN", "VIIND", "VIDEOC",
+        // BSNL
+        "BSNLSM", "BSNLIN",
+        // Tata Play
+        "TATPLY", "TATAPL",
+        // Dish TV / Hathway
+        "DISHSM", "DISHTV", "HTHWAY",
     )
 
     // Matches the bank portion of a DLT sender ID like "AX-HDFCBK" or bare "HDFCBK"
@@ -166,7 +206,7 @@ object SmsParser {
 
     // Bank/NBFC name mentions in SMS body (fallback when sender ID isn't whitelisted)
     private val BODY_BANK_RE = Regex(
-        """(?i)(?:HDFC\s*Bank|State\s*Bank\s*of\s*India|ICICI\s*Bank|Axis\s*Bank|Kotak\s*(?:Mahindra\s*)?Bank|Punjab\s*National\s*Bank|Bank\s*of\s*India|Canara\s*Bank|UCO\s*Bank|IDBI\s*Bank|Yes\s*Bank|IndusInd\s*Bank|Bank\s*of\s*Baroda|IDFC\s*First\s*Bank|Federal\s*Bank|RBL\s*Bank|Central\s*Bank\s*of\s*India|Paytm\s*(?:Payments\s*)?Bank|Bajaj\s*Finserv|Bajaj\s*Finance|Muthoot\s*Finance|Manappuram\s*Finance|HDB\s*Financial|Tata\s*Capital|L\s*&\s*T\s*Finance|Slice|BharatPe|Navi|KreditBee|Piramal\s*(?:Capital|Finance)|DMI\s*Finance|Aditya\s*Birla\s*(?:Finance|Capital)|Shriram\s*Finance|Fullerton\s*India)"""
+        """(?i)(?:HDFC\s*Bank|State\s*Bank\s*of\s*India|ICICI\s*Bank|Axis\s*Bank|Kotak\s*(?:Mahindra\s*)?Bank|Punjab\s*National\s*Bank|Bank\s*of\s*India|Canara\s*Bank|UCO\s*Bank|IDBI\s*Bank|Yes\s*Bank|IndusInd\s*Bank|Bank\s*of\s*Baroda|IDFC\s*First\s*Bank|Federal\s*Bank|RBL\s*Bank|Central\s*Bank\s*of\s*India|Paytm\s*(?:Payments\s*)?Bank|Bajaj\s*Finserv|Bajaj\s*Finance|Muthoot\s*Finance|Manappuram\s*Finance|HDB\s*Financial|Tata\s*Capital|L\s*&\s*T\s*Finance|Slice|BharatPe|Navi|KreditBee|Piramal\s*(?:Capital|Finance)|DMI\s*Finance|Aditya\s*Birla\s*(?:Finance|Capital)|Shriram\s*Finance|Fullerton\s*India|LIC\s*(?:of\s*India)?|HDFC\s*Life|ICICI\s*(?:Prudential|Pru)|SBI\s*Life|Bajaj\s*Allianz|Tata\s*AIA|Max\s*Life|Kotak\s*Life|Star\s*Health|HDFC\s*ERGO|ICICI\s*Lombard|Reliance\s*(?:General|Life)\s*Insurance|Jio|Airtel|Vodafone\s*Idea|Vi\s*Mobile|BSNL|Tata\s*Play|Dish\s*TV)"""
     )
 
     // ── OTP / promo filters ───────────────────────────────────────────────────
@@ -180,7 +220,7 @@ object SmsParser {
     )
 
     private val FINANCIAL_KEYWORD_RE = Regex(
-        """(?i)(?:debited?|credited?|paid|withdrawn?|deducted?|processed?|transferred?|received|deposited?|instalment|installment|salary|emi|neft|imps|rtgs|upi)"""
+        """(?i)(?:debited?|credited?|paid|withdrawn?|deducted?|processed?|transferred?|received|deposited?|instalment|installment|salary|emi|neft|imps|rtgs|upi|premium|recharge|subscription|renewal|bill\s+paid|due\s+paid|mandated?|auto.?pay|standing\s+instruction|SI\s+executed|nach)"""
     )
 
     // ── Amount ────────────────────────────────────────────────────────────────
@@ -242,6 +282,30 @@ object SmsParser {
         """(?i)(?:\bSIP\b|\bmutual\s+fund\b|\bNPS\b|\bPPF\b\s+(?:credited|deposited)|\bMF\s+(?:purchase|redemption)\b)"""
     )
 
+    private val INSURANCE_RE = Regex("""(?i)(?:\bpremium\b)""")
+
+    private val LOAN_DISBURSAL_RE = Regex(
+        """(?i)(?:disbursed?|sanctioned?|loan\s+(?:amount\s+)?(?:credited|released|transferred)|loan\s+disburs)"""
+    )
+
+    private val TELECOM_RECHARGE_RE = Regex(
+        """(?i)(?:recharge|prepaid\s+(?:plan|pack)|data\s+(?:pack|plan|add.?on))"""
+    )
+
+    private val SUBSCRIPTION_RE = Regex(
+        """(?i)(?:\bsubscription\b|\brenew(?:al|ed)\b|\bNetflix\b|\bSpotify\b|\bAmazon\s*Prime\b|\bDisney\+?\s*Hotstar\b|\bZEE5\b|\bSonyLIV\b|\bYouTube\s*Premium\b)"""
+    )
+
+    private val REFUND_RE = Regex("""(?i)(?:\brefund(?:ed)?\b|\breversal\b)""")
+
+    private val BALANCE_ALERT_RE = Regex(
+        """(?i)(?:avl\s*bal|available\s*bal(?:ance)?|a/c\s*balance|account\s*balance|bal\s*(?:is|:|=)\s*(?:Rs|INR|₹))"""
+    )
+
+    private val CATEGORY_KEYWORD_RE = Regex(
+        """(?i)(?:\bEMI\b|equated\s+monthly|\bsalary\b|\bpremium\b|\brecharge\b|\bSIP\b|\bsubscription\b)"""
+    )
+
     // ── Public API ────────────────────────────────────────────────────────────
 
     /**
@@ -263,27 +327,34 @@ object SmsParser {
         // 2. Promotional with no financial content — ignore
         if (PROMO_RE.containsMatchIn(body) && !FINANCIAL_KEYWORD_RE.containsMatchIn(body)) return null
 
-        // 3. Sender whitelist — unknown senders pass only if body signals EMI + amount (NBFC fallback)
+        // 3. Sender gate — unknown senders pass only if body has any financial keyword + amount (NBFC fallback)
         val knownById   = isKnownSenderId(senderAddress)
         val knownByBody = BODY_BANK_RE.containsMatchIn(body)
+        val senderPoints: Int
         if (!knownById && !knownByBody) {
-            val hasEmiSignal = EMI_RE.containsMatchIn(body) && AMOUNT_RE_V2.containsMatchIn(body)
-            if (!hasEmiSignal) return null
+            val hasFinancialSignal = FINANCIAL_KEYWORD_RE.containsMatchIn(body) && AMOUNT_RE_V2.containsMatchIn(body)
+            if (!hasFinancialSignal) return null
+            senderPoints = 10
+        } else {
+            senderPoints = if (knownById) 35 else 20
         }
 
-        // 4. Extract fields
+        // 4. Balance-alert gate — pure balance notifications carry no transaction action verb
+        if (!DEBIT_RE.containsMatchIn(body) && !CREDIT_RE.containsMatchIn(body)
+            && BALANCE_ALERT_RE.containsMatchIn(body)) return null
+
+        // 5. Extract fields
         val amount       = extractAmountV2(body)
         val date         = extractDateV2(body)
         val accountLast4 = extractAccountLast4(body)
         val vpa          = extractVpa(body)
         val merchantName = vpa?.substringBefore('@')?.takeIf { it.isNotBlank() }
 
-        // 5. Classify (PRD §5.2)
+        // 6. Classify (PRD §5.2 / HEL-586 §3.2)
         val category = classify(body, vpa)
 
-        // 6. Confidence score (PRD §5.4): known sender + amount + date = 90+
-        val senderPoints = if (knownById) 35 else 20
-        val confidence   = computeConfidence(senderPoints, amount, date, body)
+        // 7. Confidence score (HEL-586 §5.4)
+        val confidence = computeConfidence(senderPoints, amount, date, body)
 
         return ParsedTransaction(
             category        = category,
@@ -334,22 +405,44 @@ object SmsParser {
         }?.value
 
     /**
-     * PRD §5.2 classification table, evaluated in priority order.
-     * EMI and salary are checked before generic debit/credit to avoid mis-classification.
+     * HEL-586 §3.2 classification table — 19 categories evaluated in priority order.
      */
     private fun classify(body: String, vpa: String?): TransactionCategory = when {
-        EMI_RE.containsMatchIn(body) && DEBIT_RE.containsMatchIn(body)       -> TransactionCategory.EMI_DEBIT
-        SALARY_RE.containsMatchIn(body) && CREDIT_RE.containsMatchIn(body)   -> TransactionCategory.SALARY_CREDIT
-        ATM_RE.containsMatchIn(body)                                          -> TransactionCategory.ATM_WITHDRAWAL
-        CC_BILL_RE.containsMatchIn(body)                                      -> TransactionCategory.CREDIT_CARD_BILL
-        UTILITY_RE.containsMatchIn(body)                                      -> TransactionCategory.UTILITY_BILL
-        INVESTMENT_RE.containsMatchIn(body)                                   -> TransactionCategory.INVESTMENT
-        NEFT_IMPS_RE.containsMatchIn(body)                                    -> TransactionCategory.NEFT_IMPS
-        vpa != null && CREDIT_RE.containsMatchIn(body)                        -> TransactionCategory.UPI_CREDIT
-        vpa != null                                                            -> TransactionCategory.UPI_DEBIT
-        UPI_SIGNAL_RE.containsMatchIn(body) && CREDIT_RE.containsMatchIn(body) -> TransactionCategory.UPI_CREDIT
-        UPI_SIGNAL_RE.containsMatchIn(body)                                   -> TransactionCategory.UPI_DEBIT
-        else                                                                   -> TransactionCategory.UNKNOWN
+        // P1 — loan repayment (EMI debit must beat generic debit)
+        EMI_RE.containsMatchIn(body) && DEBIT_RE.containsMatchIn(body)          -> TransactionCategory.EMI_DEBIT
+        // P2 — salary / payroll credit
+        SALARY_RE.containsMatchIn(body) && CREDIT_RE.containsMatchIn(body)      -> TransactionCategory.SALARY_CREDIT
+        // P3 — cash withdrawal
+        ATM_RE.containsMatchIn(body)                                             -> TransactionCategory.ATM_WITHDRAWAL
+        // P4 — credit card bill / dues
+        CC_BILL_RE.containsMatchIn(body)                                         -> TransactionCategory.CREDIT_CARD_BILL
+        // P5 — insurance premium
+        INSURANCE_RE.containsMatchIn(body)                                       -> TransactionCategory.INSURANCE_PREMIUM
+        // P6 — utility bill
+        UTILITY_RE.containsMatchIn(body)                                         -> TransactionCategory.UTILITY_BILL
+        // P7 — loan disbursal (credit with disbursal keyword)
+        LOAN_DISBURSAL_RE.containsMatchIn(body)                                  -> TransactionCategory.LOAN_DISBURSAL
+        // P8 — refund / reversal
+        REFUND_RE.containsMatchIn(body)                                          -> TransactionCategory.REFUND
+        // P9 — investments (SIP / MF)
+        INVESTMENT_RE.containsMatchIn(body)                                      -> TransactionCategory.INVESTMENT
+        // P10 — UPI credit with VPA
+        vpa != null && CREDIT_RE.containsMatchIn(body)                           -> TransactionCategory.UPI_CREDIT
+        // P11 — telecom recharge / prepaid
+        TELECOM_RECHARGE_RE.containsMatchIn(body)                                -> TransactionCategory.TELECOM_RECHARGE
+        // P12 — subscription / renewal
+        SUBSCRIPTION_RE.containsMatchIn(body)                                    -> TransactionCategory.SUBSCRIPTION
+        // P13 — UPI debit with VPA
+        vpa != null                                                               -> TransactionCategory.UPI_DEBIT
+        // P14 — UPI credit (signal only, no VPA)
+        UPI_SIGNAL_RE.containsMatchIn(body) && CREDIT_RE.containsMatchIn(body)  -> TransactionCategory.UPI_CREDIT
+        // P15 — bank transfer credit (NEFT/IMPS/RTGS in)
+        NEFT_IMPS_RE.containsMatchIn(body) && CREDIT_RE.containsMatchIn(body)   -> TransactionCategory.BANK_TRANSFER_CREDIT
+        // P16 — bank transfer debit (NEFT/IMPS/RTGS out)
+        NEFT_IMPS_RE.containsMatchIn(body)                                       -> TransactionCategory.BANK_TRANSFER_DEBIT
+        // P17 — UPI debit (signal only, no VPA)
+        UPI_SIGNAL_RE.containsMatchIn(body)                                      -> TransactionCategory.UPI_DEBIT
+        else                                                                      -> TransactionCategory.UNKNOWN
     }
 
     // ── Public helpers for BankAccount resolution ─────────────────────────────
@@ -390,9 +483,12 @@ object SmsParser {
     }
 
     /**
-     * PRD §5.4: known sender + amount + date = 90+; < 50 → analytics-only.
-     *
-     *   senderPoints (35 whitelist / 20 body-only) + amount (30) + date (25) + action keyword (10)
+     * HEL-586 §5.4 revised scoring — max 100.
+     *   senderPoints: 35 (whitelist) / 20 (body institution match) / 10 (NBFC fallback)
+     *   + amount:             30
+     *   + date:               20  (was 25)
+     *   + action verb:        10  (debit/credit/paid)
+     *   + category keyword:    5  (EMI/salary/premium/recharge/SIP/subscription)
      */
     private fun computeConfidence(
         senderPoints: Int,
@@ -402,8 +498,9 @@ object SmsParser {
     ): Int {
         var score = senderPoints
         if (amount != null) score += 30
-        if (date != null) score += 25
-        if (FINANCIAL_KEYWORD_RE.containsMatchIn(body)) score += 10
+        if (date != null) score += 20
+        if (DEBIT_RE.containsMatchIn(body) || CREDIT_RE.containsMatchIn(body)) score += 10
+        if (CATEGORY_KEYWORD_RE.containsMatchIn(body)) score += 5
         return minOf(score, 100)
     }
 }
