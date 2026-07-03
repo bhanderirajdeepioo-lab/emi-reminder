@@ -182,8 +182,8 @@ fun IncomeTaxCalculatorScreen(
                 SingleRegimeResults(state = state)
             }
 
-            // 87A rebate note — new/compare, income ≤ ₹7L
-            if (state.regime != TaxRegime.OLD && state.totalIncome in 1.0..7_00_000.0) {
+            // 87A rebate note — new/compare, taxable income ≤ ₹7L (gross ≤ ~₹7.75L after std deduction)
+            if (state.regime != TaxRegime.OLD && state.newTaxableIncome in 1.0..7_00_000.0) {
                 Card(
                     shape = RoundedCornerShape(10.dp),
                     colors = CardDefaults.cardColors(containerColor = TaxGreen50),

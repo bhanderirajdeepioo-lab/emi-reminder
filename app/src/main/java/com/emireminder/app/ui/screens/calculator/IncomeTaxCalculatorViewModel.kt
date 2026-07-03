@@ -98,17 +98,17 @@ class IncomeTaxCalculatorViewModel @Inject constructor() : ViewModel() {
         // New regime — std deduction ₹75,000; 87A rebate if income ≤ ₹7L
         val newTaxable = (income - 75_000.0).coerceAtLeast(0.0)
         val newBase = computeNewRegimeTax(newTaxable)
-        val newAfterRebate = if (income <= 7_00_000.0) 0.0 else newBase
+        val newAfterRebate = if (newTaxable <= 7_00_000.0) 0.0 else newBase
         val newTotal = newAfterRebate * 1.04
 
-        // Old regime — std deduction ₹50,000; 80C cap ₹1.5L; 80D cap ₹1L; 87A rebate if income ≤ ₹5L
+        // Old regime — std deduction ₹50,000; 80C cap ₹1.5L; 80D cap ₹1L; 87A rebate if taxable ≤ ₹5L
         val c80 = (deduction80CText.toDoubleOrNull() ?: 0.0).coerceAtMost(1_50_000.0)
         val d80 = (deduction80DText.toDoubleOrNull() ?: 0.0).coerceAtMost(1_00_000.0)
         val hra = hraExemptionText.toDoubleOrNull() ?: 0.0
         val other = otherDeductionsText.toDoubleOrNull() ?: 0.0
         val oldTaxable = (income - 50_000.0 - c80 - d80 - hra - other).coerceAtLeast(0.0)
         val oldBase = computeOldRegimeTax(oldTaxable)
-        val oldAfterRebate = if (income <= 5_00_000.0) 0.0 else oldBase
+        val oldAfterRebate = if (oldTaxable <= 5_00_000.0) 0.0 else oldBase
         val oldTotal = oldAfterRebate * 1.04
 
         return copy(
@@ -116,12 +116,12 @@ class IncomeTaxCalculatorViewModel @Inject constructor() : ViewModel() {
             newTaxableIncome = newTaxable,
             newEffectiveTaxRate = if (income > 0) newTotal / income * 100 else 0.0,
             newMonthlyTds = newTotal / 12,
-            newSlabs = buildNewSlabs(newTaxable, rebate = income <= 7_00_000.0),
+            newSlabs = buildNewSlabs(newTaxable, rebate = newTaxable <= 7_00_000.0),
             oldTotalTax = oldTotal,
             oldTaxableIncome = oldTaxable,
             oldEffectiveTaxRate = if (income > 0) oldTotal / income * 100 else 0.0,
             oldMonthlyTds = oldTotal / 12,
-            oldSlabs = buildOldSlabs(oldTaxable, rebate = income <= 5_00_000.0),
+            oldSlabs = buildOldSlabs(oldTaxable, rebate = oldTaxable <= 5_00_000.0),
         )
     }
 
