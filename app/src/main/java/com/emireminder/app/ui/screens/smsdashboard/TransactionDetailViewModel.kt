@@ -46,6 +46,18 @@ class TransactionDetailViewModel @Inject constructor(
         }
     }
 
+    fun retry() {
+        _uiState.value = TransactionDetailUiState(isLoading = true)
+        viewModelScope.launch {
+            try {
+                val txn = transactionDao.getById(transactionId)
+                _uiState.value = TransactionDetailUiState(transaction = txn, isLoading = false)
+            } catch (e: Exception) {
+                _uiState.value = TransactionDetailUiState(isLoading = false, error = e.message ?: "Failed to load transaction")
+            }
+        }
+    }
+
     fun toggleVerified() {
         val txn = _uiState.value.transaction ?: return
         viewModelScope.launch {

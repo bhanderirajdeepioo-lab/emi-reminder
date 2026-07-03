@@ -140,7 +140,10 @@ fun TransactionDetailScreen(
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("Transaction not found", color = Color(0xFF64748B))
+                TransactionNotFoundContent(
+                    onBack = onBack,
+                    onRetry = viewModel::retry,
+                )
             }
 
             else -> {
@@ -401,6 +404,63 @@ private fun NotesSection(notes: String?) {
             } else {
                 Text(notes, fontSize = 14.sp, color = Slate800, lineHeight = 20.sp)
             }
+        }
+    }
+}
+
+// ─── Transaction not found state ──────────────────────────────────────────────
+
+@Composable
+private fun TransactionNotFoundContent(onBack: () -> Unit, onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(88.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFFEE2E2)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Default.Warning,
+                contentDescription = null,
+                tint = Color(0xFFEF4444),
+                modifier = Modifier.size(44.dp),
+            )
+        }
+        Spacer(Modifier.height(24.dp))
+        Text(
+            "Transaction Not Found",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Slate800,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "This transaction may have been deleted\nor is no longer available.",
+            fontSize = 13.sp,
+            color = Color(0xFF94A3B8),
+            textAlign = TextAlign.Center,
+            lineHeight = 20.sp,
+        )
+        Spacer(Modifier.height(24.dp))
+        Button(
+            onClick = onBack,
+            shape = RoundedCornerShape(50),
+            colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
+        ) {
+            Icon(Icons.Default.ArrowBack, contentDescription = null, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(8.dp))
+            Text("Back to Finance", fontWeight = FontWeight.SemiBold)
+        }
+        Spacer(Modifier.height(4.dp))
+        TextButton(onClick = onRetry) {
+            Text("Retry", color = Indigo600, fontWeight = FontWeight.SemiBold)
         }
     }
 }

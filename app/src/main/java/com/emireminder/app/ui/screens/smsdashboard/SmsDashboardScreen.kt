@@ -268,7 +268,9 @@ fun SmsDashboardScreen(
                     if (uiState.filteredTransactions.isEmpty() && activeFilter != null) {
                         item(key = "empty_filter") {
                             EmptyFilterState(
-                                categoryLabel = activeFilter.meta().label,
+                                catMeta = activeFilter.meta(),
+                                month = if (uiState.selectedYearMonth.isNotEmpty())
+                                    displayMonth(uiState.selectedYearMonth) else "",
                                 onClearFilter = { viewModel.setCategoryFilter(null) },
                             )
                         }
@@ -720,29 +722,55 @@ private fun TransactionSmartCard(
 // ─── Empty filter state ────────────────────────────────────────────────────────
 
 @Composable
-private fun EmptyFilterState(categoryLabel: String, onClearFilter: () -> Unit) {
+private fun EmptyFilterState(catMeta: CatMeta, month: String, onClearFilter: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 32.dp, vertical = 32.dp),
+            .padding(horizontal = 32.dp, vertical = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(
-            Icons.Default.FilterList,
-            contentDescription = null,
-            tint = Color(0xFFCBD5E1),
-            modifier = Modifier.size(48.dp),
-        )
-        Spacer(Modifier.height(12.dp))
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFF1F5F9)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                catMeta.icon,
+                contentDescription = null,
+                tint = catMeta.color,
+                modifier = Modifier.size(40.dp),
+            )
+        }
+        Spacer(Modifier.height(16.dp))
         Text(
-            "No $categoryLabel transactions this month.",
-            fontSize = 14.sp,
-            color = Color(0xFF64748B),
+            "No ${catMeta.label} transactions",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = Slate800,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(12.dp))
-        TextButton(onClick = onClearFilter) {
-            Text("Clear filter", color = Indigo600, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Nothing found${if (month.isNotEmpty()) " in $month" else ""}.",
+            fontSize = 13.sp,
+            color = Color(0xFF94A3B8),
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            "Try a different category or month.",
+            fontSize = 13.sp,
+            color = Color(0xFF94A3B8),
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(20.dp))
+        Button(
+            onClick = onClearFilter,
+            shape = RoundedCornerShape(50),
+            colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
+        ) {
+            Text("Clear Filter", fontWeight = FontWeight.SemiBold)
         }
     }
 }
