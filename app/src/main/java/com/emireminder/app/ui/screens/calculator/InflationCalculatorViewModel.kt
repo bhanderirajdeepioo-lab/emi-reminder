@@ -8,51 +8,142 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import kotlin.math.pow
 
-enum class InflationScenario(val label: String, val rate: Float) {
-    EDUCATION("Education", 10f),
-    HEALTHCARE("Healthcare", 8f),
-    GROCERIES("Groceries", 6f),
-    HOUSING("Housing", 7f),
-}
+enum class InflationMode { PURCHASING_POWER, REAL_RETURNS }
+
+data class InflationResultA(
+    val currentAmount: Double,
+    val inflationRate: Double,
+    val years: Int,
+    val futureCost: Double,
+    val purchasingPowerPct: Double,
+    val purchasingPowerLost: Double,
+    val purchasingPowerLostPct: Double,
+    val purchasingPowerValue: Double,
+)
+
+data class InflationResultB(
+    val nominalRate: Double,
+    val inflationRate: Double,
+    val realReturn: Double,
+    val beatsInflation: Boolean,
+)
 
 data class InflationUiState(
-    val currentAmount: Float = 1_00_000f,
-    val inflationRate: Float = 6f,
-    val years: Int = 10,
-    val activeScenario: InflationScenario? = null,
-    val futureValue: Double = 0.0,
-    val purchasingPowerPct: Double = 0.0,
-    val extraNeeded: Double = 0.0,
-)
+    val mode: InflationMode = InflationMode.PURCHASING_POWER,
+    // Shared field
+    val inflationRateText: String = "6.00",
+    // Mode A — Purchasing Power
+    val currentAmountText: String = "",
+    val yearsText: String = "",
+    // Mode B — Real Returns (nominal rate can be negative)
+    val nominalRateText: String = "",
+    // Results
+    val showResults: Boolean = false,
+    val resultA: InflationResultA? = null,
+    val resultB: InflationResultB? = null,
+    // Ad state
+    val triggerAd: Boolean = false,
+    val adShownThisSession: Boolean = false,
+) {
+    val isCalculateEnabled: Boolean
+        get() = when (mode) {
+            InflationMode.PURCHASING_POWER ->
+                currentAmountText.toDoubleOrNull()?.let { it > 0 } == true &&
+                    inflationRateText.toDoubleOrNull()?.let { it > 0 } == true &&
+                    yearsText.toIntOrNull()?.let { it in 1..50 } == true
+            InflationMode.REAL_RETURNS ->
+                nominalRateText.toDoubleOrNull() != null &&
+                    inflationRateText.toDoubleOrNull()?.let { it > 0 } == true
+        }
+}
 
 @HiltViewModel
 class InflationCalculatorViewModel @Inject constructor() : ViewModel() {
 
-    private val _uiState = MutableStateFlow(InflationUiState().recalculated())
+    private val _uiState = MutableStateFlow(InflationUiState())
     val uiState: StateFlow<InflationUiState> = _uiState.asStateFlow()
 
-    fun setCurrentAmount(v: Float) = update { copy(currentAmount = v) }
-    fun incrementRate() = update { copy(inflationRate = (inflationRate + 0.5f).coerceAtMost(20f), activeScenario = null) }
-    fun decrementRate() = update { copy(inflationRate = (inflationRate - 0.5f).coerceAtLeast(1f), activeScenario = null) }
-    fun incrementYears() = update { copy(years = (years + 1).coerceAtMost(50)) }
-    fun decrementYears() = update { copy(years = (years - 1).coerceAtLeast(1)) }
-    fun setScenario(scenario: InflationScenario) = update {
-        copy(inflationRate = scenario.rate, activeScenario = scenario)
-    }
-
-    private fun update(block: InflationUiState.() -> InflationUiState) {
-        _uiState.value = _uiState.value.block().recalculated()
-    }
-
-    private fun InflationUiState.recalculated(): InflationUiState {
-        val p = currentAmount.toDouble()
-        val r = inflationRate / 100.0
-        val fv = p * (1 + r).pow(years)
-        val purchasingPower = (1.0 / (1 + r).pow(years)) * 100.0
-        return copy(
-            futureValue = fv,
-            purchasingPowerPct = purchasingPower,
-            extraNeeded = fv - p,
+    fun setMode(mode: InflationMode) {
+        _uiState.value = _uiState.value.copy(
+            mode = mode,
+            showResults = false,
+            resultA = null,
+            resultB = null,
         )
+    }
+
+    fun setInflationRateText(text: String) {
+        _uiState.value = _uiState.value.copy(inflationRateText = text, showResults = false)
+    }
+
+    fun setCurrentAmountText(text: String) {
+        _uiState.value = _uiState.value.copy(currentAmountText = text, showResults = false)
+    }
+
+    fun setYearsText(text: String) {
+        _uiState.value = _uiState.value.copy(yearsText = text, showResults = false)
+    }
+
+    fun setNominalRateText(text: String) {
+        _uiState.value = _uiState.value.copy(nominalRateText = text, showResults = false)
+    }
+
+    fun calculate() {
+        val state = _uiState.value
+        val inflationRate = state.inflationRateText.toDoubleOrNull() ?: return
+
+        when (state.mode) {
+            InflationMode.PURCHASING_POWER -> {
+                val amount = state.currentAmountText.toDoubleOrNull() ?: return
+                val years = state.yearsText.toIntOrNull() ?: return
+                val r = inflationRate / 100.0
+                val futureCost = amount * (1.0 + r).pow(years)
+                val purchasingPowerPct = (amount / futureCost) * 100.0
+                val purchasingPowerLost = futureCost - amount
+                val purchasingPowerLostPct = 100.0 - purchasingPowerPct
+                val purchasingPowerValue = amount / (1.0 + r).pow(years)
+                _uiState.value = state.copy(
+                    showResults = true,
+                    resultA = InflationResultA(
+                        currentAmount = amount,
+                        inflationRate = inflationRate,
+                        years = years,
+                        futureCost = futureCost,
+                        purchasingPowerPct = purchasingPowerPct,
+                        purchasingPowerLost = purchasingPowerLost,
+                        purchasingPowerLostPct = purchasingPowerLostPct,
+                        purchasingPowerValue = purchasingPowerValue,
+                    ),
+                )
+            }
+            InflationMode.REAL_RETURNS -> {
+                val nominalRate = state.nominalRateText.toDoubleOrNull() ?: return
+                val n = nominalRate / 100.0
+                val i = inflationRate / 100.0
+                // Fisher equation: real_return = (1 + nominal) / (1 + inflation) - 1
+                val realReturn = ((1.0 + n) / (1.0 + i)) - 1.0
+                _uiState.value = state.copy(
+                    showResults = true,
+                    resultB = InflationResultB(
+                        nominalRate = nominalRate,
+                        inflationRate = inflationRate,
+                        realReturn = realReturn * 100.0,
+                        beatsInflation = realReturn > 0,
+                    ),
+                )
+            }
+        }
+    }
+
+    fun reset() {
+        _uiState.value = _uiState.value.copy(showResults = false, resultA = null, resultB = null)
+    }
+
+    fun onAdTriggered() {
+        _uiState.value = _uiState.value.copy(triggerAd = true)
+    }
+
+    fun onAdConsumed() {
+        _uiState.value = _uiState.value.copy(triggerAd = false, adShownThisSession = true)
     }
 }
