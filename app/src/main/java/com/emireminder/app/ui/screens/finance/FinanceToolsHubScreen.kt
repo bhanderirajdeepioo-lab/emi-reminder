@@ -56,16 +56,9 @@ fun FinanceToolsHubScreen(
     val scope = rememberCoroutineScope()
 
     val loanTools = remember(
-        onNavigateToLoanCategories, onNavigateToEmiCalculator,
+        onNavigateToEmiCalculator,
         onNavigateToComparison, onNavigateToPrepayment,
     ) { listOf(
-        ListTool(
-            icon = Icons.Default.Category,
-            iconBg = Color(0xFFFFF7ED), iconTint = WarnOrange,
-            label = "Loan Categories",
-            subtitle = "Explore loan types & eligibility",
-            onClick = onNavigateToLoanCategories,
-        ),
         ListTool(
             icon = Icons.Default.Calculate,
             iconBg = Indigo50, iconTint = Indigo600,
