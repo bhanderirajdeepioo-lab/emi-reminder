@@ -216,10 +216,21 @@ fun SettingsScreen(
                             if (prefs.userName.isNotBlank()) prefs.userName else "Your Profile",
                             fontWeight = FontWeight.Bold, fontSize = 17.sp, color = Color.White,
                         )
-                        Text(
-                            if (prefs.userName.isNotBlank()) "Tap to edit your name" else "Tap to set up your name",
-                            fontSize = 13.sp, color = Color(0xFFC7D2FE),
-                        )
+                        if (prefs.userName.isNotBlank()) {
+                            Text(
+                                "Tap to edit your name",
+                                fontSize = 13.sp, color = Color(0xFFC7D2FE),
+                            )
+                        } else {
+                            Text(
+                                "Tap to set up name & photo",
+                                fontSize = 13.sp, color = Color(0xFFC7D2FE),
+                            )
+                            Text(
+                                "EMI Reminder App",
+                                fontSize = 13.sp, color = Color(0xFFC7D2FE),
+                            )
+                        }
                     }
                     Icon(Icons.Default.Edit, contentDescription = "Edit name", tint = Color(0xFFA5B4FC), modifier = Modifier.size(20.dp))
                 }
