@@ -36,6 +36,7 @@ import java.util.Locale
 import kotlin.math.pow
 
 private val PrepayGreenGradient = listOf(Color(0xFF059669), Color(0xFF0891B2))
+private val SlateStatusBg = Color(0xFF1E293B)
 
 @Composable
 fun PrepaymentCalculatorScreen(
@@ -54,6 +55,7 @@ fun PrepaymentCalculatorScreen(
     var prepayAmount by remember { mutableStateOf("100000") }
     var prepayMonth by remember { mutableStateOf("12") }
     var goal by remember { mutableStateOf("TENURE") }
+    var prepayType by remember { mutableStateOf("ONE_TIME") }
     var result by remember { mutableStateOf<PrepayResult?>(null) }
     val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
 
@@ -77,130 +79,101 @@ fun PrepaymentCalculatorScreen(
         containerColor = MaterialTheme.colorScheme.background,
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState()),
         ) {
-            if (seedLoanName != null) {
-                Text(
-                    "$seedLoanName — Current loan details pre-filled.",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 22.sp,
+            // Dark status bar: outstanding balance + months remaining for active loan
+            activeLoan?.let { loan ->
+                val monthsElapsed = ((System.currentTimeMillis() - loan.startDate) / (30.44 * 24 * 3600 * 1000))
+                    .toInt().coerceIn(0, loan.tenureMonths)
+                val tenureRemaining = (loan.tenureMonths - monthsElapsed).coerceAtLeast(0)
+                val outstanding = calcOutstandingBalance(
+                    loan.principalAmount, loan.interestRate, loan.tenureMonths, monthsElapsed,
                 )
-            } else {
-                Text(
-                    "Calculate how much you save by making a lump-sum prepayment on your loan.",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 22.sp,
-                )
-            }
-
-            SectionLabel("ORIGINAL LOAN DETAILS")
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    InputField("Loan Amount (₹)", principal) { principal = it }
-                    InputField("Annual Interest Rate (%)", rate) { rate = it }
-                    InputField("Loan Tenure (months)", tenure) { tenure = it }
-                }
-            }
-
-            SectionLabel("PREPAYMENT DETAILS")
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    InputField("Prepayment Amount (₹)", prepayAmount) { prepayAmount = it }
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("₹0", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(fmt.format(principalVal), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    Slider(
-                        value = sliderVal,
-                        onValueChange = { prepayAmount = it.toLong().toString() },
-                        valueRange = 0f..sliderMax,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = SliderDefaults.colors(
-                            thumbColor = Color(0xFF059669),
-                            activeTrackColor = Color(0xFF059669),
-                        ),
-                    )
-                    InputField("Prepay After Month #", prepayMonth) { prepayMonth = it }
-                }
-            }
-
-            SectionLabel("PREPAYMENT GOAL")
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                GoalCard(
-                    modifier = Modifier.weight(1f),
-                    title = "Reduce Tenure",
-                    subtitle = "Pay off sooner, same EMI",
-                    isSelected = goal == "TENURE",
-                    onClick = { goal = "TENURE" },
-                )
-                GoalCard(
-                    modifier = Modifier.weight(1f),
-                    title = "Reduce EMI",
-                    subtitle = "Lower monthly payment",
-                    isSelected = goal == "EMI",
-                    onClick = { goal = "EMI" },
-                )
-            }
-
-            Button(
-                onClick = {
-                    val p = principal.toDoubleOrNull() ?: return@Button
-                    val r = rate.toDoubleOrNull() ?: return@Button
-                    val t = tenure.toIntOrNull() ?: return@Button
-                    val pa = prepayAmount.toDoubleOrNull() ?: return@Button
-                    val pm = prepayMonth.toIntOrNull() ?: return@Button
-                    result = calcPrepayment(p, r, t, pa, pm)
-                },
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669)),
-            ) {
-                Icon(Icons.Default.Savings, null)
-                Spacer(Modifier.width(8.dp))
-                Text("Calculate Savings", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-            }
-
-            result?.let { res ->
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Brush.linearGradient(PrepayGreenGradient))
-                        .padding(20.dp),
+                        .background(SlateStatusBg)
+                        .padding(16.dp),
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                        Text("Total Savings", fontSize = 13.sp, color = Color.White.copy(alpha = 0.8f))
-                        Text(fmt.format(res.totalSavings), fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                        Text(
-                            if (goal == "TENURE") "${res.monthsSaved} months off your loan tenure"
-                            else "Monthly EMI now ${fmt.format(res.newEmi)}",
-                            fontSize = 13.sp,
-                            color = Color.White.copy(alpha = 0.85f),
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "Outstanding Balance",
+                                fontSize = 11.sp,
+                                color = Color.White.copy(alpha = 0.7f),
+                            )
+                            Text(
+                                fmt.format(outstanding),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .height(40.dp)
+                                .align(Alignment.CenterVertically)
+                                .background(Color.White.copy(alpha = 0.2f)),
                         )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "Months Remaining",
+                                fontSize = 11.sp,
+                                color = Color.White.copy(alpha = 0.7f),
+                            )
+                            Text(
+                                "$tenureRemaining months",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                            )
+                        }
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                if (seedLoanName != null) {
+                    Text(
+                        "$seedLoanName — Current loan details pre-filled.",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 22.sp,
+                    )
+                } else {
+                    Text(
+                        "Calculate how much you save by making a prepayment on your loan.",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 22.sp,
+                    )
+                }
+
+                SectionLabel("ORIGINAL LOAN DETAILS")
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                ) {
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        InputField("Loan Amount (₹)", principal) { principal = it }
+                        InputField("Annual Interest Rate (%)", rate) { rate = it }
+                        InputField("Loan Tenure (months)", tenure) { tenure = it }
                     }
                 }
 
-                // Sub-metric cards
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SaveMetricCard(Modifier.weight(1f), "New Tenure", "${res.newTenure} mo", Color(0xFF059669))
-                    SaveMetricCard(Modifier.weight(1f), "Interest Saved", fmt.format(res.interestWithout - res.interestWith), Color(0xFF0891B2))
-                    SaveMetricCard(Modifier.weight(1f), "Months Saved", "${res.monthsSaved}", SafeGreen)
-                }
-
-                // Balance comparison chart
+                SectionLabel("PREPAYMENT DETAILS")
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
@@ -208,36 +181,175 @@ fun PrepaymentCalculatorScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 ) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Outstanding Balance", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            LegendDot(Color(0xFF4F46E5), "Without Prepayment")
-                            LegendDot(Color(0xFF059669), "With Prepayment")
+                        // Prepayment type selector
+                        Text(
+                            "Prepayment Type",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            listOf(
+                                "ONE_TIME" to "One-time",
+                                "MONTHLY" to "Monthly",
+                                "ANNUAL" to "Annual",
+                            ).forEach { (type, label) ->
+                                FilterChip(
+                                    selected = prepayType == type,
+                                    onClick = {
+                                        prepayType = type
+                                        result = null
+                                    },
+                                    label = { Text(label, fontSize = 12.sp) },
+                                    modifier = Modifier.weight(1f),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = Color(0xFF059669),
+                                        selectedLabelColor = Color.White,
+                                    ),
+                                )
+                            }
                         }
-                        BalanceComparisonChart(
-                            res.balanceSeriesWithout,
-                            res.balanceSeriesWith,
-                            modifier = Modifier.fillMaxWidth().height(130.dp),
+
+                        Spacer(Modifier.height(4.dp))
+
+                        InputField(
+                            label = when (prepayType) {
+                                "MONTHLY" -> "Monthly Extra Payment (₹)"
+                                "ANNUAL" -> "Annual Extra Payment (₹)"
+                                else -> "Prepayment Amount (₹)"
+                            },
+                            value = prepayAmount,
+                            onChange = { prepayAmount = it },
+                        )
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("₹0", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(fmt.format(principalVal), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Slider(
+                            value = sliderVal,
+                            onValueChange = { prepayAmount = it.toLong().toString() },
+                            valueRange = 0f..sliderMax,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = SliderDefaults.colors(
+                                thumbColor = Color(0xFF059669),
+                                activeTrackColor = Color(0xFF059669),
+                            ),
+                        )
+                        InputField(
+                            label = when (prepayType) {
+                                "MONTHLY" -> "Start From Month #"
+                                "ANNUAL" -> "Start From Month #"
+                                else -> "Prepay After Month #"
+                            },
+                            value = prepayMonth,
+                            onChange = { prepayMonth = it },
                         )
                     }
                 }
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
+                SectionLabel("PREPAYMENT GOAL")
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    GoalCard(
+                        modifier = Modifier.weight(1f),
+                        title = "Reduce Tenure",
+                        subtitle = "Pay off sooner, same EMI",
+                        isSelected = goal == "TENURE",
+                        onClick = { goal = "TENURE" },
+                    )
+                    GoalCard(
+                        modifier = Modifier.weight(1f),
+                        title = "Reduce EMI",
+                        subtitle = "Lower monthly payment",
+                        isSelected = goal == "EMI",
+                        onClick = { goal = "EMI" },
+                    )
+                }
+
+                Button(
+                    onClick = {
+                        val p = principal.toDoubleOrNull() ?: return@Button
+                        val r = rate.toDoubleOrNull() ?: return@Button
+                        val t = tenure.toIntOrNull() ?: return@Button
+                        val pa = prepayAmount.toDoubleOrNull() ?: return@Button
+                        val pm = prepayMonth.toIntOrNull() ?: return@Button
+                        result = calcPrepayment(p, r, t, pa, pm, prepayType)
+                    },
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669)),
                 ) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Text("Comparison", fontWeight = FontWeight.Bold)
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            Text("", modifier = Modifier.weight(1.2f))
-                            Text("Without", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("With Prepay", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 12.sp, color = SafeGreen)
+                    Icon(Icons.Default.Savings, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Calculate Savings", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                }
+
+                result?.let { res ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Brush.linearGradient(PrepayGreenGradient))
+                            .padding(20.dp),
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                            Text("Total Savings", fontSize = 13.sp, color = Color.White.copy(alpha = 0.8f))
+                            Text(fmt.format(res.totalSavings), fontSize = 32.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                            Text(
+                                if (goal == "TENURE") "${res.monthsSaved} months off your loan tenure"
+                                else "Monthly EMI now ${fmt.format(res.newEmi)}",
+                                fontSize = 13.sp,
+                                color = Color.White.copy(alpha = 0.85f),
+                            )
                         }
-                        Divider()
-                        CompareRow("Total Interest", fmt.format(res.interestWithout), fmt.format(res.interestWith))
-                        CompareRow("Total Payment", fmt.format(res.totalWithout), fmt.format(res.totalWith))
-                        CompareRow("Loan Tenure", "${res.originalTenure} months", "${res.newTenure} months")
+                    }
+
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        SaveMetricCard(Modifier.weight(1f), "New Tenure", "${res.newTenure} mo", Color(0xFF059669))
+                        SaveMetricCard(Modifier.weight(1f), "Interest Saved", fmt.format(res.interestWithout - res.interestWith), Color(0xFF0891B2))
+                        SaveMetricCard(Modifier.weight(1f), "Months Saved", "${res.monthsSaved}", SafeGreen)
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("Outstanding Balance", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                LegendDot(Color(0xFF4F46E5), "Without Prepayment")
+                                LegendDot(Color(0xFF059669), "With Prepayment")
+                            }
+                            BalanceComparisonChart(
+                                res.balanceSeriesWithout,
+                                res.balanceSeriesWith,
+                                modifier = Modifier.fillMaxWidth().height(130.dp),
+                            )
+                        }
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text("Comparison", fontWeight = FontWeight.Bold)
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                Text("", modifier = Modifier.weight(1.2f))
+                                Text("Without", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("With Prepay", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 12.sp, color = SafeGreen)
+                            }
+                            Divider()
+                            CompareRow("Total Interest", fmt.format(res.interestWithout), fmt.format(res.interestWith))
+                            CompareRow("Total Payment", fmt.format(res.totalWithout), fmt.format(res.totalWith))
+                            CompareRow("Loan Tenure", "${res.originalTenure} months", "${res.newTenure} months")
+                        }
                     }
                 }
             }
@@ -348,12 +460,31 @@ private data class PrepayResult(
     val balanceSeriesWith: List<Double>,
 )
 
+private fun calcOutstandingBalance(
+    principal: Double,
+    annualRate: Double,
+    tenureMonths: Int,
+    monthsElapsed: Int,
+): Double {
+    val r = annualRate / (12 * 100)
+    if (r == 0.0) return maxOf(0.0, principal - (principal / tenureMonths) * monthsElapsed)
+    val emi = (principal * r * (1 + r).pow(tenureMonths)) / ((1 + r).pow(tenureMonths) - 1)
+    var balance = principal
+    for (m in 0 until monthsElapsed.coerceAtMost(tenureMonths)) {
+        if (balance <= 0) break
+        val interest = balance * r
+        balance -= (emi - interest)
+    }
+    return maxOf(0.0, balance)
+}
+
 private fun calcPrepayment(
     principal: Double,
     annualRate: Double,
     tenureMonths: Int,
     prepayAmount: Double,
     prepayAtMonth: Int,
+    prepayType: String,
 ): PrepayResult {
     val r = annualRate / (12 * 100)
     val emi = if (r == 0.0) principal / tenureMonths else
@@ -383,13 +514,23 @@ private fun calcPrepayment(
         balance -= principalPaid
         totalPaid += emi
         monthsPaid++
-        if (month == prepayAtMonth && balance > 0) {
+
+        val shouldPrepay = when (prepayType) {
+            "ONE_TIME" -> month == prepayAtMonth
+            "MONTHLY" -> month >= prepayAtMonth
+            "ANNUAL" -> month >= prepayAtMonth && (month - prepayAtMonth) % 12 == 0
+            else -> false
+        }
+
+        if (shouldPrepay && balance > 0) {
             val actualPrepay = minOf(prepayAmount, balance)
             balance -= actualPrepay
             totalPaid += actualPrepay
-            val remainingMonths = tenureMonths - month
-            if (remainingMonths > 0 && r > 0 && balance > 0) {
-                newEmi = (balance * r * (1 + r).pow(remainingMonths)) / ((1 + r).pow(remainingMonths) - 1)
+            if (prepayType == "ONE_TIME") {
+                val remainingMonths = tenureMonths - month
+                if (remainingMonths > 0 && r > 0 && balance > 0) {
+                    newEmi = (balance * r * (1 + r).pow(remainingMonths)) / ((1 + r).pow(remainingMonths) - 1)
+                }
             }
         }
         seriesWith.add(maxOf(0.0, balance))
