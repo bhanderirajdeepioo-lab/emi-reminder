@@ -45,7 +45,6 @@ import com.emireminder.app.ui.screens.reminders.*
 import com.emireminder.app.ui.screens.settings.SettingsScreen
 import com.emireminder.app.ui.screens.sms.SMSImportScreen
 import com.emireminder.app.ui.screens.splash.SplashScreen
-import com.emireminder.app.ui.theme.Indigo50
 import com.emireminder.app.ui.theme.Indigo600
 
 private data class NavItem(
@@ -105,7 +104,7 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                FlatNavBar(
+                PillNavBar(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
                         navController.navigate(route) {
@@ -506,61 +505,95 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
 }
 
 @Composable
-private fun FlatNavBar(currentRoute: String?, onNavigate: (String) -> Unit) {
-    Column(
+private fun PillNavBar(currentRoute: String?, onNavigate: (String) -> Unit) {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
             .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 10.dp),
     ) {
-        HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(28.dp),
+            color = Color.White,
+            shadowElevation = 8.dp,
+            tonalElevation = 0.dp,
         ) {
-            bottomNavItems.forEach { item ->
-                val selected = currentRoute == item.route
-                // weight(1f) gives every tab an equal 25 % touch target so positions
-                // stay stable regardless of which tab's pill is currently expanded.
-                FlatNavItem(
-                    item = item,
-                    selected = selected,
-                    onClick = { if (!selected) onNavigate(item.route) },
-                    modifier = Modifier.weight(1f),
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                bottomNavItems.forEach { item ->
+                    val selected = currentRoute == item.route
+                    PillNavItem(
+                        item = item,
+                        selected = selected,
+                        onClick = { if (!selected) onNavigate(item.route) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun FlatNavItem(item: NavItem, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun PillNavItem(item: NavItem, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .fillMaxHeight()
-            .padding(horizontal = 4.dp, vertical = 2.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (selected) Indigo50 else Color.Transparent)
-            .clickable(onClick = onClick),
+        modifier = modifier.fillMaxHeight(),
         contentAlignment = Alignment.Center,
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                if (selected) item.filledIcon else item.outlinedIcon,
-                contentDescription = item.label,
-                tint = if (selected) Indigo600 else Color(0xFF94A3B8),
-                modifier = Modifier.size(20.dp),
-            )
-            Spacer(Modifier.height(2.dp))
-            Text(
-                item.label,
-                fontSize = 9.sp,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                color = if (selected) Indigo600 else Color(0xFF94A3B8),
-                maxLines = 1,
-            )
+        if (selected) {
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50.dp))
+                    .background(Indigo600)
+                    .clickable(onClick = onClick)
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(
+                    item.filledIcon,
+                    contentDescription = item.label,
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp),
+                )
+                Text(
+                    item.label,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    maxLines = 1,
+                )
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50.dp))
+                    .clickable(onClick = onClick)
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    item.outlinedIcon,
+                    contentDescription = item.label,
+                    tint = Color(0xFF94A3B8),
+                    modifier = Modifier.size(20.dp),
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    item.label,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color(0xFF94A3B8),
+                    maxLines = 1,
+                )
+            }
         }
     }
 }
