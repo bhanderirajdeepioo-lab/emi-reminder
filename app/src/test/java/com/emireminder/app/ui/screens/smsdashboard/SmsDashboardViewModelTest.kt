@@ -217,6 +217,36 @@ class SmsDashboardViewModelTest {
     }
 
     @Test
+    fun `summary totalSpend equals emi plus expenses`() = runTest {
+        val txns = listOf(
+            makeTxn(TransactionCategory.INCOME,          TransactionDirection.CREDIT, 50000.0),
+            makeTxn(TransactionCategory.EMI_AND_LOANS,   TransactionDirection.DEBIT,  10000.0),
+            makeTxn(TransactionCategory.FOOD_AND_DINING, TransactionDirection.DEBIT,   5000.0),
+        )
+        every { transactionDao.getByMonth(any()) } returns flowOf(txns)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
+        var state = viewModel.uiState.value
+        backgroundScope.launch { viewModel.uiState.collect { state = it } }
+        advanceUntilIdle()
+        assertEquals(15000.0, state.summary.totalSpend, 0.01)
+    }
+
+    @Test
+    fun `summary transactionCount equals total number of transactions`() = runTest {
+        val txns = listOf(
+            makeTxn(TransactionCategory.INCOME,          TransactionDirection.CREDIT, 50000.0),
+            makeTxn(TransactionCategory.FOOD_AND_DINING, TransactionDirection.DEBIT,   1000.0),
+            makeTxn(TransactionCategory.TRANSPORT,       TransactionDirection.DEBIT,    500.0),
+        )
+        every { transactionDao.getByMonth(any()) } returns flowOf(txns)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
+        var state = viewModel.uiState.value
+        backgroundScope.launch { viewModel.uiState.collect { state = it } }
+        advanceUntilIdle()
+        assertEquals(3, state.summary.transactionCount)
+    }
+
+    @Test
     fun `previousSummary populated when previous month has transactions`() = runTest {
         val currentYm = YearMonth.now().format(fmt)
         val prevYm = YearMonth.now().minusMonths(1).format(fmt)

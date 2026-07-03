@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -42,7 +41,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
-import kotlin.math.abs
 
 private val amtFmt = NumberFormat.getNumberInstance(Locale("en", "IN")).apply {
     maximumFractionDigits = 0
@@ -164,7 +162,6 @@ fun SmsDashboardScreen(
         )
     }
 
-    // Memoize the date-grouped list to avoid rebuilding on every recomposition
     val transactionListItems = remember(uiState.filteredTransactions) {
         buildTransactionListItems(uiState.filteredTransactions)
     }
@@ -172,7 +169,16 @@ fun SmsDashboardScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Finance", fontWeight = FontWeight.Bold) },
+                title = {
+                    Column {
+                        Text("Finance", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text(
+                            "Tracked from your SMS",
+                            fontSize = 12.sp,
+                            color = Color.White.copy(alpha = 0.7f),
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Indigo600,
                     titleContentColor = Color.White,
@@ -234,11 +240,11 @@ fun SmsDashboardScreen(
                         }
                     }
 
+                    // Smart Summary Card
                     item {
                         Spacer(Modifier.height(12.dp))
-                        MonthlySummaryCard(
+                        SmartSummaryCard(
                             summary = uiState.summary,
-                            previous = uiState.previousSummary,
                             currencySymbol = uiState.currencySymbol,
                             onViewReport = { onNavigateToMonthlyReport(uiState.selectedYearMonth) },
                         )
@@ -254,23 +260,25 @@ fun SmsDashboardScreen(
                         )
                     }
 
-                    // Summary strip
-                    item(key = "summary_strip") {
-                        FilterSummaryStrip(
-                            count = uiState.filteredTransactions.size,
-                            totalAmount = uiState.filteredTransactions.sumOf { it.amount },
-                            currencySymbol = uiState.currencySymbol,
-                        )
+                    // Category summary card (only when a filter is active)
+                    val activeFilter = uiState.selectedCategoryFilter
+                    if (activeFilter != null) {
+                        item(key = "category_summary") {
+                            Spacer(Modifier.height(4.dp))
+                            CategorySummaryCard(
+                                category = activeFilter,
+                                totalAmount = uiState.filteredTransactions.sumOf { it.amount },
+                                transactionCount = uiState.filteredTransactions.size,
+                                currencySymbol = uiState.currencySymbol,
+                            )
+                        }
                     }
 
                     // Empty filter state
-                    val activeFilter = uiState.selectedCategoryFilter
                     if (uiState.filteredTransactions.isEmpty() && activeFilter != null) {
                         item(key = "empty_filter") {
                             EmptyFilterState(
-                                catMeta = activeFilter.meta(),
-                                month = if (uiState.selectedYearMonth.isNotEmpty())
-                                    displayMonth(uiState.selectedYearMonth) else "",
+                                categoryLabel = activeFilter.meta().label,
                                 onClearFilter = { viewModel.setCategoryFilter(null) },
                             )
                         }
@@ -370,15 +378,33 @@ private fun MonthPickerHeader(
         modifier = Modifier
             .fillMaxWidth()
             .background(Indigo600)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        IconButton(onClick = onPrev) {
+        IconButton(onClick = onPrev, modifier = Modifier.size(40.dp)) {
             Icon(Icons.Default.ChevronLeft, contentDescription = "Previous month", tint = Color.White)
         }
-        Text(displayText, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-        IconButton(onClick = onNext, enabled = canGoNext) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.White.copy(alpha = 0.15f))
+                .padding(vertical = 4.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                displayText,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White,
+            )
+        }
+        IconButton(
+            onClick = onNext,
+            enabled = canGoNext,
+            modifier = Modifier.size(40.dp),
+        ) {
             Icon(
                 Icons.Default.ChevronRight,
                 contentDescription = "Next month",
@@ -388,12 +414,11 @@ private fun MonthPickerHeader(
     }
 }
 
-// ─── Monthly summary card ──────────────────────────────────────────────────────
+// ─── Smart Summary Card ────────────────────────────────────────────────────────
 
 @Composable
-private fun MonthlySummaryCard(
+private fun SmartSummaryCard(
     summary: MonthlySummaryData,
-    previous: MonthlySummaryData?,
     currencySymbol: String,
     onViewReport: () -> Unit,
 ) {
@@ -401,118 +426,140 @@ private fun MonthlySummaryCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Slate800),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text("Monthly Summary", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF94A3B8))
+        Box {
+            // Decorative accent circle (top-right)
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .align(Alignment.TopEnd)
+                    .offset(x = 30.dp, y = (-30).dp)
+                    .clip(CircleShape)
+                    .background(Indigo600.copy(alpha = 0.3f)),
+            )
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    "TOTAL SPEND",
+                    fontSize = 9.sp,
+                    color = Color.White.copy(alpha = 0.5f),
+                    letterSpacing = 1.sp,
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    fmtAmt(currencySymbol, summary.totalSpend),
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                )
+
+                Spacer(Modifier.height(10.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    MiniStatBox(
+                        label = "INCOME",
+                        value = fmtAmt(currencySymbol, summary.totalIncome),
+                        valueColor = Color(0xFF4ADE80),
+                        modifier = Modifier.weight(1f),
+                    )
+                    MiniStatBox(
+                        label = "EMIs",
+                        value = fmtAmt(currencySymbol, summary.totalEmi),
+                        valueColor = Color(0xFF818CF8),
+                        modifier = Modifier.weight(1f),
+                    )
+                    MiniStatBox(
+                        label = "TRANSACTIONS",
+                        value = "${summary.transactionCount}",
+                        valueColor = Color.White,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                val progress = if (summary.totalIncome > 0)
+                    (summary.totalSpend / summary.totalIncome).coerceIn(0.0, 1.0).toFloat()
+                else 0f
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        "Spend vs Income",
+                        fontSize = 10.sp,
+                        color = Color.White.copy(alpha = 0.6f),
+                    )
+                    Text(
+                        "${(progress * 100).toInt()}%",
+                        fontSize = 10.sp,
+                        color = Color.White.copy(alpha = 0.8f),
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp)),
+                    color = Color(0xFF818CF8),
+                    trackColor = Color.White.copy(alpha = 0.1f),
+                )
+
+                Spacer(Modifier.height(6.dp))
                 TextButton(
                     onClick = onViewReport,
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    contentPadding = PaddingValues(0.dp),
                 ) {
-                    Text("View Report", fontSize = 12.sp, color = Color(0xFF818CF8), fontWeight = FontWeight.SemiBold)
-                    Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color(0xFF818CF8), modifier = Modifier.size(14.dp))
+                    Text(
+                        "See full report →",
+                        fontSize = 11.sp,
+                        color = Color(0xFF818CF8),
+                        fontWeight = FontWeight.SemiBold,
+                    )
                 }
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                SummaryMetric(
-                    label = "Income",
-                    value = fmtAmt(currencySymbol, summary.totalIncome),
-                    current = summary.totalIncome,
-                    previous = previous?.totalIncome,
-                    higherIsBetter = true,
-                    valueColor = SafeGreen,
-                    modifier = Modifier.weight(1f),
-                )
-                SummaryMetric(
-                    label = "EMIs",
-                    value = fmtAmt(currencySymbol, summary.totalEmi),
-                    current = summary.totalEmi,
-                    previous = previous?.totalEmi,
-                    higherIsBetter = false,
-                    valueColor = Color(0xFFF87171),
-                    modifier = Modifier.weight(1f),
-                )
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                SummaryMetric(
-                    label = "Expenses",
-                    value = fmtAmt(currencySymbol, summary.totalExpenses),
-                    current = summary.totalExpenses,
-                    previous = previous?.totalExpenses,
-                    higherIsBetter = false,
-                    valueColor = Amber700,
-                    modifier = Modifier.weight(1f),
-                )
-                SummaryMetric(
-                    label = "Net Savings",
-                    value = fmtAmt(currencySymbol, summary.netSavings),
-                    current = summary.netSavings,
-                    previous = previous?.netSavings,
-                    higherIsBetter = true,
-                    valueColor = if (summary.netSavings >= 0) SafeGreen else UrgentRed,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            val progress = if (summary.totalIncome > 0)
-                (summary.totalExpenses / summary.totalIncome).coerceIn(0.0, 1.0).toFloat()
-            else 0f
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp)),
-                color = Amber700,
-                trackColor = Color(0xFF334155),
-            )
-            if (summary.netSavings > 0 && summary.totalIncome > 0) {
-                val savingsPct = (summary.netSavings / summary.totalIncome * 100).toInt()
-                Spacer(Modifier.height(4.dp))
-                Text("💡 $savingsPct% saved", fontSize = 12.sp, color = SafeGreen)
             }
         }
     }
 }
 
 @Composable
-private fun SummaryMetric(
+private fun MiniStatBox(
     label: String,
     value: String,
-    current: Double,
-    previous: Double?,
-    higherIsBetter: Boolean,
     valueColor: Color,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.padding(horizontal = 4.dp)) {
-        Text(label, fontSize = 11.sp, color = Color(0xFF94A3B8))
-        Spacer(Modifier.height(2.dp))
-        Text(value, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = valueColor)
-        if (previous != null && previous != 0.0) {
-            val delta = current - previous
-            val isPositive = delta > 0
-            val isGood = isPositive == higherIsBetter
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.White.copy(alpha = 0.08f))
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+    ) {
+        Column {
             Text(
-                "${if (isPositive) "▲" else "▼"} ${fmtAmt("", abs(delta))}",
-                fontSize = 10.sp,
-                color = if (isGood) SafeGreen else UrgentRed,
-                fontWeight = FontWeight.Medium,
+                label,
+                fontSize = 9.sp,
+                color = Color.White.copy(alpha = 0.5f),
+                letterSpacing = 0.5.sp,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                value,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = valueColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
@@ -539,10 +586,18 @@ private fun CategoryFilterChipBar(
             FilterChip(
                 selected = selectedFilter == null,
                 onClick = { onFilterSelected(null) },
-                label = { Text("All", fontSize = 13.sp) },
+                label = {
+                    Text(
+                        "All",
+                        fontSize = 13.sp,
+                        fontWeight = if (selectedFilter == null) FontWeight.SemiBold else FontWeight.Normal,
+                    )
+                },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = Indigo600.copy(alpha = 0.15f),
-                    selectedLabelColor = Indigo600,
+                    containerColor = Color.White,
+                    labelColor = Color(0xFF475569),
+                    selectedContainerColor = Indigo600,
+                    selectedLabelColor = Color.White,
                 ),
                 border = FilterChipDefaults.filterChipBorder(
                     enabled = true,
@@ -558,14 +613,27 @@ private fun CategoryFilterChipBar(
             FilterChip(
                 selected = isSelected,
                 onClick = { onFilterSelected(if (isSelected) null else cat) },
-                label = { Text(meta.label, fontSize = 13.sp) },
+                label = {
+                    Text(
+                        meta.label,
+                        fontSize = 13.sp,
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                    )
+                },
                 leadingIcon = {
-                    Icon(meta.icon, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(
+                        meta.icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                    )
                 },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = meta.color.copy(alpha = 0.15f),
-                    selectedLabelColor = meta.color,
-                    selectedLeadingIconColor = meta.color,
+                    containerColor = Color.White,
+                    labelColor = Color(0xFF475569),
+                    iconColor = Color(0xFF475569),
+                    selectedContainerColor = meta.color,
+                    selectedLabelColor = Color.White,
+                    selectedLeadingIconColor = Color.White,
                 ),
                 border = FilterChipDefaults.filterChipBorder(
                     enabled = true,
@@ -578,31 +646,91 @@ private fun CategoryFilterChipBar(
     }
 }
 
-// ─── Filter summary strip ──────────────────────────────────────────────────────
+// ─── Category summary card (shown when a category filter is active) ────────────
 
 @Composable
-private fun FilterSummaryStrip(count: Int, totalAmount: Double, currencySymbol: String) {
-    Text(
-        "$count transaction${if (count != 1) "s" else ""} · $currencySymbol${amtFmt.format(totalAmount.toLong())} total",
-        fontSize = 12.sp,
-        color = Color(0xFF94A3B8),
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 2.dp),
-    )
+private fun CategorySummaryCard(
+    category: TransactionCategory,
+    totalAmount: Double,
+    transactionCount: Int,
+    currencySymbol: String,
+) {
+    val meta = category.meta()
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(meta.color),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    meta.icon,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    meta.label,
+                    fontSize = 10.sp,
+                    color = Color(0xFF94A3B8),
+                )
+                Text(
+                    fmtAmt(currencySymbol, totalAmount),
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = meta.color,
+                )
+            }
+            Text(
+                "$transactionCount transaction${if (transactionCount != 1) "s" else ""}",
+                fontSize = 10.sp,
+                color = Color(0xFF94A3B8),
+            )
+        }
+    }
 }
 
 // ─── Date group header ─────────────────────────────────────────────────────────
 
 @Composable
 private fun DateGroupHeader(label: String) {
-    Text(
-        label,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = Color(0xFF64748B),
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 20.dp, end = 16.dp, top = 12.dp, bottom = 4.dp),
-    )
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            label.uppercase(),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color(0xFF94A3B8),
+            letterSpacing = 0.5.sp,
+        )
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            thickness = 1.dp,
+            color = Color(0xFFE2E8F0),
+        )
+    }
 }
 
 // ─── Transaction smart card ────────────────────────────────────────────────────
@@ -654,7 +782,7 @@ private fun TransactionSmartCard(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(10.dp))
                         .background(meta.color.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -688,9 +816,9 @@ private fun TransactionSmartCard(
                         if (txn.isEmi) {
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(4.dp))
+                                    .clip(RoundedCornerShape(7.dp))
                                     .background(Indigo600.copy(alpha = 0.12f))
-                                    .padding(horizontal = 5.dp, vertical = 1.dp),
+                                    .padding(horizontal = 5.dp, vertical = 2.dp),
                             ) {
                                 Text("EMI", fontSize = 9.sp, color = Indigo600, fontWeight = FontWeight.Bold)
                             }
@@ -722,55 +850,29 @@ private fun TransactionSmartCard(
 // ─── Empty filter state ────────────────────────────────────────────────────────
 
 @Composable
-private fun EmptyFilterState(catMeta: CatMeta, month: String, onClearFilter: () -> Unit) {
+private fun EmptyFilterState(categoryLabel: String, onClearFilter: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 32.dp, vertical = 48.dp),
+            .padding(horizontal = 32.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(
-            modifier = Modifier
-                .size(80.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFF1F5F9)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                catMeta.icon,
-                contentDescription = null,
-                tint = catMeta.color,
-                modifier = Modifier.size(40.dp),
-            )
-        }
-        Spacer(Modifier.height(16.dp))
+        Icon(
+            Icons.Default.FilterList,
+            contentDescription = null,
+            tint = Color(0xFFCBD5E1),
+            modifier = Modifier.size(48.dp),
+        )
+        Spacer(Modifier.height(12.dp))
         Text(
-            "No ${catMeta.label} transactions",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = Slate800,
+            "No $categoryLabel transactions this month.",
+            fontSize = 14.sp,
+            color = Color(0xFF64748B),
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            "Nothing found${if (month.isNotEmpty()) " in $month" else ""}.",
-            fontSize = 13.sp,
-            color = Color(0xFF94A3B8),
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            "Try a different category or month.",
-            fontSize = 13.sp,
-            color = Color(0xFF94A3B8),
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(20.dp))
-        Button(
-            onClick = onClearFilter,
-            shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
-        ) {
-            Text("Clear Filter", fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(12.dp))
+        TextButton(onClick = onClearFilter) {
+            Text("Clear filter", color = Indigo600, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -1020,7 +1122,16 @@ private fun SmsPermissionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Finance", fontWeight = FontWeight.Bold) },
+                title = {
+                    Column {
+                        Text("Finance", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text(
+                            "Tracked from your SMS",
+                            fontSize = 12.sp,
+                            color = Color.White.copy(alpha = 0.7f),
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Indigo600,
                     titleContentColor = Color.White,
@@ -1070,7 +1181,9 @@ private fun SmsPermissionScreen(
 
             Button(
                 onClick = onRequestPermission,
-                modifier = Modifier.fillMaxWidth().height(52.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
             ) {
@@ -1090,7 +1203,9 @@ private fun SmsPermissionScreen(
                         )
                     )
                 },
-                modifier = Modifier.fillMaxWidth().height(48.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Indigo600),
             ) {

@@ -209,7 +209,14 @@ class SmsDashboardViewModel @Inject constructor(
         val expenses = txns
             .filter { it.direction == TransactionDirection.DEBIT && it.category != TransactionCategory.EMI_AND_LOANS }
             .sumOf { it.amount }
-        return MonthlySummaryData(income, emi, expenses, income - emi - expenses)
+        return MonthlySummaryData(
+            totalIncome = income,
+            totalEmi = emi,
+            totalExpenses = expenses,
+            netSavings = income - emi - expenses,
+            totalSpend = emi + expenses,
+            transactionCount = txns.size,
+        )
     }
 
     private fun buildCategories(txns: List<ParsedTransaction>): List<CategorySummary> =

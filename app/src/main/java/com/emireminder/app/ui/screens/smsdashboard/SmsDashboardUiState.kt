@@ -9,6 +9,8 @@ data class MonthlySummaryData(
     val totalEmi: Double = 0.0,
     val totalExpenses: Double = 0.0,
     val netSavings: Double = 0.0,
+    val totalSpend: Double = 0.0,
+    val transactionCount: Int = 0,
 )
 
 data class CategorySummary(
