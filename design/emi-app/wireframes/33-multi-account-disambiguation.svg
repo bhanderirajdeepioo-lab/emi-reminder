@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background: dimmed Finance Dashboard (simplified) -->
+  <rect width="390" height="844" fill="#EEF2FF"/>
+  <rect width="390" height="48" fill="#4F46E5"/>
+  <text x="16" y="32" font-size="12" fill="#C7D2FE">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#C7D2FE"/>
+  <rect x="0" y="48" width="390" height="56" fill="url(#hdr)"/>
+  <text x="20" y="84" font-size="20" font-weight="800" fill="#FFFFFF">Finance</text>
+  <!-- Month selector bar -->
+  <rect x="16" y="116" width="358" height="40" rx="12" fill="#FFFFFF" opacity="0.7"/>
+  <text x="195" y="141" font-size="14" font-weight="700" text-anchor="middle" fill="#94A3B8">July 2026</text>
+  <!-- Summary card ghosts -->
+  <rect x="16" y="168" width="174" height="72" rx="14" fill="#FFFFFF" opacity="0.6"/>
+  <rect x="200" y="168" width="174" height="72" rx="14" fill="#FFFFFF" opacity="0.6"/>
+  <rect x="16" y="250" width="174" height="72" rx="14" fill="#FFFFFF" opacity="0.6"/>
+  <rect x="200" y="250" width="174" height="72" rx="14" fill="#FFFFFF" opacity="0.6"/>
+  <!-- Category bars ghosts -->
+  <rect x="16" y="340" width="358" height="124" rx="14" fill="#FFFFFF" opacity="0.6"/>
+
+  <!-- Dark scrim overlay -->
+  <rect width="390" height="844" fill="#0F172A" opacity="0.60"/>
+
+  <!-- Bottom sheet -->
+  <rect x="0" y="360" width="390" height="484" rx="24" fill="#FFFFFF"/>
+
+  <!-- Drag handle -->
+  <rect x="163" y="374" width="64" height="4" rx="2" fill="#E2E8F0"/>
+
+  <!-- Bank detection header icon area -->
+  <circle cx="195" cy="422" r="28" fill="#EEF2FF"/>
+  <rect x="179" y="408" width="32" height="20" rx="4" fill="#4F46E5"/>
+  <text x="195" y="423" font-size="10" font-weight="700" text-anchor="middle" fill="#FFFFFF">HDFC</text>
+  <!-- "New" badge on icon -->
+  <circle cx="218" cy="406" r="8" fill="#059669"/>
+  <text x="218" y="410" font-size="9" font-weight="700" text-anchor="middle" fill="#FFFFFF">+</text>
+
+  <!-- Sheet header -->
+  <text x="195" y="468" font-size="17" font-weight="800" text-anchor="middle" fill="#1E293B">New Bank Account Detected</text>
+  <text x="195" y="488" font-size="13" text-anchor="middle" fill="#64748B">HDFC Bank · Account ·· 5678</text>
+
+  <!-- Divider -->
+  <line x1="20" y1="504" x2="370" y2="504" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Prompt text -->
+  <text x="20" y="528" font-size="14" fill="#1E293B">What is this account?</text>
+  <text x="20" y="546" font-size="12" fill="#94A3B8">You already have an HDFC account (·· 1234). Labelling</text>
+  <text x="20" y="562" font-size="12" fill="#94A3B8">helps you tell them apart in the Finance Dashboard.</text>
+
+  <!-- Label option chips (row 1) -->
+  <rect x="20" y="578" width="160" height="44" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="100" y="605" font-size="13" font-weight="600" text-anchor="middle" fill="#1E293B">💰 Salary Account</text>
+
+  <rect x="192" y="578" width="178" height="44" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="281" y="605" font-size="13" font-weight="600" text-anchor="middle" fill="#1E293B">🏦 Savings Account</text>
+
+  <!-- Label option chips (row 2) -->
+  <rect x="20" y="634" width="140" height="44" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="90" y="661" font-size="13" font-weight="600" text-anchor="middle" fill="#1E293B">💳 Current Acc.</text>
+
+  <rect x="172" y="634" width="198" height="44" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="271" y="657" font-size="12" font-weight="600" text-anchor="middle" fill="#1E293B">✏️ Other (type name)</text>
+  <rect x="192" y="666" width="158" height="4" rx="2" fill="#E2E8F0"/>
+
+  <!-- Selection state indicator: Salary Account selected -->
+  <rect x="20" y="578" width="160" height="44" rx="10" fill="#EEF2FF" stroke="#4F46E5" stroke-width="2"/>
+  <text x="100" y="605" font-size="13" font-weight="600" text-anchor="middle" fill="#4F46E5">💰 Salary Account</text>
+  <circle cx="168" cy="600" r="6" fill="#4F46E5"/>
+  <text x="168" y="604" font-size="9" font-weight="700" text-anchor="middle" fill="#FFFFFF">✓</text>
+
+  <!-- Divider before CTAs -->
+  <line x1="20" y1="694" x2="370" y2="694" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Privacy note -->
+  <rect x="20" y="702" width="350" height="28" rx="6" fill="#F0FDF4"/>
+  <text x="36" y="721" font-size="11" fill="#15803D">🔒  Account labels are stored only on your device</text>
+
+  <!-- CTAs -->
+  <!-- Save Label (primary, indigo) -->
+  <rect x="20" y="740" width="200" height="52" rx="14" fill="#4F46E5"/>
+  <text x="120" y="771" font-size="14" font-weight="700" text-anchor="middle" fill="#FFFFFF">Save Label</text>
+
+  <!-- Skip (ghost) -->
+  <rect x="228" y="740" width="142" height="52" rx="14" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="299" y="771" font-size="14" font-weight="600" text-anchor="middle" fill="#64748B">Skip for now</text>
+
+  <!-- Annotation callouts (red dashed) -->
+  <!-- 1 icon+bank -->
+  <rect x="6" y="396" width="16" height="16" rx="8" fill="#D33"/>
+  <text x="14" y="408" font-size="9" font-weight="700" text-anchor="middle" fill="#FFFFFF">1</text>
+
+  <!-- 2 header text -->
+  <rect x="6" y="460" width="16" height="16" rx="8" fill="#D33"/>
+  <text x="14" y="472" font-size="9" font-weight="700" text-anchor="middle" fill="#FFFFFF">2</text>
+
+  <!-- 3 option chips -->
+  <rect x="6" y="590" width="16" height="16" rx="8" fill="#D33"/>
+  <text x="14" y="602" font-size="9" font-weight="700" text-anchor="middle" fill="#FFFFFF">3</text>
+
+  <!-- 4 privacy badge -->
+  <rect x="6" y="704" width="16" height="16" rx="8" fill="#D33"/>
+  <text x="14" y="716" font-size="9" font-weight="700" text-anchor="middle" fill="#FFFFFF">4</text>
+
+  <!-- 5 CTAs -->
+  <rect x="6" y="752" width="16" height="16" rx="8" fill="#D33"/>
+  <text x="14" y="764" font-size="9" font-weight="700" text-anchor="middle" fill="#FFFFFF">5</text>
+</svg>

@@ -174,7 +174,7 @@
     </summary>
     <nav class="toc-body" aria-label="Section navigation">
       <h1>HEL-17</h1>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">EMI Reminder — Full App Mockup · 28 screens · 4-tab nav</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">EMI Reminder — Full App Mockup · 33 screens · 4-tab nav</div>
 
       <h2>Foundation</h2>
       <a href="#tokens"><span class="num">◈</span>Design tokens</a>
@@ -222,6 +222,13 @@
       <a href="#s27"><span class="num">27</span>HRA Calculator <span class="badge new">NEW</span></a>
       <a href="#s28"><span class="num">28</span>CIBIL Score <span class="badge new">NEW</span></a>
 
+      <h2>SMS Finance Intelligence</h2>
+      <a href="#s29"><span class="num">29</span>SMS Permission <span class="badge new">NEW</span></a>
+      <a href="#s30"><span class="num">30</span>Finance Dashboard <span class="badge new">NEW</span></a>
+      <a href="#s31"><span class="num">31</span>Monthly Summary <span class="badge new">NEW</span></a>
+      <a href="#s32"><span class="num">32</span>EMI Detected Card <span class="badge new">NEW</span></a>
+      <a href="#s33"><span class="num">33</span>Multi-Account Label <span class="badge new">NEW</span></a>
+
       <h2>System</h2>
       <a href="#s7"><span class="num">7</span>Notifications</a>
       <a href="#s15"><span class="num">15</span>Settings</a>
@@ -237,7 +244,7 @@
       <h1>EMI Reminder — Full App Design</h1>
       <p>Complete wireframe specification for all 17 screens of the Android EMI Calculator &amp; Loan Reminder app. Covers the full user journey from first launch through advanced features: loan comparison, prepayment calculator, amortization schedule, portfolio analytics, and SMS auto-import.</p>
       <div class="pills">
-        <span class="pill dark">28 screens total</span>
+        <span class="pill dark">32 screens total</span>
         <span class="pill dark">4-tab nav with icons</span>
         <span class="pill">390×844 · portrait mobile</span>
         <span class="pill">Material Design 3 · Indigo/Violet</span>
@@ -446,7 +453,7 @@
     <section id="s16">
       <div class="lede">State · First-time <span class="notes new-badge">NEW</span></div>
       <h2><span class="step-num">16.</span>Empty State — Dashboard</h2>
-      <p class="desc">First-time user sees this instead of the normal dashboard. Illustration + dual CTAs to guide them to either add a loan manually or calculate an EMI first. SMS import shortcut surfaces the auto-import path without friction.</p>
+      <p class="desc">First-time user sees this instead of the normal dashboard. Illustration + dual CTAs to guide them to either add a loan manually or calculate an EMI first. SMS Finance Intelligence entry card surfaces the auto-tracking path — leads to <a href="#s29">SMS Permission Onboarding (Screen 29)</a> if READ_SMS not yet granted, or directly to <a href="#s30">Finance Dashboard (Screen 30)</a> if already enabled.</p>
       <div class="grid">
         <div class="wire phone-wire" data-zoom data-caption="16 · Empty State Dashboard">
           <div class="label"><span>16-empty-state-dashboard.svg</span><span>390×844</span></div>
@@ -459,9 +466,10 @@
               <li><b>1</b> — Geometric illustration using the ₹ brand mark. No copyrighted images. Uses only <code>color/outline</code> and <code>color/primary</code> tokens — renders correctly in dark mode.</li>
               <li><b>2</b> — Primary CTA "Add Your First Loan" — direct path to Add Reminder bottom sheet. Full-width, black fill (<code>color/primary</code>).</li>
               <li><b>3</b> — Secondary CTA "Calculate EMI First" — for users who want to explore before committing. Outlined style.</li>
-              <li><b>4</b> — SMS import hint card. Surfaces only if READ_SMS permission was granted during onboarding. Hidden otherwise — no hollow offers.</li>
+              <li><b>4</b> — SMS Finance Intelligence card (always visible — not gated on permission). Two states: (a) READ_SMS <em>not</em> granted → "Let your bank SMS do the work" teaser with "Enable →" CTA that opens <a href="#s29">SMS Permission Onboarding (Screen 29)</a>; (b) READ_SMS <em>already</em> granted → "Finance Intelligence ON ✓" status with "View Dashboard →" CTA navigating to <a href="#s30">Finance Dashboard (Screen 30)</a>. Always surfaced because the value prop motivates users to grant permission — matches the Commitment &amp; Consistency priming pattern in Screen 29.</li>
             </ul>
             <div class="why"><b>Design lens — Progressive Disclosure:</b> Empty state shows only 2 primary actions, not the full app surface. Reduces cognitive load (Miller's Law) for first-time users who haven't formed a mental model yet.</div>
+            <div class="why"><b>SMS Finance Intelligence entry point (HEL-541):</b> Replaces the old conditional "SMS import hint" (visible only after permission). Always-visible card mirrors the pre-permission rationale pattern from <a href="#s29">Screen 29</a>. Flow: teaser → Screen 29 permission → <a href="#s30">Screen 30</a> Finance Dashboard → <a href="#s31">Screen 31</a> Monthly Summary.</div>
           </div>
         </div>
       </div>
@@ -1073,6 +1081,140 @@
       </div>
     </section>
 
+    <!-- ========== Screen 29: SMS Permission Onboarding ========== -->
+    <section id="s29">
+      <div class="lede">SMS Finance Intelligence · HEL-548 <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">29.</span>SMS Permission Onboarding</h2>
+      <p class="desc">One-time permission onboarding shown on first open of the Finance tab (or re-triggerable from Settings). A gradient hero zone with an in-phone SMS illustration communicates the feature visually before any text is read. Three benefit bullets explain the value prop. A green privacy badge ("Parsed on-device. Never uploaded.") addresses the primary concern before the user sees the Android system permission dialog. Secondary "Not now" enforces a 7-day cooldown nudge.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="29 · SMS Permission Onboarding">
+          <div class="label"><span>29-sms-permission-onboarding.svg</span><span>390×844</span></div>
+          <img src="wireframes/29-sms-permission-onboarding.svg" alt="SMS Permission Onboarding wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Indigo→Violet gradient hero (230px) with schematic phone showing real-looking SMS bubbles and an auto-detect ✓ badge. Applies <b>Aesthetic-Usability Effect</b>: the visual warmth reduces perceived friction of the permission ask.</li>
+              <li><b>2</b> — "Let your bank SMS do the work" headline split across two lines with the key benefit phrase on line 2 in brand indigo. Applies <b>Von Restorff Effect</b>: color contrast makes the differentiating phrase pop.</li>
+              <li><b>3</b> — Three benefit rows (card chips) match the <b>Miller's Law (3 items)</b> threshold. Each row pairs an emoji icon with a headline and short descriptor, minimizing cognitive load.</li>
+              <li><b>4</b> — Green privacy badge (#F0FDF4 bg, #15803D text) addresses the single largest objection (SMS privacy) before the CTA. Applies <b>Loss Aversion framing</b>: reassurance reduces perceived risk of tapping the primary CTA.</li>
+              <li><b>5</b> — "Enable SMS Intelligence" in #059669 green (not indigo) signals trust and permission-granting. "Not now" as plain muted text — no button styling — applies <b>Tesler's Law</b> by keeping the opt-out accessible but visually subordinate.</li>
+            </ul>
+            <div class="why"><b>Design lens — Commitment &amp; Consistency:</b> The benefit bullets ask the user to mentally commit to the value ("yes, I want auto-detected EMIs") before the actual Android permission dialog appears. Users who have already agreed internally are more likely to tap "Allow" on the system prompt.</div>
+            <div class="why"><b>Privacy note:</b> Per product policy, SMS data is never uploaded. The badge is not optional copy — it is a product safety guarantee that must survive design iteration.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 30: Finance Dashboard Tab ========== -->
+    <section id="s30">
+      <div class="lede">SMS Finance Intelligence · HEL-548 <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">30.</span>Finance Dashboard</h2>
+      <p class="desc">Primary Finance tab screen (Finance tab active in pill-style bottom nav). Header shows "Finance" + initials avatar + "SMS Intelligence ON" status badge. Month selector (← July 2026 →) enables navigation without drilling into a separate screen. Four 2×2 summary metric cards: Total Income (green), Total EMIs (red), Total Expenses (amber), Net Savings (teal). Horizontal category bars provide at-a-glance spending breakdown. Recent transaction list (4 rows) each tappable to an edit/override sheet. AdMob banner pinned above the nav pill.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="30 · Finance Dashboard">
+          <div class="label"><span>30-finance-dashboard.svg</span><span>390×844</span></div>
+          <img src="wireframes/30-finance-dashboard.svg" alt="Finance Dashboard wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Month selector uses ‹ › chevrons with the month name center-anchored. Applies <b>Hick's Law</b>: navigation is a single swipe decision, not a date picker modal.</li>
+              <li><b>2</b> — Four summary cards use semantic color (green/red/amber/teal) for immediate pattern reading. Applies <b>Pre-attentive processing</b>: color encodes value polarity faster than reading numbers. WCAG contrast checked for each pair.</li>
+              <li><b>3</b> — Horizontal category bars share a fixed left-column (150px) for labels, right section for bars + values. <b>Alignment</b> ensures bars are visually comparable without reading numbers.</li>
+              <li><b>4</b> — Transaction rows follow F-pattern: merchant name (bold, left) → description (muted, left) → amount (bold, right) → category chip (right-bottom). <b>Recognition over Recall</b>: category chip colours match the bar chart colours for consistency.</li>
+              <li><b>5</b> — "View all transactions →" text link, not a button — <b>Progressive Disclosure</b>: most users scan the top 3, power users tap through to the full list.</li>
+              <li><b>6</b> — AdMob banner (48dp) is clearly separated from transaction content by 8dp gap. Non-intrusive per <b>Dark pattern ethics</b> — ad is clearly labelled and does not mimic a transaction row.</li>
+            </ul>
+            <div class="why"><b>Design lens — Goal-Gradient Effect:</b> The Net Savings card is positioned bottom-right (last in Z-pattern scan), reinforcing the positive outcome after the user processes costs. This ordering increases perceived value of the feature.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 31: Monthly Summary ========== -->
+    <section id="s31">
+      <div class="lede">SMS Finance Intelligence · HEL-548 <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">31.</span>Monthly Summary</h2>
+      <p class="desc">Full-screen drill-down for a single month, navigable from the Finance Dashboard by tapping the month selector or a dedicated "Monthly Summary" CTA. Grouped bar chart compares income vs. expense side-by-side for current and previous month. Top 5 spending categories ranked list with amount, % of spend, and month-on-month delta badge (↑/↓/=). EMI section lists all EMI payments with status (Paid ✓ / Due soon). AdMob banner above bottom nav.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="31 · Monthly Summary">
+          <div class="label"><span>31-monthly-summary.svg</span><span>390×844</span></div>
+          <img src="wireframes/31-monthly-summary.svg" alt="Monthly Summary wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Grouped bar chart (Income | Expense for current + prior month) allows 4-way comparison in a single glance. Green = income, Red = expense — consistent with Dashboard color tokens. Applies <b>Chunking</b>: two months of data are visually grouped before the ranked category list.</li>
+              <li><b>2</b> — Top 5 categories ranked list (not a pie/donut): ranked order applies <b>Serial Position Effect</b> — users remember the first and last items. EMI/Loans is deliberately ranked #1 (highest spend) to prompt action.</li>
+              <li><b>3</b> — Month-on-month delta badges (↑ +₹800, ↓ -₹500, = same) use minimal color coding: yellow for increase, green for decrease, gray for unchanged. Applies <b>Information Scent</b>: the delta is the most actionable data point on each row.</li>
+              <li><b>4</b> — EMI section groups all detected loan payments with Paid/Due status. A running total row at the bottom acts as a cognitive anchor — users verify the sum matches their expectations.</li>
+              <li><b>5</b> — Back button (←) + in-header month navigation arrows allow non-linear browsing without breaking the back stack. Applies <b>Norman's Mapping</b>: spatial left-right matches temporal past-future.</li>
+            </ul>
+            <div class="why"><b>Design lens — Inverted Pyramid:</b> The income/expense chart (highest-level summary) leads, then ranked categories (mid-level), then EMI itemisation (most granular). A first-time user gets value from the first card even without scrolling.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 32: EMI Detected Confirmation Card ========== -->
+    <section id="s32">
+      <div class="lede">SMS Finance Intelligence · HEL-548 <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">32.</span>EMI Detected Confirmation Card</h2>
+      <p class="desc">In-app bottom sheet triggered when a new recurring EMI is auto-detected from an incoming bank SMS. The sheet surfaces over the Finance Dashboard (dimmed scrim). Shows: Lender name + logo chip, masked account number, detected monthly amount (large, prominent), and inferred due day-of-month. Confidence badge ("High confidence") communicates detection quality. Two CTAs: "Add Reminder" (primary green → opens pre-filled reminder form) and "Dismiss" (ghost). AdMob banner replaces the pill nav at the bottom of the sheet — EMI detection is a high-value moment with high user engagement.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="32 · EMI Detected Confirmation Card">
+          <div class="label"><span>32-emi-detected-card.svg</span><span>390×844</span></div>
+          <img src="wireframes/32-emi-detected-card.svg" alt="EMI Detected Confirmation Card wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Dark scrim (60% opacity over Finance Dashboard) focuses attention on the sheet. The dimmed content behind provides spatial context (where did this come from?) without fully occluding it. Applies <b>Figure-Ground</b> perception principle.</li>
+              <li><b>2</b> — Detected amount (₹8,500) at 28sp bold is the largest type on the sheet — hierarchy is: amount → lender → account → due day. Applies <b>Visual Hierarchy / Fitts's Law</b>: the most important data is the largest target for the eye.</li>
+              <li><b>3</b> — "High confidence" badge (#DCFCE7 green chip) addresses the trust question upfront. When confidence is low (&lt;70%), badge changes to amber "Please verify". This prevents user frustration from incorrect auto-detection without blocking the flow.</li>
+              <li><b>4</b> — "Add Reminder" is green (#059669) — same as the SMS permission CTA — building a consistent color-meaning association: green = enable / add / trust. "Dismiss" is ghost with border, not red — avoids <b>confirmshaming</b> patterns.</li>
+              <li><b>5</b> — AdMob banner at the very bottom of the sheet (below CTAs, above no nav). EMI detection is a high-intent moment — user is actively engaged with finance data. Banner is clearly labelled; it does not interfere with the "Add Reminder" tap target (minimum 48dp separation).</li>
+            </ul>
+            <div class="why"><b>Design lens — Doherty Threshold + Optimistic UI:</b> When the user taps "Add Reminder," the sheet should dismiss immediately and the reminder form should open pre-filled — no loading spinner. The confidence the user builds from seeing "High confidence" should carry into the add flow without friction.</div>
+            <div class="why"><b>Open question:</b> Should Dismiss trigger a "Don't show for this lender" option? Flagged as HEL-542 open question — non-blocking for this wireframe iteration.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 33: Multi-Account Disambiguation ========== -->
+    <section id="s33">
+      <div class="lede">SMS Finance Intelligence · HEL-541 v1.1 <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">33.</span>Multi-Account Disambiguation</h2>
+      <p class="desc">Bottom sheet triggered once when a second account from the same bank is first detected (e.g., user has HDFC ·· 1234 already; new SMS from HDFC ·· 5678 arrives). The user is invited to label the new account so the Finance Dashboard can group transactions clearly. Labelling is optional — last-4 digit tracking works regardless. Implements PRD v1.1 §8.4 (OQ-6 resolution).</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="33 · Multi-Account Disambiguation">
+          <div class="label"><span>33-multi-account-disambiguation.svg</span><span>390×844</span></div>
+          <img src="wireframes/33-multi-account-disambiguation.svg" alt="Multi-Account Disambiguation wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Bank icon with green "+" badge communicates "new account at a known bank" at a glance. The existing account's last-4 (·· 1234) is shown in the subtitle for comparison — user knows immediately which account is which.</li>
+              <li><b>2</b> — Clear framing: "You already have an HDFC account (·· 1234)." This anchors the disambiguation need — without this context, the user might not understand why they're being asked. Design lens: <i>Situational Awareness</i>.</li>
+              <li><b>3</b> — Four chip options in a 2×2 grid: Salary Account, Savings Account, Current Account, Other (type name). First-tap selects (indigo highlight + checkmark); tapping "Other" reveals an inline text field. Design lens: <i>Recognition over Recall</i> — most common labels are pre-suggested. Miller's Law — 4 options, not 10.</li>
+              <li><b>4</b> — Green privacy badge: "Account labels are stored only on your device." Consistent with the SMS permission onboarding tone. Trust infrastructure must be repeated at every new data-collection moment.</li>
+              <li><b>5</b> — "Save Label" (indigo, 200dp) vs. "Skip for now" (ghost, 142dp). Width ratio communicates hierarchy without hiding the skip option. Design lens: <i>Tesler's Law</i> — skipping is always possible; complexity is managed in the chip selection, not by removing the skip path.</li>
+            </ul>
+            <div class="why"><b>Design lens — Minimal Footprint:</b> This sheet appears exactly once per new <code>(sender_id, account_last4)</code> pair — never re-prompted if dismissed. No persistent badge, no red dot, no nudge after skip. Respects user agency: last-4 tracking handles disambiguation silently if the user ignores all labelling prompts.</div>
+            <div class="why"><b>PRD v1.1 §8.4 acceptance criteria met by this screen:</b> (1) Two accounts at same bank → separate BankAccount records. (2) Prompt shown once per new account when another exists at that bank. (3) Skipping does not affect transaction attribution. (4) User can rename via Settings → Finance Accounts at any time.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ========== Open Questions ========== -->
     <section id="open">
       <div class="lede">For reviewer</div>
@@ -1091,7 +1233,7 @@
     </section>
 
     <div class="footer">
-      HEL-17 · Full App Mockup · v3 · 28 screens (16 new) · HEL-537: 6 coming-soon Finance Tool screens added · Designed by Iris (Figma App Designer) · helsy.ioo<br>
+      HEL-17 · Full App Mockup · v5 · 33 screens (21 new) · HEL-548: SMS Finance Intelligence screens 29–32 · HEL-541 v1.1: Multi-Account Disambiguation screen 33 added · Designed by Iris (Figma App Designer) · helsy.ioo<br>
       Wireframes follow house style: black on white, 1.5pt strokes, 8dp grid, type scale 11/12/14/20/28sp. Red dashed callouts are annotation layer only. Reference app analysed: EMI Calculator &amp; Loan Reminder (Play Store).
     </div>
   </main>

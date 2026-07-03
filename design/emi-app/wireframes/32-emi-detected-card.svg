@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background: dimmed Finance Dashboard (simplified) -->
+  <rect width="390" height="844" fill="#EEF2FF"/>
+  <rect width="390" height="48" fill="#4F46E5"/>
+  <text x="16" y="32" font-size="12" fill="#C7D2FE">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#C7D2FE"/>
+  <rect x="0" y="48" width="390" height="56" fill="url(#hdr)"/>
+  <text x="20" y="84" font-size="20" font-weight="800" fill="#FFFFFF">Finance</text>
+  <!-- Month selector bar -->
+  <rect x="16" y="116" width="358" height="40" rx="12" fill="#FFFFFF" opacity="0.7"/>
+  <text x="195" y="141" font-size="14" font-weight="700" text-anchor="middle" fill="#94A3B8">July 2026</text>
+  <!-- Summary card ghosts -->
+  <rect x="16" y="168" width="174" height="72" rx="14" fill="#FFFFFF" opacity="0.6"/>
+  <rect x="200" y="168" width="174" height="72" rx="14" fill="#FFFFFF" opacity="0.6"/>
+  <rect x="16" y="250" width="174" height="72" rx="14" fill="#FFFFFF" opacity="0.6"/>
+  <rect x="200" y="250" width="174" height="72" rx="14" fill="#FFFFFF" opacity="0.6"/>
+  <!-- Category bars ghosts -->
+  <rect x="16" y="340" width="358" height="124" rx="14" fill="#FFFFFF" opacity="0.6"/>
+
+  <!-- Dark scrim overlay -->
+  <rect width="390" height="844" fill="#0F172A" opacity="0.60"/>
+
+  <!-- Bottom sheet -->
+  <rect x="0" y="436" width="390" height="408" rx="24" fill="#FFFFFF"/>
+
+  <!-- Drag handle -->
+  <rect x="163" y="450" width="64" height="4" rx="2" fill="#E2E8F0"/>
+
+  <!-- Sheet header -->
+  <text x="195" y="492" font-size="18" font-weight="800" text-anchor="middle" fill="#1E293B">New EMI Detected</text>
+  <text x="195" y="512" font-size="13" text-anchor="middle" fill="#64748B">Auto-detected from your bank SMS</text>
+
+  <!-- Bell icon badge -->
+  <circle cx="195" cy="470" r="0" fill="none"/>
+  <text x="312" y="492" font-size="20" text-anchor="middle">🔔</text>
+
+  <!-- Divider -->
+  <line x1="20" y1="528" x2="370" y2="528" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Detected data rows -->
+  <!-- Lender -->
+  <rect x="20" y="540" width="350" height="48" rx="10" fill="#F8FAFC"/>
+  <text x="36" y="558" font-size="10" fill="#94A3B8">LENDER</text>
+  <text x="36" y="578" font-size="14" font-weight="700" fill="#1E293B">HDFC Bank</text>
+  <!-- Bank logo placeholder -->
+  <rect x="310" y="548" width="44" height="28" rx="6" fill="#E2E8F0"/>
+  <text x="332" y="567" font-size="10" text-anchor="middle" fill="#64748B">HDFC</text>
+
+  <!-- Account -->
+  <rect x="20" y="596" width="162" height="48" rx="10" fill="#F8FAFC"/>
+  <text x="36" y="614" font-size="10" fill="#94A3B8">ACCOUNT</text>
+  <text x="36" y="634" font-size="14" font-weight="700" fill="#1E293B">****4821</text>
+
+  <!-- Due day -->
+  <rect x="190" y="596" width="180" height="48" rx="10" fill="#F8FAFC"/>
+  <text x="206" y="614" font-size="10" fill="#94A3B8">INFERRED DUE DAY</text>
+  <text x="206" y="634" font-size="14" font-weight="700" fill="#1E293B">5th of month</text>
+
+  <!-- Amount (prominent) -->
+  <rect x="20" y="652" width="350" height="64" rx="14" fill="#EEF2FF"/>
+  <text x="36" y="672" font-size="10" fill="#64748B">DETECTED AMOUNT</text>
+  <text x="36" y="704" font-size="28" font-weight="800" fill="#4F46E5">₹8,500</text>
+  <text x="140" y="704" font-size="14" fill="#64748B">/ month</text>
+  <!-- Confidence badge -->
+  <rect x="268" y="664" width="88" height="20" rx="6" fill="#DCFCE7"/>
+  <text x="312" y="678" font-size="9" text-anchor="middle" fill="#15803D">✓ High confidence</text>
+
+  <!-- CTAs -->
+  <!-- Add Reminder (primary, green) -->
+  <rect x="20" y="728" width="204" height="52" rx="14" fill="#059669"/>
+  <text x="122" y="759" font-size="14" font-weight="700" text-anchor="middle" fill="#FFFFFF">Add Reminder</text>
+
+  <!-- Dismiss (ghost) -->
+  <rect x="232" y="728" width="138" height="52" rx="14" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="301" y="759" font-size="14" font-weight="600" text-anchor="middle" fill="#64748B">Dismiss</text>
+
+  <!-- AdMob banner (at bottom of sheet) -->
+  <rect x="0" y="792" width="390" height="52" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="12" y="798" width="36" height="36" rx="6" fill="#E2E8F0"/>
+  <text x="30" y="820" font-size="10" text-anchor="middle" fill="#94A3B8">Ad</text>
+  <rect x="56" y="804" width="160" height="10" rx="3" fill="#E2E8F0"/>
+  <rect x="56" y="820" width="100" height="8" rx="3" fill="#E2E8F0"/>
+  <text x="370" y="820" font-size="10" text-anchor="end" fill="#94A3B8">AdMob</text>
+</svg>
