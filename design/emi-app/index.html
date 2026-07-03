@@ -174,7 +174,7 @@
     </summary>
     <nav class="toc-body" aria-label="Section navigation">
       <h1>HEL-17</h1>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">EMI Reminder — Full App Mockup · 33 screens · 4-tab nav</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">EMI Reminder — Full App Mockup · 36 screens · 4-tab nav</div>
 
       <h2>Foundation</h2>
       <a href="#tokens"><span class="num">◈</span>Design tokens</a>
@@ -227,7 +227,10 @@
       <a href="#s30"><span class="num">30</span>Finance Dashboard <span class="badge new">NEW</span></a>
       <a href="#s31"><span class="num">31</span>Monthly Summary <span class="badge new">NEW</span></a>
       <a href="#s32"><span class="num">32</span>EMI Detected Card <span class="badge new">NEW</span></a>
-      <a href="#s33"><span class="num">33</span>Multi-Account Label <span class="badge new">NEW</span></a>
+      <a href="#s33"><span class="num">33</span>Account Labelling Prompt <span class="badge new">NEW</span></a>
+      <a href="#s34"><span class="num">34</span>Transaction List <span class="badge new">NEW</span></a>
+      <a href="#s35"><span class="num">35</span>Category Breakdown <span class="badge new">NEW</span></a>
+      <a href="#s36"><span class="num">36</span>Account Management <span class="badge new">NEW</span></a>
 
       <h2>System</h2>
       <a href="#s7"><span class="num">7</span>Notifications</a>
@@ -244,7 +247,7 @@
       <h1>EMI Reminder — Full App Design</h1>
       <p>Complete wireframe specification for all 17 screens of the Android EMI Calculator &amp; Loan Reminder app. Covers the full user journey from first launch through advanced features: loan comparison, prepayment calculator, amortization schedule, portfolio analytics, and SMS auto-import.</p>
       <div class="pills">
-        <span class="pill dark">32 screens total</span>
+        <span class="pill dark">36 screens total</span>
         <span class="pill dark">4-tab nav with icons</span>
         <span class="pill">390×844 · portrait mobile</span>
         <span class="pill">Material Design 3 · Indigo/Violet</span>
@@ -428,7 +431,7 @@
     <section id="s2">
       <div class="lede">Core · Primary screen</div>
       <h2><span class="step-num">2.</span>Home Dashboard</h2>
-      <p class="desc">Portfolio-at-a-glance. Active loan count, next due date, total monthly outflow with mini trend chart, quick action shortcuts, and 2 most urgent reminders. Tapping a reminder opens Loan Detail (Screen 10).</p>
+      <p class="desc">Portfolio-at-a-glance. Active loan count, next due date, total monthly outflow with mini trend chart, quick action shortcuts, 2 most urgent reminders, and a Finance Intelligence card at the bottom (OQ-5 decision: no 5th tab — Finance is a card on this Dashboard). Tapping a reminder opens Loan Detail (Screen 10). Tapping the Finance card navigates to <a href="#s30">Finance Dashboard (Screen 30)</a>.</p>
       <div class="grid">
         <div class="wire phone-wire" data-zoom data-caption="02 · Home Dashboard">
           <div class="label"><span>02-home-dashboard.svg</span><span>390×844</span></div>
@@ -442,8 +445,10 @@
               <li><b>2</b> — Summary cards: 2×half-width (Total Loans, Next Due) + 1×full-width dark card (Total EMI/Month + mini bar chart). Design lens: <i>Von Restorff</i> — dark card draws attention to the primary metric.</li>
               <li><b>3</b> — Quick Actions row: Calculator, Add Reminder, View All. Design lens: <i>Fitts's Law</i> — 48×48dp minimum tap targets. <i>Recognition over Recall</i> — labelled icons not bare glyphs.</li>
               <li><b>4</b> — Recent Reminders: 2 cards with left-border urgency encoding. Black border = due ≤7d, grey = ≤14d, dimmed = paused. "See all →" navigates to Reminders list.</li>
+              <li><b>5</b> — Finance Intelligence card (dark #1E293B card, bottom of scrollable content). When READ_SMS is granted: shows "⚡ SMS Intelligence ON" badge, monthly spend + savings summary, "View Finance →" CTA. Implements OQ-5 Option B (HEL-549): Finance is a card on the Home tab, not a 5th bottom-nav tab. Design lens: <i>Progressive Disclosure</i> — Finance data surfaces in context, not behind a hidden tab. <i>Goal-Gradient</i>: the "₹20,300 saved" figure motivates continued engagement.</li>
             </ul>
             <div class="why"><b>Why dashboard first:</b> Reference app has no summary view — lands on Calculator. Users with multiple loans need a portfolio view for orientation. Design lens: <i>Mental Models</i> (banking app conventions), <i>Goal-Gradient</i> (next due creates urgency).</div>
+            <div class="why"><b>OQ-5 nav decision (HEL-549):</b> Finance Intelligence is Option B — a card on the existing Dashboard tab, not a new 5th tab. The Finance card (annotation 5) is always visible once SMS permission is granted; before permission it shows the teaser (see <a href="#s16">Screen 16 empty state</a>). Tap → <a href="#s30">Screen 30 Finance Dashboard</a>.</div>
           </div>
         </div>
       </div>
@@ -1188,28 +1193,109 @@
       </div>
     </section>
 
-    <!-- ========== Screen 33: Multi-Account Disambiguation ========== -->
+    <!-- ========== Screen 33: Account Labelling Prompt ========== -->
     <section id="s33">
-      <div class="lede">SMS Finance Intelligence · HEL-541 v1.1 <span class="notes new-badge">NEW</span></div>
-      <h2><span class="step-num">33.</span>Multi-Account Disambiguation</h2>
-      <p class="desc">Bottom sheet triggered once when a second account from the same bank is first detected (e.g., user has HDFC ·· 1234 already; new SMS from HDFC ·· 5678 arrives). The user is invited to label the new account so the Finance Dashboard can group transactions clearly. Labelling is optional — last-4 digit tracking works regardless. Implements PRD v1.1 §8.4 (OQ-6 resolution).</p>
+      <div class="lede">SMS Finance Intelligence · HEL-555 <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">33.</span>Account Labelling Prompt</h2>
+      <p class="desc">Bottom sheet card triggered once when a second account at the same bank is detected from SMS (e.g., user already has HDFC ·· 1234; a new SMS from HDFC ·· 5678 arrives). The user is invited to give the new account a name so the Finance Dashboard can distinguish them. Three quick-select chips cover the common cases; tapping "Other" reveals a custom-name text field. Labelling is always optional — last-4 tracking works regardless. Implements PRD §8.4 (OQ-6 resolution), HEL-555.</p>
       <div class="grid">
-        <div class="wire phone-wire" data-zoom data-caption="33 · Multi-Account Disambiguation">
-          <div class="label"><span>33-multi-account-disambiguation.svg</span><span>390×844</span></div>
-          <img src="wireframes/33-multi-account-disambiguation.svg" alt="Multi-Account Disambiguation wireframe" />
+        <div class="wire phone-wire" data-zoom data-caption="33 · Account Labelling Prompt">
+          <div class="label"><span>33-account-labelling-prompt.svg</span><span>390×844</span></div>
+          <img src="wireframes/33-account-labelling-prompt.svg" alt="Account Labelling Prompt wireframe" />
         </div>
         <div class="notes-col">
           <div class="notes">
             <h3>Annotations</h3>
             <ul>
-              <li><b>1</b> — Bank icon with green "+" badge communicates "new account at a known bank" at a glance. The existing account's last-4 (·· 1234) is shown in the subtitle for comparison — user knows immediately which account is which.</li>
-              <li><b>2</b> — Clear framing: "You already have an HDFC account (·· 1234)." This anchors the disambiguation need — without this context, the user might not understand why they're being asked. Design lens: <i>Situational Awareness</i>.</li>
-              <li><b>3</b> — Four chip options in a 2×2 grid: Salary Account, Savings Account, Current Account, Other (type name). First-tap selects (indigo highlight + checkmark); tapping "Other" reveals an inline text field. Design lens: <i>Recognition over Recall</i> — most common labels are pre-suggested. Miller's Law — 4 options, not 10.</li>
-              <li><b>4</b> — Green privacy badge: "Account labels are stored only on your device." Consistent with the SMS permission onboarding tone. Trust infrastructure must be repeated at every new data-collection moment.</li>
-              <li><b>5</b> — "Save Label" (indigo, 200dp) vs. "Skip for now" (ghost, 142dp). Width ratio communicates hierarchy without hiding the skip option. Design lens: <i>Tesler's Law</i> — skipping is always possible; complexity is managed in the chip selection, not by removing the skip path.</li>
+              <li><b>Bank icon + badge</b> — Indigo HDFC pill inside an EEF2FF circle with a green "+" badge. Communicates "new account at a known bank" pre-attentively before the user reads any text. Subtitle "Account ending in 5678" anchors the specific account. Design lens: <i>Von Restorff Effect</i> — the green badge pulls attention first.</li>
+              <li><b>Body copy</b> — "What is this account? Give it a name so you can tell it apart." Two short sentences: the question frames the task; the reason removes the "why bother?" objection. Design lens: <i>Plain Language</i>, <i>Inverted Pyramid</i>.</li>
+              <li><b>3 chips in a single row</b> — Salary Account · Savings Account · Other. Equal-width chips at 114dp each. Wireframe shows "Other" selected (indigo border + checkmark). Three options follows <i>Miller's Law</i>; one row avoids the cognitive overhead of a 2×2 grid. Design lens: <i>Recognition over Recall</i>.</li>
+              <li><b>Custom name field</b> — Appears only when "Other" is selected (Progressive Disclosure). Active indigo border signals focus; placeholder text suggests realistic examples. Text cursor visible to reinforce "ready to type." Design lens: <i>Progressive Disclosure</i>, <i>Affordance</i>.</li>
+              <li><b>Settings note</b> — "You can rename accounts anytime in Settings" in muted 11sp. Removes the anxiety of making a wrong choice. Design lens: <i>Forgiveness</i> (Norman).</li>
+              <li><b>CTA pair</b> — "Save Name" (indigo, 210dp primary) vs. "Skip for now" (ghost, 140dp). Width hierarchy encodes priority without suppressing the skip path. Design lens: <i>Tesler's Law</i> — complexity is conserved; the system handles unlabelled accounts gracefully.</li>
             </ul>
-            <div class="why"><b>Design lens — Minimal Footprint:</b> This sheet appears exactly once per new <code>(sender_id, account_last4)</code> pair — never re-prompted if dismissed. No persistent badge, no red dot, no nudge after skip. Respects user agency: last-4 tracking handles disambiguation silently if the user ignores all labelling prompts.</div>
-            <div class="why"><b>PRD v1.1 §8.4 acceptance criteria met by this screen:</b> (1) Two accounts at same bank → separate BankAccount records. (2) Prompt shown once per new account when another exists at that bank. (3) Skipping does not affect transaction attribution. (4) User can rename via Settings → Finance Accounts at any time.</div>
+            <div class="why"><b>Minimal Footprint rule:</b> This sheet fires exactly once per new <code>(bank_sender_id, account_last4)</code> pair. If dismissed, the account is tracked by last-4 only — no re-prompt, no badge, no notification. Skipping has zero cost to the user and zero cost to the dashboard's grouping logic.</div>
+            <div class="why"><b>PRD §8.4 acceptance criteria:</b> (1) Two accounts at same bank → separate BankAccount records. (2) Prompt shown once per new account when another already exists at that bank. (3) Skipping does not break transaction attribution. (4) User can rename via Settings → Finance Accounts at any time (echoed in the footer note on this card).</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 34: Transaction List ========== -->
+    <section id="s34">
+      <div class="lede">SMS Finance Intelligence · HEL-541 <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">34.</span>Transaction List</h2>
+      <p class="desc">Full scrollable list of transactions detected from bank SMS, accessible via "View all transactions →" from the Finance Dashboard (Screen 30). Filter chips (All | Banks ▾ | Categories ▾ | Date ▾) allow narrowing by institution or spend category. Transactions are grouped by date; each row shows merchant icon, name, category chip, amount, and source account (last-4). Income rows have a green left border; EMI rows have a red left border. A month summary strip anchors total spend at the top. AdMob banner above the bottom nav.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="34 · Transaction List">
+          <div class="label"><span>34-transaction-list.svg</span><span>390×844</span></div>
+          <img src="wireframes/34-transaction-list.svg" alt="Transaction List wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Filter chip row (full-bleed white strip). "All" chip is active (indigo fill). Chips use ▾ suffix to signal a dropdown is available. Applies <b>Hick's Law</b>: 4 filter dimensions is the maximum before the bar feels crowded. Chips scroll horizontally if more filters are added in future.</li>
+              <li><b>2</b> — Month summary strip: total transaction count + net spend for the selected month. Anchors the user's current scope before they scan the list. Design lens: <i>Inverted Pyramid</i> — highest-level number (total spend) leads.</li>
+              <li><b>3</b> — Date group headers ("TODAY · JUL 29", "JUL 27") apply <b>Chunking</b>: transactions cluster into familiar temporal groups. Reduces perceived length of a long list.</li>
+              <li><b>4</b> — EMI rows (e.g., SBI Home Loan EMI) get a red left-border marker consistent with the Dashboard's color vocabulary. This pre-attentively distinguishes loan payments from regular spending — no reading required.</li>
+              <li><b>5</b> — Income rows (e.g., Salary Credit) get a green left-border. The positive amount (+₹85,000) in green reinforces the semantic. Design lens: <i>Pre-attentive processing</i> — color encodes transaction polarity faster than sign or label.</li>
+            </ul>
+            <div class="why"><b>Design lens — Recognition over Recall:</b> Category chips on each row use the same amber/teal/red color vocabulary as the Finance Dashboard bars. Users map colors across screens without needing to read the label text.</div>
+            <div class="why"><b>Prototype path:</b> Dashboard → "View all transactions →" → this screen. Filters open contextual bottom sheets (bank picker, category picker, date range picker) — not separate screens.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 35: Category Breakdown ========== -->
+    <section id="s35">
+      <div class="lede">SMS Finance Intelligence · HEL-541 <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">35.</span>Category Breakdown</h2>
+      <p class="desc">Deep-dive into a single spending category (e.g., Food &amp; Dining), accessible by tapping a category bar on the Finance Dashboard or the Monthly Summary. Shows the total spend for the selected month, a breakdown of sub-sources (Zomato, Swiggy, Restaurants, Coffee &amp; Café, Other) with proportional horizontal bars, month-on-month delta, and the full list of transactions in that category. Month selector (← ›) allows navigation between months without leaving the screen. Share icon exports a category summary.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="35 · Category Breakdown">
+          <div class="label"><span>35-category-breakdown.svg</span><span>390×844</span></div>
+          <img src="wireframes/35-category-breakdown.svg" alt="Category Breakdown wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Month selector (← July 2026 ›) carries over the same interaction pattern from the Finance Dashboard. Applies <b>Jakob's Law</b>: consistent navigation across related screens reduces re-learning cost for the user.</li>
+              <li><b>2</b> — Total amount hero (₹12,400 in amber, 34sp bold) is the single primary datum on this screen. MoM delta badge ("↑ +₹800 vs June") in a yellow pill immediately contextualises whether the amount is increasing. Design lens: <i>Information Scent</i> — the delta is the most actionable insight for a budgeter.</li>
+              <li><b>3</b> — Horizontal bars for sub-sources share a proportional scale anchored to the category total. Bar widths are visually comparable because they share the same left edge at x=24. Design lens: <i>Pre-attentive processing</i> — bar length encodes percentage without reading the "% of spend" label.</li>
+              <li><b>4</b> — Transaction list for this category (limited to 2 rows, "See all →" for full list) applies <b>Progressive Disclosure</b>: a sampling is enough context for most users; power users drill into the full list.</li>
+            </ul>
+            <div class="why"><b>Design lens — Inverted Pyramid:</b> Total → subcategory breakdown → individual transactions. Each layer adds resolution. A user who only cares about total spend gets their answer at the hero card without scrolling.</div>
+            <div class="why"><b>Prototype path:</b> Finance Dashboard → tap category bar → this screen. OR: Monthly Summary → tap ranked category row → this screen.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 36: Account Management ========== -->
+    <section id="s36">
+      <div class="lede">SMS Finance Intelligence · HEL-555 <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">36.</span>Account Management</h2>
+      <p class="desc">Settings sub-screen (Settings → Finance Accounts) for managing all bank accounts auto-detected from SMS. Top toggle enables or disables SMS Intelligence globally. Below, accounts are grouped by bank, showing last-4 digits, assigned label (if any), and transaction count. Unlabelled accounts show a yellow "Add label" prompt chip (OQ-6 resolution: optional label, not forced). The Account Labelling Prompt (Screen 33) fires when a second account at the same bank is first detected; this screen allows renaming any account at any time. A privacy note ("stored only on your device") repeats the trust signal at the point where the user is managing their data.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="36 · Account Management">
+          <div class="label"><span>36-account-management.svg</span><span>390×844</span></div>
+          <img src="wireframes/36-account-management.svg" alt="Account Management wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — SMS Intelligence toggle (top, ON state). This is the global kill-switch for the feature. Turning it OFF suppresses all SMS parsing without deleting existing transaction history. Design lens: <i>User Control &amp; Freedom</i> (Nielsen heuristic 3) — users can disable the feature at any time with one tap.</li>
+              <li><b>2</b> — Bank groups (HDFC Bank with 2 accounts shown). Each account row shows last-4 digits, label, and transaction count. Grouped by bank because that is the user's mental model for their money — not by account type. Design lens: <i>Mental Models</i>.</li>
+              <li><b>3</b> — Unlabelled account (SBI ·· 4321) shown with amber background and "Add label" chip. The yellow tint is a soft prompt — not an error state. Users understand the account still works without a label. Applies <b>Forgiveness</b> (Norman): the system works fine without the label; naming is enhancement, not requirement.</li>
+              <li><b>4</b> — "Add account manually" ghost button at the bottom for accounts at banks that don't send parseable SMS (e.g., some co-operative banks). Keeps the feature useful even when auto-detection can't cover all accounts.</li>
+              <li><b>5</b> — Privacy reassurance footer in #F0FDF4 green: "stored only on your device · never uploaded." Echoes the Screen 29 onboarding guarantee. Trust signals must be repeated at data-management touchpoints, not just at consent — applies <b>Commitment &amp; Consistency</b>: users who saw the promise at onboarding expect to see it confirmed here.</li>
+            </ul>
+            <div class="why"><b>Design lens — Minimal Footprint:</b> No data export, no cloud sync, no account linking. This screen manages local labels only. Adding those features would require a separate privacy flow. Scope is intentionally constrained to v1 DPDP compliance.</div>
+            <div class="why"><b>Prototype path:</b> Settings → Finance Accounts → this screen. Also reachable from Finance Dashboard header menu (⋮ → Manage Accounts).</div>
           </div>
         </div>
       </div>
@@ -1233,7 +1319,7 @@
     </section>
 
     <div class="footer">
-      HEL-17 · Full App Mockup · v5 · 33 screens (21 new) · HEL-548: SMS Finance Intelligence screens 29–32 · HEL-541 v1.1: Multi-Account Disambiguation screen 33 added · Designed by Iris (Figma App Designer) · helsy.ioo<br>
+      HEL-17 · Full App Mockup · v6 · 36 screens (24 new) · HEL-548: SMS Finance Intelligence screens 29–32 · HEL-555: Account Labelling Prompt screen 33 · HEL-541: Transaction List (34), Category Breakdown (35), Account Management (36) · OQ-5 resolved: Finance card on Dashboard, not 5th tab · Designed by Iris (Figma App Designer) · helsy.ioo<br>
       Wireframes follow house style: black on white, 1.5pt strokes, 8dp grid, type scale 11/12/14/20/28sp. Red dashed callouts are annotation layer only. Reference app analysed: EMI Calculator &amp; Loan Reminder (Play Store).
     </div>
   </main>

@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="amberBar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#FCD34D"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="390" height="844" fill="#EEF2FF"/>
+
+  <!-- Status bar -->
+  <rect width="390" height="48" fill="#4F46E5"/>
+  <text x="16" y="32" font-size="12" fill="#C7D2FE">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#C7D2FE"/>
+
+  <!-- App bar (gradient) -->
+  <rect x="0" y="48" width="390" height="56" fill="url(#hdr)"/>
+  <text x="20" y="82" font-size="22" fill="#FFFFFF">←</text>
+  <text x="195" y="83" font-size="18" font-weight="800" text-anchor="middle" fill="#FFFFFF">Food &amp; Dining</text>
+  <!-- Share icon -->
+  <circle cx="362" cy="76" r="14" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.8"/>
+  <text x="362" y="81" font-size="13" text-anchor="middle" fill="#FFFFFF">⤴</text>
+
+  <!-- Month selector -->
+  <rect x="12" y="116" width="366" height="40" rx="12" fill="#FFFFFF"/>
+  <text x="32" y="141" font-size="18" fill="#4F46E5">‹</text>
+  <text x="195" y="141" font-size="14" font-weight="700" text-anchor="middle" fill="#1E293B">July 2026</text>
+  <text x="358" y="141" font-size="18" text-anchor="end" fill="#4F46E5">›</text>
+
+  <!-- Total amount hero card -->
+  <rect x="12" y="168" width="366" height="112" rx="14" fill="#FFFFFF"/>
+  <!-- Total amount -->
+  <text x="195" y="218" font-size="34" font-weight="800" text-anchor="middle" fill="#D97706">₹12,400</text>
+  <text x="195" y="242" font-size="13" text-anchor="middle" fill="#64748B">Total · Food &amp; Dining · July 2026</text>
+  <!-- MoM delta badge -->
+  <rect x="148" y="252" width="94" height="20" rx="10" fill="#FFF7ED"/>
+  <text x="195" y="266" font-size="10" text-anchor="middle" fill="#D97706">↑ +₹800 vs June</text>
+
+  <!-- BREAKDOWN BY SOURCE label -->
+  <text x="12" y="306" font-size="11" font-weight="700" fill="#64748B">BREAKDOWN BY SOURCE</text>
+
+  <!-- Subcategory bars -->
+  <!-- Zomato: 35% of ₹12,400 = ₹4,200 -->
+  <rect x="12" y="314" width="366" height="44" rx="12" fill="#FFFFFF"/>
+  <text x="24" y="334" font-size="12" font-weight="600" fill="#1E293B">Zomato</text>
+  <text x="370" y="334" font-size="12" font-weight="700" text-anchor="end" fill="#1E293B">₹4,200</text>
+  <rect x="24" y="340" width="330" height="8" rx="4" fill="#E2E8F0"/>
+  <rect x="24" y="340" width="116" height="8" rx="4" fill="url(#amberBar)"/>
+  <text x="24" y="354" font-size="10" fill="#94A3B8">33% of spend</text>
+
+  <!-- Swiggy: 26% = ₹3,100 -->
+  <rect x="12" y="366" width="366" height="44" rx="12" fill="#FFFFFF"/>
+  <text x="24" y="386" font-size="12" font-weight="600" fill="#1E293B">Swiggy</text>
+  <text x="370" y="386" font-size="12" font-weight="700" text-anchor="end" fill="#1E293B">₹3,100</text>
+  <rect x="24" y="392" width="330" height="8" rx="4" fill="#E2E8F0"/>
+  <rect x="24" y="392" width="86" height="8" rx="4" fill="url(#amberBar)"/>
+  <text x="24" y="406" font-size="10" fill="#94A3B8">25% of spend</text>
+
+  <!-- Restaurants: 23% = ₹2,800 -->
+  <rect x="12" y="418" width="366" height="44" rx="12" fill="#FFFFFF"/>
+  <text x="24" y="438" font-size="12" font-weight="600" fill="#1E293B">Restaurants</text>
+  <text x="370" y="438" font-size="12" font-weight="700" text-anchor="end" fill="#1E293B">₹2,800</text>
+  <rect x="24" y="444" width="330" height="8" rx="4" fill="#E2E8F0"/>
+  <rect x="24" y="444" width="77" height="8" rx="4" fill="url(#amberBar)"/>
+  <text x="24" y="458" font-size="10" fill="#94A3B8">23% of spend</text>
+
+  <!-- Coffee / Café: 13% = ₹1,620 -->
+  <rect x="12" y="470" width="366" height="44" rx="12" fill="#FFFFFF"/>
+  <text x="24" y="490" font-size="12" font-weight="600" fill="#1E293B">Coffee &amp; Café</text>
+  <text x="370" y="490" font-size="12" font-weight="700" text-anchor="end" fill="#1E293B">₹1,620</text>
+  <rect x="24" y="496" width="330" height="8" rx="4" fill="#E2E8F0"/>
+  <rect x="24" y="496" width="43" height="8" rx="4" fill="url(#amberBar)"/>
+  <text x="24" y="510" font-size="10" fill="#94A3B8">13% of spend</text>
+
+  <!-- Other: 7% = ₹680 -->
+  <rect x="12" y="522" width="366" height="44" rx="12" fill="#FFFFFF"/>
+  <text x="24" y="542" font-size="12" font-weight="600" fill="#1E293B">Other</text>
+  <text x="370" y="542" font-size="12" font-weight="700" text-anchor="end" fill="#1E293B">₹680</text>
+  <rect x="24" y="548" width="330" height="8" rx="4" fill="#E2E8F0"/>
+  <rect x="24" y="548" width="23" height="8" rx="4" fill="#E2E8F0" opacity="0.6"/>
+  <text x="24" y="562" font-size="10" fill="#94A3B8">5% of spend</text>
+
+  <!-- TRANSACTIONS label -->
+  <text x="12" y="592" font-size="11" font-weight="700" fill="#64748B">TRANSACTIONS</text>
+  <text x="370" y="592" font-size="11" text-anchor="end" fill="#4F46E5">See all →</text>
+
+  <!-- Transaction row 1 -->
+  <rect x="12" y="600" width="366" height="52" rx="12" fill="#FFFFFF"/>
+  <circle cx="32" cy="626" r="14" fill="#FFF7ED"/>
+  <text x="32" y="630" font-size="12" text-anchor="middle">🍔</text>
+  <text x="56" y="620" font-size="12" font-weight="600" fill="#1E293B">Zomato</text>
+  <text x="56" y="638" font-size="10" fill="#64748B">Jul 29 · HDFC ·· 1234</text>
+  <text x="370" y="620" font-size="13" font-weight="700" text-anchor="end" fill="#DC2626">−₹840</text>
+
+  <!-- Transaction row 2 -->
+  <rect x="12" y="660" width="366" height="52" rx="12" fill="#FFFFFF"/>
+  <circle cx="32" cy="686" r="14" fill="#FFF7ED"/>
+  <text x="32" y="690" font-size="12" text-anchor="middle">🛵</text>
+  <text x="56" y="680" font-size="12" font-weight="600" fill="#1E293B">Swiggy</text>
+  <text x="56" y="698" font-size="10" fill="#64748B">Jul 27 · HDFC ·· 1234</text>
+  <text x="370" y="680" font-size="13" font-weight="700" text-anchor="end" fill="#DC2626">−₹520</text>
+
+  <!-- AdMob banner -->
+  <rect x="0" y="726" width="390" height="48" fill="#F8FAFC"/>
+  <rect x="0" y="726" width="390" height="1" fill="#E2E8F0"/>
+  <rect x="0" y="773" width="390" height="1" fill="#E2E8F0"/>
+  <text x="195" y="754" font-size="10" text-anchor="middle" fill="#94A3B8">Advertisement</text>
+  <rect x="8" y="736" width="66" height="28" rx="4" fill="#E2E8F0"/>
+  <text x="41" y="754" font-size="9" text-anchor="middle" fill="#64748B">AdMob</text>
+
+  <!-- Bottom nav (Finance tab active) -->
+  <rect x="0" y="796" width="390" height="48" fill="#FFFFFF"/>
+  <rect x="0" y="796" width="390" height="1" fill="#E2E8F0"/>
+  <text x="49" y="815" font-size="16" text-anchor="middle" fill="#94A3B8">🏠</text>
+  <text x="49" y="834" font-size="9" text-anchor="middle" fill="#94A3B8">Home</text>
+  <text x="147" y="815" font-size="16" text-anchor="middle" fill="#94A3B8">⚡</text>
+  <text x="147" y="834" font-size="9" text-anchor="middle" fill="#94A3B8">Calculator</text>
+  <text x="244" y="815" font-size="16" text-anchor="middle" fill="#94A3B8">🔔</text>
+  <text x="244" y="834" font-size="9" text-anchor="middle" fill="#94A3B8">Reminders</text>
+  <rect x="297" y="798" width="88" height="44" rx="12" fill="#EEF2FF"/>
+  <text x="341" y="815" font-size="16" text-anchor="middle" fill="#4F46E5">💰</text>
+  <text x="341" y="834" font-size="9" font-weight="700" text-anchor="middle" fill="#4F46E5">Finance</text>
+
+  <!-- Annotation callouts -->
+  <circle cx="378" cy="141" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="378" y="145" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">1</text>
+  <circle cx="378" cy="218" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="378" y="222" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">2</text>
+  <circle cx="378" cy="340" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="378" y="344" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">3</text>
+  <circle cx="378" cy="620" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="378" y="624" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">4</text>
+</svg>

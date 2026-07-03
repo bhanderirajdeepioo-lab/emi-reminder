@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="390" height="844" fill="#EEF2FF"/>
+
+  <!-- Status bar -->
+  <rect width="390" height="48" fill="#4F46E5"/>
+  <text x="16" y="32" font-size="12" fill="#C7D2FE">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#C7D2FE"/>
+
+  <!-- App bar (gradient) -->
+  <rect x="0" y="48" width="390" height="56" fill="url(#hdr)"/>
+  <text x="20" y="82" font-size="22" fill="#FFFFFF">←</text>
+  <text x="195" y="83" font-size="18" font-weight="800" text-anchor="middle" fill="#FFFFFF">Transactions</text>
+  <!-- Search icon -->
+  <circle cx="362" cy="76" r="14" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.8"/>
+  <text x="362" y="81" font-size="14" text-anchor="middle" fill="#FFFFFF">⌕</text>
+
+  <!-- Filter chips strip -->
+  <rect x="0" y="104" width="390" height="48" fill="#FFFFFF"/>
+  <rect x="0" y="151" width="390" height="1" fill="#E2E8F0"/>
+  <!-- Active chip: All -->
+  <rect x="12" y="116" width="44" height="24" rx="12" fill="#4F46E5"/>
+  <text x="34" y="132" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">All</text>
+  <!-- Banks chip -->
+  <rect x="62" y="116" width="72" height="24" rx="12" fill="#EEF2FF" stroke="#C7D2FE" stroke-width="1"/>
+  <text x="98" y="132" font-size="11" text-anchor="middle" fill="#4F46E5">Banks ▾</text>
+  <!-- Categories chip -->
+  <rect x="140" y="116" width="96" height="24" rx="12" fill="#EEF2FF" stroke="#C7D2FE" stroke-width="1"/>
+  <text x="188" y="132" font-size="11" text-anchor="middle" fill="#4F46E5">Categories ▾</text>
+  <!-- Date chip -->
+  <rect x="242" y="116" width="62" height="24" rx="12" fill="#EEF2FF" stroke="#C7D2FE" stroke-width="1"/>
+  <text x="273" y="132" font-size="11" text-anchor="middle" fill="#4F46E5">Date ▾</text>
+
+  <!-- Month summary strip -->
+  <rect x="12" y="160" width="366" height="36" rx="10" fill="#FFFFFF"/>
+  <text x="24" y="183" font-size="12" font-weight="700" fill="#1E293B">July 2026</text>
+  <text x="120" y="183" font-size="11" fill="#64748B">· 47 transactions</text>
+  <text x="370" y="183" font-size="12" font-weight="700" text-anchor="end" fill="#DC2626">−₹41,200</text>
+
+  <!-- ===== Group: TODAY · JUL 29 ===== -->
+  <text x="12" y="214" font-size="10" font-weight="700" fill="#94A3B8">TODAY · JUL 29</text>
+
+  <!-- Row 1: Zomato -->
+  <rect x="12" y="222" width="366" height="64" rx="12" fill="#FFFFFF"/>
+  <circle cx="36" cy="254" r="18" fill="#FFF7ED"/>
+  <text x="36" y="259" font-size="15" text-anchor="middle">🍔</text>
+  <text x="64" y="246" font-size="13" font-weight="600" fill="#1E293B">Zomato</text>
+  <text x="64" y="264" font-size="11" fill="#64748B">Food &amp; Dining</text>
+  <rect x="64" y="270" width="84" height="14" rx="7" fill="#FFF7ED"/>
+  <text x="106" y="280" font-size="9" text-anchor="middle" fill="#D97706">Food &amp; Dining</text>
+  <text x="370" y="246" font-size="14" font-weight="700" text-anchor="end" fill="#DC2626">−₹840</text>
+  <text x="370" y="264" font-size="10" text-anchor="end" fill="#94A3B8">HDFC ·· 1234</text>
+
+  <!-- Row 2: Netflix -->
+  <rect x="12" y="294" width="366" height="64" rx="12" fill="#FFFFFF"/>
+  <circle cx="36" cy="326" r="18" fill="#FFF1F2"/>
+  <text x="36" y="331" font-size="15" text-anchor="middle">📱</text>
+  <text x="64" y="318" font-size="13" font-weight="600" fill="#1E293B">Netflix</text>
+  <text x="64" y="336" font-size="11" fill="#64748B">Entertainment</text>
+  <rect x="64" y="342" width="84" height="14" rx="7" fill="#F0F9FF"/>
+  <text x="106" y="352" font-size="9" text-anchor="middle" fill="#0891B2">Entertainment</text>
+  <text x="370" y="318" font-size="14" font-weight="700" text-anchor="end" fill="#DC2626">−₹649</text>
+  <text x="370" y="336" font-size="10" text-anchor="end" fill="#94A3B8">HDFC ·· 5678</text>
+
+  <!-- ===== Group: JUL 27 ===== -->
+  <text x="12" y="378" font-size="10" font-weight="700" fill="#94A3B8">JUL 27</text>
+
+  <!-- Row 3: SBI Home EMI (red left-border) -->
+  <rect x="12" y="386" width="366" height="64" rx="12" fill="#FFFFFF"/>
+  <rect x="12" y="386" width="4" height="64" rx="2" fill="#DC2626"/>
+  <circle cx="36" cy="418" r="18" fill="#FEF2F2"/>
+  <text x="36" y="423" font-size="15" text-anchor="middle">🏠</text>
+  <text x="64" y="410" font-size="13" font-weight="600" fill="#1E293B">SBI Home Loan EMI</text>
+  <text x="64" y="428" font-size="11" fill="#64748B">EMI / Loans</text>
+  <rect x="64" y="434" width="68" height="14" rx="7" fill="#FEF2F2"/>
+  <text x="98" y="444" font-size="9" text-anchor="middle" fill="#DC2626">EMI / Loans</text>
+  <text x="370" y="410" font-size="14" font-weight="700" text-anchor="end" fill="#DC2626">−₹32,450</text>
+  <text x="370" y="428" font-size="10" text-anchor="end" fill="#94A3B8">SBI ·· 4321</text>
+
+  <!-- Row 4: Swiggy -->
+  <rect x="12" y="458" width="366" height="64" rx="12" fill="#FFFFFF"/>
+  <circle cx="36" cy="490" r="18" fill="#FFF7ED"/>
+  <text x="36" y="495" font-size="15" text-anchor="middle">🛵</text>
+  <text x="64" y="482" font-size="13" font-weight="600" fill="#1E293B">Swiggy</text>
+  <text x="64" y="500" font-size="11" fill="#64748B">Food &amp; Dining</text>
+  <rect x="64" y="506" width="84" height="14" rx="7" fill="#FFF7ED"/>
+  <text x="106" y="516" font-size="9" text-anchor="middle" fill="#D97706">Food &amp; Dining</text>
+  <text x="370" y="482" font-size="14" font-weight="700" text-anchor="end" fill="#DC2626">−₹520</text>
+  <text x="370" y="500" font-size="10" text-anchor="end" fill="#94A3B8">HDFC ·· 1234</text>
+
+  <!-- ===== Group: JUL 25 ===== -->
+  <text x="12" y="546" font-size="10" font-weight="700" fill="#94A3B8">JUL 25</text>
+
+  <!-- Row 5: Salary Credit (green left-border) -->
+  <rect x="12" y="554" width="366" height="64" rx="12" fill="#FFFFFF"/>
+  <rect x="12" y="554" width="4" height="64" rx="2" fill="#059669"/>
+  <circle cx="36" cy="586" r="18" fill="#F0FDF4"/>
+  <text x="36" y="591" font-size="15" text-anchor="middle">💼</text>
+  <text x="64" y="578" font-size="13" font-weight="600" fill="#1E293B">Salary Credit</text>
+  <text x="64" y="596" font-size="11" fill="#64748B">Income</text>
+  <rect x="64" y="602" width="50" height="14" rx="7" fill="#F0FDF4"/>
+  <text x="89" y="612" font-size="9" text-anchor="middle" fill="#059669">Income</text>
+  <text x="370" y="578" font-size="14" font-weight="700" text-anchor="end" fill="#059669">+₹85,000</text>
+  <text x="370" y="596" font-size="10" text-anchor="end" fill="#94A3B8">HDFC ·· 5678</text>
+
+  <!-- Row 6: D-Mart -->
+  <rect x="12" y="626" width="366" height="64" rx="12" fill="#FFFFFF"/>
+  <circle cx="36" cy="658" r="18" fill="#F8FAFC"/>
+  <text x="36" y="663" font-size="15" text-anchor="middle">🛒</text>
+  <text x="64" y="650" font-size="13" font-weight="600" fill="#1E293B">D-Mart</text>
+  <text x="64" y="668" font-size="11" fill="#64748B">Groceries</text>
+  <rect x="64" y="674" width="62" height="14" rx="7" fill="#F1F5F9"/>
+  <text x="95" y="684" font-size="9" text-anchor="middle" fill="#475569">Groceries</text>
+  <text x="370" y="650" font-size="14" font-weight="700" text-anchor="end" fill="#DC2626">−₹3,200</text>
+  <text x="370" y="668" font-size="10" text-anchor="end" fill="#94A3B8">HDFC ·· 1234</text>
+
+  <!-- "View more" text link -->
+  <text x="195" y="716" font-size="12" text-anchor="middle" fill="#4F46E5">View 41 more transactions →</text>
+
+  <!-- AdMob banner -->
+  <rect x="0" y="740" width="390" height="48" fill="#F8FAFC"/>
+  <rect x="0" y="740" width="390" height="1" fill="#E2E8F0"/>
+  <rect x="0" y="787" width="390" height="1" fill="#E2E8F0"/>
+  <text x="195" y="768" font-size="10" text-anchor="middle" fill="#94A3B8">Advertisement</text>
+  <rect x="8" y="750" width="66" height="28" rx="4" fill="#E2E8F0"/>
+  <text x="41" y="768" font-size="9" text-anchor="middle" fill="#64748B">AdMob</text>
+
+  <!-- Bottom nav (Finance tab active) -->
+  <rect x="0" y="796" width="390" height="48" fill="#FFFFFF"/>
+  <rect x="0" y="796" width="390" height="1" fill="#E2E8F0"/>
+  <text x="49" y="815" font-size="16" text-anchor="middle" fill="#94A3B8">🏠</text>
+  <text x="49" y="834" font-size="9" text-anchor="middle" fill="#94A3B8">Home</text>
+  <text x="147" y="815" font-size="16" text-anchor="middle" fill="#94A3B8">⚡</text>
+  <text x="147" y="834" font-size="9" text-anchor="middle" fill="#94A3B8">Calculator</text>
+  <text x="244" y="815" font-size="16" text-anchor="middle" fill="#94A3B8">🔔</text>
+  <text x="244" y="834" font-size="9" text-anchor="middle" fill="#94A3B8">Reminders</text>
+  <rect x="297" y="798" width="88" height="44" rx="12" fill="#EEF2FF"/>
+  <text x="341" y="815" font-size="16" text-anchor="middle" fill="#4F46E5">💰</text>
+  <text x="341" y="834" font-size="9" font-weight="700" text-anchor="middle" fill="#4F46E5">Finance</text>
+
+  <!-- Annotation callouts -->
+  <circle cx="378" cy="128" r="12" fill="#EEF2FF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="378" y="132" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">1</text>
+  <circle cx="378" cy="178" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="378" y="182" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">2</text>
+  <circle cx="378" cy="254" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="378" y="258" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">3</text>
+  <circle cx="378" cy="418" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="378" y="422" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">4</text>
+  <circle cx="378" cy="586" r="12" fill="#FFFFFF" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="378" y="590" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">5</text>
+</svg>
