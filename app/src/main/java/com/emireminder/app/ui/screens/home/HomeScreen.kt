@@ -92,11 +92,12 @@ fun HomeScreen(
                     onNavigateToReminders = onNavigateToReminders,
                     onNavigateToSettings = onNavigateToSettings,
                     reminderCount = reminderCount,
+                    userName = userName,
                 )
             }
 
             if (loans.isEmpty()) {
-                item { EmptyState(onNavigateToAddLoan, onNavigateToSmsImport, onNavigateToCalculator, userName) }
+                item { EmptyState(onNavigateToAddLoan, onNavigateToSmsImport, onNavigateToCalculator) }
             } else {
                 item { LoanSummarySection(loans, currencySymbol) }
                 item {
@@ -151,9 +152,20 @@ private fun DashboardHeader(
     onNavigateToReminders: () -> Unit,
     onNavigateToSettings: () -> Unit,
     reminderCount: Int = 0,
+    userName: String = "",
 ) {
     val dateText = remember {
         LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.ENGLISH))
+    }
+    val greeting = remember {
+        when (LocalTime.now().hour) {
+            in 5..11 -> "Good morning"
+            in 12..17 -> "Good afternoon"
+            else -> "Good evening"
+        }
+    }
+    val initials = remember(userName) {
+        userName.trim().split(" ").take(2).mapNotNull { it.firstOrNull()?.uppercase() }.joinToString("")
     }
     Box(
         modifier = Modifier
@@ -173,12 +185,16 @@ private fun DashboardHeader(
                     .background(Color(0xFF312E81)),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("₹", fontSize = 20.sp, color = Color(0xFFE0E7FF), fontWeight = FontWeight.Bold)
+                if (userName.isNotBlank()) {
+                    Text(initials, fontSize = 17.sp, color = Color(0xFFE0E7FF), fontWeight = FontWeight.Bold)
+                } else {
+                    Text("₹", fontSize = 20.sp, color = Color(0xFFE0E7FF), fontWeight = FontWeight.Bold)
+                }
             }
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "EMI Reminder & Calculator",
+                    if (userName.isNotBlank()) "$greeting, $userName" else "EMI Reminder & Calculator",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White,
@@ -248,7 +264,6 @@ private fun EmptyState(
     onAddLoan: () -> Unit,
     onSmsImport: () -> Unit,
     onNavigateToCalculator: () -> Unit,
-    userName: String = "",
 ) {
     val smsPermissionState = rememberPermissionState(android.Manifest.permission.READ_SMS)
 
@@ -258,40 +273,6 @@ private fun EmptyState(
             .padding(horizontal = 16.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Personalized greeting when user name is set
-        if (userName.isNotBlank()) {
-            val initials = remember(userName) {
-                userName.trim().split(" ").take(2).mapNotNull { it.firstOrNull()?.uppercase() }.joinToString("")
-            }
-            val greeting = remember {
-                when (LocalTime.now().hour) {
-                    in 5..11 -> "Good morning"
-                    in 12..17 -> "Good afternoon"
-                    else -> "Good evening"
-                }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Indigo600),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(initials, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                }
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text("$greeting, $userName", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Slate800)
-                    Text("Let's set up your first loan", fontSize = 13.sp, color = Color(0xFF64748B))
-                }
-            }
-            Spacer(Modifier.height(24.dp))
-        }
-
         // Illustration
         Box(
             modifier = Modifier
