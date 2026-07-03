@@ -282,10 +282,11 @@ object SmsParser {
         """(?i)(?:\bSIP\b|\bmutual\s+fund\b|\bNPS\b|\bPPF\b\s+(?:credited|deposited)|\bMF\s+(?:purchase|redemption)\b)"""
     )
 
-    // Requires an insurance-domain anchor so OTT "Premium" services don't misclassify.
-    // Both orders are covered: insurance-word before premium (second branch) and after (lookahead).
+    // Requires an insurance-domain anchor so OTT/subscription services with "Premium" in their
+    // name (YouTube Premium, Spotify Premium) are not misclassified as INSURANCE_PREMIUM.
+    // Matches either an insurance institution/policy word, OR "premium <action-verb>" explicitly.
     private val INSURANCE_RE = Regex(
-        """(?i)(?:(?:\bpremium\b)(?=.*(?:\bpolicy\b|\binsurance\b|\bLIC\b|HDFC\s*Life|SBI\s*Life|Bajaj\s*Allianz|Tata\s*AIA|Max\s*Life|Star\s*Health|HDFC\s*ERGO|ICICI\s*Lombard))|(?:\binsurance\b|\bLIC\b|HDFC\s*Life|SBI\s*Life).*\bpremium\b)"""
+        """(?i)(?:\binsurance\b|\bpolicy\b|\bLIC\b|\bHDFC\s*Life\b|\bSBI\s*Life\b|\bICICI\s*(?:Pru|Prudential)\b|\bBajaj\s*Allianz\b|\bTata\s*AIA\b|\bMax\s*Life\b|\bKotak\s*Life\b|\bStar\s*Health\b|\bHDFC\s*ERGO\b|\bICICI\s*Lombard\b|\bpremium\s+(?:due|paid|deducted|debited|amount)\b)"""
     )
 
     private val LOAN_DISBURSAL_RE = Regex(

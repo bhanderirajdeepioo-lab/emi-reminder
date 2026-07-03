@@ -319,4 +319,17 @@ class SmsParserTest {
         )
         assertEquals(TransactionCategory.REFUND, result?.category)
     }
+
+    @Test fun parseTransaction_spotifyPremium_subscriptionCategory() {
+        val result = SmsParser.parseTransaction(
+            "VM-SPOTFY",
+            "Your Spotify Premium plan of Rs.119 has been debited from a/c XX5678 on 01-Jul-26.",
+        )
+        assertNotNull(result)
+        assertEquals(
+            "Spotify Premium must classify as SUBSCRIPTION, not INSURANCE_PREMIUM",
+            TransactionCategory.SUBSCRIPTION,
+            result!!.category,
+        )
+    }
 }
