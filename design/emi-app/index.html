@@ -174,7 +174,7 @@
     </summary>
     <nav class="toc-body" aria-label="Section navigation">
       <h1>HEL-17</h1>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">EMI Reminder — Full App Mockup · 22 screens · 4-tab nav</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">EMI Reminder — Full App Mockup · 28 screens · 4-tab nav</div>
 
       <h2>Foundation</h2>
       <a href="#tokens"><span class="num">◈</span>Design tokens</a>
@@ -215,6 +215,12 @@
       <a href="#s19"><span class="num">19</span>Finance Tools Hub <span class="badge new">NEW</span></a>
       <a href="#s20"><span class="num">20</span>FD / RD Calculator <span class="badge new">NEW</span></a>
       <a href="#s21"><span class="num">21</span>SIP Calculator <span class="badge new">NEW</span></a>
+      <a href="#s23"><span class="num">23</span>PPF Calculator <span class="badge new">NEW</span></a>
+      <a href="#s24"><span class="num">24</span>GST Calculator <span class="badge new">NEW</span></a>
+      <a href="#s25"><span class="num">25</span>Income Tax Calc <span class="badge new">NEW</span></a>
+      <a href="#s26"><span class="num">26</span>Inflation Calc <span class="badge new">NEW</span></a>
+      <a href="#s27"><span class="num">27</span>HRA Calculator <span class="badge new">NEW</span></a>
+      <a href="#s28"><span class="num">28</span>CIBIL Score <span class="badge new">NEW</span></a>
 
       <h2>System</h2>
       <a href="#s7"><span class="num">7</span>Notifications</a>
@@ -231,7 +237,7 @@
       <h1>EMI Reminder — Full App Design</h1>
       <p>Complete wireframe specification for all 17 screens of the Android EMI Calculator &amp; Loan Reminder app. Covers the full user journey from first launch through advanced features: loan comparison, prepayment calculator, amortization schedule, portfolio analytics, and SMS auto-import.</p>
       <div class="pills">
-        <span class="pill dark">22 screens total</span>
+        <span class="pill dark">28 screens total</span>
         <span class="pill dark">4-tab nav with icons</span>
         <span class="pill">390×844 · portrait mobile</span>
         <span class="pill">Material Design 3 · Indigo/Violet</span>
@@ -342,10 +348,22 @@
     <section id="flow" class="flow-section">
       <div class="lede">Navigation</div>
       <h2>App navigation flow</h2>
-      <p class="desc">Solid arrows = primary path. Dashed arrows = optional flows. Five main journeys: (A) First launch → onboarding, (B) Calculate EMI, (C) Manage reminders, (D) Portfolio analytics, (E) WorkManager notification.</p>
+      <p class="desc">Solid arrows = primary path. Dashed arrows = optional flows. Six main journeys: (A) First launch → onboarding, (B) Calculate EMI, (C) Manage reminders, (D) Portfolio analytics, (E) WorkManager notification, (F) Finance Tools Hub → calculator screens (FD/RD · SIP · PPF · GST · Income Tax · Inflation · HRA · CIBIL).</p>
       <div class="wire" data-zoom data-caption="App flow diagram">
         <div class="label"><span>flow.svg</span><span>1440×400 · landscape</span></div>
         <img src="wireframes/flow.svg" alt="App flow diagram" />
+      </div>
+      <div class="notes" style="margin-top:20px;">
+        <h3>Finance Tools journey (F) — coming-soon screens</h3>
+        <ul>
+          <li><b>Hub → PPF Calculator (23)</b> — Yearly investment slider, 15-yr period, locked 7.1% govt. rate, maturity breakdown (coming soon).</li>
+          <li><b>Hub → GST Calculator (24)</b> — Add/Remove GST toggle, rate chips (5/12/18/28%), CGST+SGST split, HSN lookup (coming soon).</li>
+          <li><b>Hub → Income Tax (25)</b> — Old/New regime toggle, 80C/80D deductions, taxable income &amp; effective rate (coming soon).</li>
+          <li><b>Hub → Inflation Calculator (26)</b> — Current amount, inflation rate stepper, future value &amp; purchasing power erosion chart (coming soon).</li>
+          <li><b>Hub → HRA Calculator (27)</b> — Basic salary, HRA received, rent paid, Metro/Non-Metro switch, Sec 10(13A) rule breakdown (coming soon).</li>
+          <li><b>Hub → CIBIL Score (28)</b> — Score gauge (300–900), eligibility bands, score improvement tips (coming soon).</li>
+        </ul>
+        <div class="why"><b>Coming-soon state design:</b> Each screen shows the full input layout and disabled results section with a "COMING SOON — Q3 2026" ribbon. The CTA button is muted. Inputs remain visible so users understand the tool's value proposition before launch.</div>
       </div>
     </section>
 
@@ -840,9 +858,10 @@
             <h3>Annotations</h3>
             <ul>
               <li><b>1</b> — Loan Calculators section: 5 tools in a vertical list with colour-coded icon badges. Step-up EMI and Balance Transfer marked NEW.</li>
-              <li><b>2</b> — Investment Tools: 2×2 grid (SIP, FD/RD, PPF, GST) — tappable cards that open dedicated calculator screens.</li>
+              <li><b>2</b> — Investment Tools: 2×2 grid (SIP, FD/RD, PPF, GST) — tappable cards that open dedicated calculator screens. PPF (s23) and GST (s24) now have wireframes.</li>
+              <li><b>3</b> — "4 more" strip below the grid links to Income Tax (s25), Inflation (s26), HRA (s27), and CIBIL Score (s28) — all in coming-soon state with full screen wireframes.</li>
             </ul>
-            <div class="why"><b>All 10 tools planned:</b> EMI · Loan Comparison · Prepayment · Step-up EMI · Balance Transfer · SIP · FD/RD · PPF · GST · Income Tax</div>
+            <div class="why"><b>All 10 tools wireframed (HEL-537):</b> EMI · Loan Comparison · Prepayment · SIP · FD/RD · PPF (s23) · GST (s24) · Income Tax (s25) · Inflation (s26) · HRA (s27) · CIBIL (s28). 6 are in coming-soon state launching Q3 2026.</div>
           </div>
         </div>
       </div>
@@ -896,6 +915,164 @@
       </div>
     </section>
 
+    <!-- ========== Screen 23: PPF Calculator ========== -->
+    <section id="s23">
+      <div class="lede">Finance Tool · Coming Soon <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">23.</span>PPF Calculator</h2>
+      <p class="desc">Public Provident Fund calculator for government-backed, tax-free long-term savings. Inputs: yearly investment amount (max ₹1,50,000 under Sec 80C), investment period (default 15 years, extendable in 5-year blocks), and the government-fixed interest rate (7.1% Q1 2026, read-only). Results section shows maturity value, total invested, interest earned, and a year-wise accumulation table. Screen is in coming-soon state — results area locked until Q3 2026 launch.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="23 · PPF Calculator (Coming Soon)">
+          <div class="label"><span>23-ppf-calculator.svg</span><span>390×844</span></div>
+          <img src="wireframes/23-ppf-calculator.svg" alt="PPF Calculator wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Coming-soon ribbon (dark green) below status bar clearly labels launch timeline before user engages with inputs.</li>
+              <li><b>2</b> — Yearly investment slider capped at ₹1,50,000 (Sec 80C limit). Exceeding this risks loss of tax exemption — constraint enforced at input level.</li>
+              <li><b>3</b> — Interest rate card (7.1%) is read-only with "Updated Q1 2026" sub-label. Government revises quarterly; app will auto-refresh from API on launch.</li>
+              <li><b>4</b> — Extension chips (+5 Yrs / +10 Yrs / None) let user model PPF account extensions after initial 15-year lock-in.</li>
+              <li><b>5</b> — Results hero and 3-up metric cards are muted (#CBD5E1 text on #F8FAFC) with placeholder dashes — makes the coming-soon intent unambiguous without a harsh overlay.</li>
+              <li><b>6</b> — Year-wise accumulation table placeholder shows skeleton rows — reinforces that detailed output will be available at launch.</li>
+            </ul>
+            <div class="why"><b>Design lens — Goal-Gradient:</b> Inputs are fully interactive even in coming-soon state. Users who configure their values are more likely to return when the feature launches (commitment &amp; consistency effect).</div>
+            <div class="why"><b>Color token:</b> Green (#16A34A) theme distinguishes PPF (govt. savings) from SIP (market investment, Emerald) and EMI (loan, Indigo). Follows the Finance Tools color vocabulary started with FD/RD (Amber) and SIP (Emerald→Indigo gradient).</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 24: GST Calculator ========== -->
+    <section id="s24">
+      <div class="lede">Finance Tool · Coming Soon <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">24.</span>GST Calculator</h2>
+      <p class="desc">GST (Goods and Services Tax) calculator with two modes: Add GST (calculate tax-inclusive price) and Remove GST (back-calculate from a GST-inclusive amount). GST rate chips cover all four Indian slabs: 5%, 12%, 18%, 28%. Results show GST amount, CGST+SGST split (for intra-state) or IGST (for inter-state), and total payable. Optional HSN code / category field for quick rate lookup. Share Invoice feature planned for launch.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="24 · GST Calculator (Coming Soon)">
+          <div class="label"><span>24-gst-calculator.svg</span><span>390×844</span></div>
+          <img src="wireframes/24-gst-calculator.svg" alt="GST Calculator wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Add GST / Remove GST toggle (segmented control). "Remove GST" is the more common business use case (back-calculating from invoice amount) — placed second to not anchor users on the wrong default.</li>
+              <li><b>2</b> — Rate chips (5 / 12 / 18 / 28%) cover all standard Indian GST slabs. 18% is the most common rate — place it at the active-default position in the hi-fi to reduce interaction cost (Fitts's Law).</li>
+              <li><b>3</b> — HSN Code field is optional. Auto-suggests GST rate on valid 4-digit HSN entry. Reduces manual rate selection errors for business users.</li>
+              <li><b>4</b> — CGST + SGST split in result cards (50/50 of total GST) — required for GST filing. IGST mode (inter-state) toggles via a future "Supply Type" chip.</li>
+            </ul>
+            <div class="why"><b>Design lens — Progressive Disclosure:</b> HSN lookup and IGST/CGST-SGST toggle are power-user features hidden behind optional field and coming chip. Casual users see Add/Remove + rate chips — that's all they need.</div>
+            <div class="why"><b>Color token:</b> Teal (#0891B2) for GST — communicates a transactional/business tool, distinct from savings (green) and tax-liability (blue) tools.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 25: Income Tax Calculator ========== -->
+    <section id="s25">
+      <div class="lede">Finance Tool · Coming Soon <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">25.</span>Income Tax Calculator</h2>
+      <p class="desc">Income Tax estimator supporting both Old and New tax regimes (FY 2024–25). Inputs: annual income (CTC), Sec 80C deductions (PPF/ELSS/LIC/EPF, capped ₹1.5L), Sec 80D health insurance (₹25K self + ₹50K parents for senior). Standard deduction automatically applied per regime (₹75K new, ₹50K old). Results: taxable income, tax payable with cess, effective tax rate, and per-slab breakdown table. Lets users compare old vs new regime in one tap.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="25 · Income Tax Calculator (Coming Soon)">
+          <div class="label"><span>25-income-tax-calculator.svg</span><span>390×844</span></div>
+          <img src="wireframes/25-income-tax-calculator.svg" alt="Income Tax Calculator wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — New Regime is default — it's simpler and better for most salaried users in 2024–25. Old Regime tab is accessible for comparison. Decision rationale: majority of users benefit from new regime after ₹75K standard deduction.</li>
+              <li><b>2</b> — 80C and 80D deduction cards only appear and affect calculation in Old Regime mode (collapsed/greyed in New Regime to avoid cognitive overload).</li>
+              <li><b>3</b> — Standard deduction auto-applied and labeled per regime (₹75K new vs ₹50K old) — reduces user confusion about "what's included."</li>
+              <li><b>4</b> — Slab breakdown table (placeholder) will show each bracket's tax amount + running total — matches how users verify against Form 16.</li>
+            </ul>
+            <div class="why"><b>Design lens — Defaults &amp; Loss Aversion:</b> New Regime as default prevents over-claiming deductions users can't actually use. "Compare regimes" single-tap removes the fear of choosing wrong.</div>
+            <div class="why"><b>Color token:</b> Blue (#1D4ED8) for income tax — formal, government-facing. Heavier than the primary Indigo to signal seriousness/compliance.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 26: Inflation Calculator ========== -->
+    <section id="s26">
+      <div class="lede">Finance Tool · Coming Soon <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">26.</span>Inflation Calculator</h2>
+      <p class="desc">Inflation impact estimator showing how purchasing power erodes over time. Inputs: current amount (or cost of an item/goal), annual inflation rate (default 6% — India's long-run CPI average), and time period. Quick-scenario chips (Education, Healthcare, Groceries, Housing) pre-fill typical category-specific inflation rates. Results: future value, residual purchasing power %, extra amount needed. Planned chart: year-by-year real-value erosion area chart.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="26 · Inflation Calculator (Coming Soon)">
+          <div class="label"><span>26-inflation-calculator.svg</span><span>390×844</span></div>
+          <img src="wireframes/26-inflation-calculator.svg" alt="Inflation Calculator wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Current amount slider (₹ input) covers a wide range — education (₹10L+) to daily grocery budget (₹5,000). Field type: currency input with slider, same UX as EMI Calculator amount field.</li>
+              <li><b>2</b> — Inflation rate stepper defaults to 6% (India CPI 5-year average). Healthcare scenario auto-sets 10%, Education 8%, Groceries 7%, Housing 5%.</li>
+              <li><b>3</b> — Purchasing Power % result shows "You'll need ₹X more" framing — loss aversion framing motivates users to start SIP or PPF to beat inflation.</li>
+              <li><b>4</b> — Bar-chart skeleton in the placeholder shows declining columns left-to-right, communicating the visual metaphor before launch.</li>
+            </ul>
+            <div class="why"><b>Design lens — Loss Aversion + Behavioral:</b> Framing results as "erosion" and "extra needed" rather than just "future value" motivates action — natural handoff to SIP Calculator to plan inflation-beating investments.</div>
+            <div class="why"><b>Color token:</b> Orange (#EA580C) — signals urgency and economic pressure. Distinct from the Amber used for FD/RD (which connotes stable savings).</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 27: HRA Calculator ========== -->
+    <section id="s27">
+      <div class="lede">Finance Tool · Coming Soon <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">27.</span>HRA Calculator</h2>
+      <p class="desc">House Rent Allowance exemption calculator under Sec 10(13A) of the Income Tax Act. Inputs: basic salary (monthly), HRA received (monthly), actual rent paid, and city type (Metro — Mumbai/Delhi/Kolkata/Chennai get 50% vs Non-Metro 40%). The exemption is the least of three statutory rules, computed automatically. Results: exempt HRA amount, taxable HRA, annual tax savings. Rule-wise breakdown shows all three calculations so users can verify against their payslip.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="27 · HRA Calculator (Coming Soon)">
+          <div class="label"><span>27-hra-calculator.svg</span><span>390×844</span></div>
+          <img src="wireframes/27-hra-calculator.svg" alt="HRA Calculator wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Metro / Non-Metro toggle is the first input (affects all three rule calculations). Placing it at top prevents common user error of using wrong percentage.</li>
+              <li><b>2</b> — Basic Salary, HRA Received, and Rent Paid are three separate cards — matches the three Sec 10(13A) rules exactly, reinforcing the mental model.</li>
+              <li><b>3</b> — Rule explainer row (below the input cards) shows the three formulas in compact form with a "Tap to see each calculation →" affordance for power users.</li>
+              <li><b>4</b> — Documents needed note (placeholder) — rent receipt + Form 16 — surfaces filing requirements proactively so users aren't surprised at tax time.</li>
+            </ul>
+            <div class="why"><b>Design lens — Recognition over Recall:</b> Three-rule summary is shown inline rather than requiring users to remember or look up the formula. Reduces support burden and builds trust in the output.</div>
+            <div class="why"><b>Color token:</b> Purple (#7C3AED) matches the app's secondary color, lending a familiar feel while distinguishing from primary Indigo EMI tools and the green savings tools.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Screen 28: CIBIL Score ========== -->
+    <section id="s28">
+      <div class="lede">Finance Tool · Coming Soon <span class="notes new-badge">NEW</span></div>
+      <h2><span class="step-num">28.</span>CIBIL Score Guide</h2>
+      <p class="desc">CIBIL credit score reference screen with interactive gauge (300–900 range), score-band eligibility table, and actionable improvement tips. Input: user's known score (manual entry — no bureau API in v1). Gauge needle animates to the entered score. Score bands: Poor (300–549), Fair (550–649), Good (650–749), Very Good (750–799), Excellent (800–900) — color-coded Red/Orange/Yellow/Green/Dark Green. Loan eligibility and typical interest rate range shown per band. Tips section: "How to improve your score" checklist.</p>
+      <div class="grid">
+        <div class="wire phone-wire" data-zoom data-caption="28 · CIBIL Score Guide (Coming Soon)">
+          <div class="label"><span>28-cibil-score.svg</span><span>390×844</span></div>
+          <img src="wireframes/28-cibil-score.svg" alt="CIBIL Score wireframe" />
+        </div>
+        <div class="notes-col">
+          <div class="notes">
+            <h3>Annotations</h3>
+            <ul>
+              <li><b>1</b> — Score gauge (semi-circle): 5-segment color gradient from red (300) to dark green (900). Needle animates on score input — provides visceral feedback and lets users feel where they stand.</li>
+              <li><b>2</b> — Score band table: left color bar (4px, same color as gauge segment) is a fast visual anchor per row — no text needed to understand the severity of each band.</li>
+              <li><b>3</b> — "Check My Score" CTA is muted in coming-soon state. On launch: deep-links to CIBIL / Experian free annual check (partner URL, not scraped).</li>
+              <li><b>4</b> — Tips skeleton placeholder communicates the section will exist — sets user expectation and justifies returning after launch.</li>
+            </ul>
+            <div class="why"><b>Design lens — Norman's Visceral Level + Aesthetic-Usability:</b> The animated gauge is primarily emotional — a 750 score moving the needle into the green "Very Good" segment feels rewarding and motivating. This makes a dry credit-score lookup feel personal and actionable.</div>
+            <div class="why"><b>Color token:</b> Red (#DC2626) header signals urgency/risk — appropriate for a credit-health tool. The multi-color gauge overrides the red brand within the content zone, so the screen doesn't feel entirely alarming.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ========== Open Questions ========== -->
     <section id="open">
       <div class="lede">For reviewer</div>
@@ -914,7 +1091,7 @@
     </section>
 
     <div class="footer">
-      HEL-17 · Full App Mockup · v2 · 17 screens (10 new) · Designed by Iris (Figma App Designer) · helsy.ioo<br>
+      HEL-17 · Full App Mockup · v3 · 28 screens (16 new) · HEL-537: 6 coming-soon Finance Tool screens added · Designed by Iris (Figma App Designer) · helsy.ioo<br>
       Wireframes follow house style: black on white, 1.5pt strokes, 8dp grid, type scale 11/12/14/20/28sp. Red dashed callouts are annotation layer only. Reference app analysed: EMI Calculator &amp; Loan Reminder (Play Store).
     </div>
   </main>
