@@ -38,4 +38,7 @@ interface ParsedTransactionDao {
 
     @Query("DELETE FROM parsed_transactions WHERE id = :id")
     suspend fun deleteById(id: String)
+
+    @Query("DELETE FROM parsed_transactions")
+    suspend fun deleteAll()
 }

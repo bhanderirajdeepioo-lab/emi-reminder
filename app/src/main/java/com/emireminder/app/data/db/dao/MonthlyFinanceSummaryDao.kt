@@ -21,4 +21,7 @@ interface MonthlyFinanceSummaryDao {
 
     @Query("DELETE FROM monthly_finance_summaries WHERE year_month = :yearMonth")
     suspend fun deleteByYearMonth(yearMonth: String)
+
+    @Query("DELETE FROM monthly_finance_summaries")
+    suspend fun deleteAll()
 }

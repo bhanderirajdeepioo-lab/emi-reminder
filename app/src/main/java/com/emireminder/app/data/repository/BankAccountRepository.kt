@@ -81,6 +81,8 @@ class BankAccountRepository @Inject constructor(
         )
     }
 
+    suspend fun deleteAll() = bankAccountDao.deleteAll()
+
     /** Renames an account at any time (accessible from Settings → Finance Accounts). */
     suspend fun renameAccount(accountId: String, label: String) {
         val account = bankAccountDao.getById(accountId) ?: return

@@ -46,6 +46,7 @@ import com.emireminder.app.ui.screens.onboarding.LanguageSelectScreen
 import com.emireminder.app.ui.screens.onboarding.OnboardingScreen
 import com.emireminder.app.ui.screens.onboarding.OnboardingViewModel
 import com.emireminder.app.ui.screens.reminders.*
+import com.emireminder.app.ui.screens.settings.MyFinanceDataScreen
 import com.emireminder.app.ui.screens.settings.SettingsScreen
 import com.emireminder.app.ui.screens.sms.HistoricalScanScreen
 import com.emireminder.app.ui.screens.sms.SMSImportScreen
@@ -462,7 +463,15 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                     onNavigateToSmsHistoricalScan = {
                         navController.navigate(NavRoutes.SMS_HISTORICAL_SCAN) { launchSingleTop = true }
                     },
+                    onNavigateToMyFinanceData = {
+                        navController.navigate(NavRoutes.MY_FINANCE_DATA) { launchSingleTop = true }
+                    },
                 )
+            }
+
+            // 16b — My Finance Data — DPDP Act Right to Access (HEL-602)
+            composable(NavRoutes.MY_FINANCE_DATA) {
+                MyFinanceDataScreen(onBack = { navController.popBackStack() })
             }
 
             // Add Loan form

@@ -32,6 +32,9 @@ interface AutoDetectedEmiDao {
     @Query("DELETE FROM auto_detected_emis WHERE id = :id")
     suspend fun deleteById(id: String)
 
+    @Query("DELETE FROM auto_detected_emis")
+    suspend fun deleteAll()
+
     @Query("""
         SELECT * FROM auto_detected_emis
         WHERE lender_name = :lenderName AND loan_account_last4 = :loanAccountLast4

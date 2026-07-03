@@ -143,6 +143,17 @@ class SmsFinanceRepository @Inject constructor(
         return rowId != -1L
     }
 
+    /**
+     * Permanently erases all SMS-derived finance data (DPDP Act 2023 Right to Erasure).
+     * Clears transactions, monthly summaries, auto-detected EMIs, and bank account metadata.
+     */
+    suspend fun deleteAllFinanceData() {
+        parsedTransactionDao.deleteAll()
+        monthlyFinanceSummaryDao.deleteAll()
+        autoDetectedEmiRepository.deleteAll()
+        bankAccountRepository.deleteAll()
+    }
+
     // ── Private helpers ────────────────────────────────────────────────────────
 
     private suspend fun updateMonthSummary(

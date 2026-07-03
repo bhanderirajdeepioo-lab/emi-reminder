@@ -72,6 +72,8 @@ class AutoDetectedEmiRepository @Inject constructor(
     suspend fun getPreviousConfirmedAmount(lenderName: String, loanAccountLast4: String): Double? =
         dao.findConfirmedByLenderAndAccount(lenderName, loanAccountLast4)?.emiAmount
 
+    suspend fun deleteAll() = dao.deleteAll()
+
     /**
      * Infer the most likely monthly debit day using median of up to 2 historical detections + current.
      * PRD §8.2: take median day across last 3 matching SMS.

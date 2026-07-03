@@ -49,6 +49,9 @@ object NavRoutes {
     // --- Finance Accounts (HEL-570) ---
     const val FINANCE_ACCOUNTS        = "finance_accounts"
 
+    // --- DPDP Act Right to Access (HEL-602) ---
+    const val MY_FINANCE_DATA         = "my_finance_data"
+
     // --- Transaction Detail (HEL-591) ---
     const val TRANSACTION_DETAIL = "transaction_detail/{transactionId}"
     fun transactionDetail(id: String) = "transaction_detail/$id"

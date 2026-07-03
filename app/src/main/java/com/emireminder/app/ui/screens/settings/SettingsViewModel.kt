@@ -10,6 +10,7 @@ import com.emireminder.app.data.db.entity.Loan
 import com.emireminder.app.data.preferences.UserPreferences
 import com.emireminder.app.data.preferences.UserPreferencesRepository
 import com.emireminder.app.data.repository.LoanRepository
+import com.emireminder.app.data.repository.SmsFinanceRepository
 import com.emireminder.app.notification.NotificationScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,12 +27,20 @@ sealed interface DriveBackupUiState {
     data class Error(val message: String) : DriveBackupUiState
 }
 
+sealed interface DeleteFinanceDataState {
+    data object Idle : DeleteFinanceDataState
+    data object Deleting : DeleteFinanceDataState
+    data object Success : DeleteFinanceDataState
+    data class Error(val message: String) : DeleteFinanceDataState
+}
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val notificationScheduler: NotificationScheduler,
     private val prefsRepository: UserPreferencesRepository,
     private val loanRepository: LoanRepository,
     private val backupRepository: BackupRepository,
+    private val smsFinanceRepository: SmsFinanceRepository,
 ) : ViewModel() {
 
     val prefs = prefsRepository.userPreferences
@@ -39,6 +48,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _driveBackupState = MutableStateFlow<DriveBackupUiState>(DriveBackupUiState.Idle)
     val driveBackupState = _driveBackupState.asStateFlow()
+
+    private val _deleteFinanceDataState = MutableStateFlow<DeleteFinanceDataState>(DeleteFinanceDataState.Idle)
+    val deleteFinanceDataState = _deleteFinanceDataState.asStateFlow()
 
     fun sendTestNotification() = notificationScheduler.scheduleTestNotification()
 
@@ -106,5 +118,21 @@ class SettingsViewModel @Inject constructor(
 
     fun clearDriveBackupState() {
         _driveBackupState.value = DriveBackupUiState.Idle
+    }
+
+    fun deleteAllFinanceData() = viewModelScope.launch {
+        _deleteFinanceDataState.value = DeleteFinanceDataState.Deleting
+        try {
+            smsFinanceRepository.deleteAllFinanceData()
+            _deleteFinanceDataState.value = DeleteFinanceDataState.Success
+        } catch (e: Exception) {
+            _deleteFinanceDataState.value = DeleteFinanceDataState.Error(
+                e.message?.take(120) ?: "Deletion failed"
+            )
+        }
+    }
+
+    fun clearDeleteFinanceDataState() {
+        _deleteFinanceDataState.value = DeleteFinanceDataState.Idle
     }
 }

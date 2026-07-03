@@ -51,10 +51,12 @@ fun SettingsScreen(
     onNavigateToSmsIntelligence: () -> Unit = {},
     onNavigateToFinanceAccounts: () -> Unit = {},
     onNavigateToSmsHistoricalScan: () -> Unit = {},
+    onNavigateToMyFinanceData: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val prefs by viewModel.prefs.collectAsStateWithLifecycle()
     val driveBackupState by viewModel.driveBackupState.collectAsStateWithLifecycle()
+    val deleteFinanceDataState by viewModel.deleteFinanceDataState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -65,6 +67,7 @@ fun SettingsScreen(
     var showCurrencyPicker by remember { mutableStateOf(false) }
     var showLanguagePicker by remember { mutableStateOf(false) }
     var showNameEditor by remember { mutableStateOf(false) }
+    var showDeleteFinanceDataConfirm by remember { mutableStateOf(false) }
 
     val dateTag = remember { SimpleDateFormat("yyyyMMdd_HHmm", Locale.US).format(Date()) }
 
@@ -85,6 +88,20 @@ fun SettingsScreen(
             is DriveBackupUiState.Error -> {
                 snackbarHostState.showSnackbar("Error: ${state.message}")
                 viewModel.clearDriveBackupState()
+            }
+            else -> Unit
+        }
+    }
+
+    LaunchedEffect(deleteFinanceDataState) {
+        when (val state = deleteFinanceDataState) {
+            is DeleteFinanceDataState.Success -> {
+                snackbarHostState.showSnackbar("All finance data deleted successfully")
+                viewModel.clearDeleteFinanceDataState()
+            }
+            is DeleteFinanceDataState.Error -> {
+                snackbarHostState.showSnackbar("Error: ${state.message}")
+                viewModel.clearDeleteFinanceDataState()
             }
             else -> Unit
         }
@@ -146,6 +163,17 @@ fun SettingsScreen(
             onConfirm = { currency ->
                 viewModel.setCurrency(currency)
                 showCurrencyPicker = false
+            },
+        )
+    }
+
+    if (showDeleteFinanceDataConfirm) {
+        DeleteFinanceDataDialog(
+            isDeleting = deleteFinanceDataState is DeleteFinanceDataState.Deleting,
+            onDismiss = { showDeleteFinanceDataConfirm = false },
+            onConfirm = {
+                showDeleteFinanceDataConfirm = false
+                viewModel.deleteAllFinanceData()
             },
         )
     }
@@ -459,6 +487,59 @@ fun SettingsScreen(
                         value = null,
                         onClick = onNavigateToFinanceAccounts,
                     )
+                }
+            }
+
+            // FINANCE DATA section
+            SettingsSectionHeader("FINANCE DATA")
+            Surface(color = MaterialTheme.colorScheme.surface) {
+                Column {
+                    NavigableSettingRow(
+                        icon = Icons.Default.Storage,
+                        iconBg = Indigo50,
+                        iconTint = Indigo600,
+                        label = "View Stored Data",
+                        subtitle = "All finance records derived from your SMS",
+                        value = null,
+                        onClick = onNavigateToMyFinanceData,
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showDeleteFinanceDataConfirm = true }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(
+                            modifier = Modifier.size(32.dp).clip(CircleShape)
+                                .background(Color(0xFFFEF2F2)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = UrgentRed,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Delete All Finance Data",
+                                fontWeight = FontWeight.SemiBold,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = UrgentRed,
+                            )
+                            Text(
+                                "Permanently removes all SMS-derived transaction records",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Icon(Icons.Default.ChevronRight, null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
 
@@ -813,6 +894,57 @@ private fun LanguagePickerDialog(
         },
         confirmButton = { TextButton(onClick = { onConfirm(selected.displayName, selected.tag) }) { Text("Apply") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
+}
+
+@Composable
+private fun DeleteFinanceDataDialog(
+    isDeleting: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = { if (!isDeleting) onDismiss() },
+        icon = {
+            Icon(Icons.Default.Delete, contentDescription = null, tint = UrgentRed)
+        },
+        title = { Text("Delete All Finance Data?") },
+        text = {
+            Column {
+                Text(
+                    "This will permanently remove all SMS-derived transaction records, monthly summaries, and auto-detected EMIs from this device.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "This action cannot be undone. SMS Finance Intelligence will be reset to a blank state.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                enabled = !isDeleting,
+                colors = ButtonDefaults.buttonColors(containerColor = UrgentRed),
+            ) {
+                if (isDeleting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = Color.White,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Deleting…")
+                } else {
+                    Text("Delete Everything")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !isDeleting) { Text("Cancel") }
+        },
     )
 }
 

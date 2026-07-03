@@ -31,6 +31,9 @@ interface BankAccountDao {
     @Query("SELECT COUNT(*) FROM bank_accounts WHERE sender_id = :senderId")
     suspend fun countBySenderId(senderId: String): Int
 
+    @Query("DELETE FROM bank_accounts")
+    suspend fun deleteAll()
+
     /**
      * Returns accounts that need a labelling prompt:
      * - labelPromptedAt is null (prompt not yet shown)
