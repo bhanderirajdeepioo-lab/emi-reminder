@@ -44,6 +44,7 @@ import com.emireminder.app.ui.screens.onboarding.OnboardingViewModel
 import com.emireminder.app.ui.screens.reminders.*
 import com.emireminder.app.ui.screens.settings.SettingsScreen
 import com.emireminder.app.ui.screens.sms.SMSImportScreen
+import com.emireminder.app.ui.screens.sms.SmsIntelligenceOnboardingScreen
 import com.emireminder.app.ui.screens.splash.SplashScreen
 import com.emireminder.app.ui.theme.Indigo600
 
@@ -405,6 +406,18 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 )
             }
 
+            // 15a — SMS Intelligence Onboarding
+            composable(NavRoutes.SMS_INTELLIGENCE_ONBOARDING) {
+                SmsIntelligenceOnboardingScreen(
+                    onGranted = {
+                        navController.navigate(NavRoutes.SMS_IMPORT) {
+                            popUpTo(NavRoutes.SMS_INTELLIGENCE_ONBOARDING) { inclusive = true }
+                        }
+                    },
+                    onBack = { navController.popBackStack() },
+                )
+            }
+
             // 15 — SMS Import
             // Explicit BackHandler covers KEYCODE_BACK / gesture back.  The NavHost's
             // implicit handler is only active when previousBackStackEntry != null; if the
@@ -420,7 +433,12 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
 
             // 16 — Settings
             composable(NavRoutes.SETTINGS) {
-                SettingsScreen(onBack = { navController.popBackStack() })
+                SettingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToSmsIntelligence = {
+                        navController.navigate(NavRoutes.SMS_INTELLIGENCE_ONBOARDING) { launchSingleTop = true }
+                    },
+                )
             }
 
             // Add Loan form

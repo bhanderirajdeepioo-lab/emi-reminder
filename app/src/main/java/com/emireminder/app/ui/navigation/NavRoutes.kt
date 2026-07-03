@@ -20,7 +20,8 @@ object NavRoutes {
     const val ADD_LOAN           = "add_loan"
     const val LOAN_ANALYTICS     = "loan_analytics"
     const val LOAN_DETAIL        = "loan_detail/{loanId}"
-    const val SMS_IMPORT         = "sms_import"
+    const val SMS_IMPORT                    = "sms_import"
+    const val SMS_INTELLIGENCE_ONBOARDING   = "sms_intelligence_onboarding"
     const val SETTINGS           = "settings"
     const val NOTIFICATION       = "notification"
 

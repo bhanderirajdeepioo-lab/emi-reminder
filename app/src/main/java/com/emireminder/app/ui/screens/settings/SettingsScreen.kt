@@ -48,6 +48,7 @@ import java.util.*
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    onNavigateToSmsIntelligence: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val prefs by viewModel.prefs.collectAsStateWithLifecycle()
@@ -422,6 +423,19 @@ fun SettingsScreen(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                         )
                     }
+                    HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
+                    NavigableSettingRow(
+                        icon = Icons.Default.AutoAwesome,
+                        iconBg = Color(0xFFEDE9FE),
+                        iconTint = Violet600,
+                        label = "SMS Intelligence",
+                        subtitle = if (smsPermission.status.isGranted)
+                            "Active — auto-detecting EMIs from bank SMS"
+                        else
+                            "Tap to set up SMS Intelligence",
+                        value = null,
+                        onClick = onNavigateToSmsIntelligence,
+                    )
                 }
             }
 

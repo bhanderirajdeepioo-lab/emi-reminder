@@ -18,6 +18,9 @@ import java.time.LocalTime
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
@@ -43,6 +46,7 @@ import com.emireminder.app.ui.theme.Violet600
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.emireminder.app.ui.screens.sms.SmsRevocationBanner
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -53,6 +57,7 @@ private val headerGradient = Brush.linearGradient(
     colors = listOf(Indigo600, Violet600)
 )
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun HomeScreen(
     onNavigateToLoanDetail: (Int) -> Unit,
@@ -69,6 +74,24 @@ fun HomeScreen(
     val reminderCount by viewModel.activeReminderCount.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
     val userName by viewModel.userName.collectAsState()
+    val smsIntelligenceEnabled by viewModel.smsIntelligenceEnabled.collectAsState()
+
+    val smsPermission = rememberPermissionState(android.Manifest.permission.READ_SMS)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var showRevocationBanner by remember { mutableStateOf(false) }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (smsIntelligenceEnabled && !smsPermission.status.isGranted) {
+                    showRevocationBanner = true
+                    viewModel.onSmsPermissionRevoked()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     Scaffold(
         floatingActionButton = {
@@ -95,6 +118,15 @@ fun HomeScreen(
                     reminderCount = reminderCount,
                     userName = userName,
                 )
+            }
+
+            if (showRevocationBanner) {
+                item {
+                    SmsRevocationBanner(
+                        onDismiss = { showRevocationBanner = false },
+                        onOpenSettings = { showRevocationBanner = false },
+                    )
+                }
             }
 
             if (loans.isEmpty()) {
