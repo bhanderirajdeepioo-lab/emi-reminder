@@ -10,7 +10,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import com.emireminder.app.data.db.AppDatabase
+import com.emireminder.app.data.db.dao.AutoDetectedEmiDao
+import com.emireminder.app.data.db.dao.BankAccountDao
 import com.emireminder.app.data.db.dao.LoanDao
+import com.emireminder.app.data.db.dao.MonthlyFinanceSummaryDao
+import com.emireminder.app.data.db.dao.ParsedTransactionDao
 import com.emireminder.app.data.db.dao.ReminderDao
 import com.emireminder.app.data.db.dao.SMSImportDao
 import javax.inject.Singleton
@@ -51,7 +55,13 @@ object DatabaseModule {
             AppDatabase::class.java,
             "emi_reminder.db"
         )
-        .addMigrations(AppDatabase.MIGRATION_2_3, AppDatabase.MIGRATION_3_4, AppDatabase.MIGRATION_4_5, AppDatabase.MIGRATION_5_6)
+        .addMigrations(
+            AppDatabase.MIGRATION_2_3,
+            AppDatabase.MIGRATION_3_4,
+            AppDatabase.MIGRATION_4_5,
+            AppDatabase.MIGRATION_5_6,
+            AppDatabase.MIGRATION_6_7,
+        )
         .addCallback(seedCallback)
         .fallbackToDestructiveMigration()
         .fallbackToDestructiveMigrationOnDowngrade()
@@ -68,4 +78,20 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideSmsImportDao(db: AppDatabase): SMSImportDao = db.smsImportDao()
+
+    @Provides
+    @Singleton
+    fun provideBankAccountDao(db: AppDatabase): BankAccountDao = db.bankAccountDao()
+
+    @Provides
+    @Singleton
+    fun provideParsedTransactionDao(db: AppDatabase): ParsedTransactionDao = db.parsedTransactionDao()
+
+    @Provides
+    @Singleton
+    fun provideAutoDetectedEmiDao(db: AppDatabase): AutoDetectedEmiDao = db.autoDetectedEmiDao()
+
+    @Provides
+    @Singleton
+    fun provideMonthlyFinanceSummaryDao(db: AppDatabase): MonthlyFinanceSummaryDao = db.monthlyFinanceSummaryDao()
 }
