@@ -241,7 +241,7 @@ fun CIBILScoreScreen(
                                     Text(tip, fontSize = 13.sp, color = Color(0xFF475569), lineHeight = 20.sp)
                                 }
                             }
-                            if (!state.adShownThisSession) {
+                            if (!state.rewardedAdWatched) {
                                 HorizontalDivider(color = Color(0xFFF1F5F9))
                                 OutlinedButton(
                                     onClick = viewModel::onRewardedAdTriggered,

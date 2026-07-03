@@ -11,21 +11,22 @@ enum class CibilBand(val label: String, val colorHex: Long, val range: String) {
     POOR("Poor", 0xFFDC2626, "300–549"),
     FAIR("Fair", 0xFFEA580C, "550–649"),
     AVERAGE("Average", 0xFFD97706, "650–699"),
-    GOOD("Good", 0xFF16A34A, "700–749"),
-    VERY_GOOD("Very Good", 0xFF059669, "750–799"),
-    EXCELLENT("Excellent", 0xFF047857, "800–900"),
+    GOOD("Good", 0xFF64748B, "700–749"),
+    VERY_GOOD("Very Good", 0xFF22C55E, "750–799"),
+    EXCELLENT("Excellent", 0xFF16A34A, "800–900"),
 }
 
 data class CibilUiState(
     val scoreText: String = "",
     val noHistory: Boolean = false,
+    val showResults: Boolean = false,
     val band: CibilBand? = null,
     val score: Int? = null,
     val scoreError: String? = null,
     val description: String = "",
     val tips: List<String> = emptyList(),
     val triggerRewardedAd: Boolean = false,
-    val adShownThisSession: Boolean = false,
+    val rewardedAdWatched: Boolean = false,
 )
 
 @HiltViewModel
@@ -40,20 +41,32 @@ class CIBILScoreViewModel @Inject constructor() : ViewModel() {
             when {
                 filtered.isEmpty() -> _uiState.value.copy(
                     scoreText = filtered, score = null, band = null,
-                    scoreError = null, description = "", tips = emptyList(), noHistory = false,
+                    scoreError = null, description = "", tips = emptyList(),
+                    noHistory = false, showResults = false,
                 )
                 score == null || score < 300 || score > 900 -> _uiState.value.copy(
                     scoreText = filtered, score = null, band = null,
                     scoreError = "CIBIL scores range from 300 to 900. Please enter a valid score.",
-                    description = "", tips = emptyList(), noHistory = false,
+                    description = "", tips = emptyList(), noHistory = false, showResults = false,
                 )
                 else -> _uiState.value.copy(
                     scoreText = filtered, score = score, band = bandFor(score),
                     scoreError = null, description = descriptionFor(score),
-                    tips = tipsFor(score), noHistory = false,
+                    tips = tipsFor(score), noHistory = false, showResults = false,
                 )
             }
         }
+    }
+
+    fun calculate() {
+        val s = _uiState.value
+        if ((s.band != null && s.score != null) || s.noHistory) {
+            _uiState.value = s.copy(showResults = true)
+        }
+    }
+
+    fun reset() {
+        _uiState.value = CibilUiState()
     }
 
     fun onRewardedAdTriggered() {
@@ -61,13 +74,14 @@ class CIBILScoreViewModel @Inject constructor() : ViewModel() {
     }
 
     fun onRewardedAdConsumed() {
-        _uiState.value = _uiState.value.copy(triggerRewardedAd = false, adShownThisSession = true)
+        _uiState.value = _uiState.value.copy(triggerRewardedAd = false, rewardedAdWatched = true)
     }
 
     fun setNoHistory(value: Boolean) {
         _uiState.value = if (value) {
             CibilUiState(
                 noHistory = true,
+                showResults = true,
                 description = "You have no credit history yet. Start building credit with a secured credit card or a small loan.",
                 tips = listOf(
                     "Apply for a secured credit card against a fixed deposit.",
