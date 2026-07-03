@@ -277,12 +277,18 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             composable(NavRoutes.FINANCE_TOOLS_HUB) {
                 FinanceToolsHubScreen(
                     onNavigateBack             = { navController.popBackStack() },
-                    onNavigateToEmiCalculator  = { navController.navigate(NavRoutes.EMI_CALCULATOR)       { launchSingleTop = true } },
-                    onNavigateToComparison     = { navController.navigate(NavRoutes.COMPARISON_CALCULATOR) { launchSingleTop = true } },
-                    onNavigateToPrepayment     = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR) { launchSingleTop = true } },
-                    onNavigateToFdRd           = { navController.navigate(NavRoutes.FD_RD_CALCULATOR)      { launchSingleTop = true } },
-                    onNavigateToSip            = { navController.navigate(NavRoutes.SIP_CALCULATOR)        { launchSingleTop = true } },
-                    onNavigateToLoanCategories = { navController.navigate(NavRoutes.LOAN_CATEGORIES)       { launchSingleTop = true } },
+                    onNavigateToEmiCalculator  = { navController.navigate(NavRoutes.EMI_CALCULATOR)         { launchSingleTop = true } },
+                    onNavigateToComparison     = { navController.navigate(NavRoutes.COMPARISON_CALCULATOR)  { launchSingleTop = true } },
+                    onNavigateToPrepayment     = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR)  { launchSingleTop = true } },
+                    onNavigateToFdRd           = { navController.navigate(NavRoutes.FD_RD_CALCULATOR)       { launchSingleTop = true } },
+                    onNavigateToSip            = { navController.navigate(NavRoutes.SIP_CALCULATOR)         { launchSingleTop = true } },
+                    onNavigateToLoanCategories = { navController.navigate(NavRoutes.LOAN_CATEGORIES)        { launchSingleTop = true } },
+                    onNavigateToPpf            = { navController.navigate(NavRoutes.PPF_CALCULATOR)         { launchSingleTop = true } },
+                    onNavigateToGst            = { navController.navigate(NavRoutes.GST_CALCULATOR)         { launchSingleTop = true } },
+                    onNavigateToIncomeTax      = { navController.navigate(NavRoutes.INCOME_TAX_CALCULATOR)  { launchSingleTop = true } },
+                    onNavigateToInflation      = { navController.navigate(NavRoutes.INFLATION_CALCULATOR)   { launchSingleTop = true } },
+                    onNavigateToHra            = { navController.navigate(NavRoutes.HRA_CALCULATOR)         { launchSingleTop = true } },
+                    onNavigateToCibil          = { navController.navigate(NavRoutes.CIBIL_SCORE)            { launchSingleTop = true } },
                 )
             }
 
@@ -500,6 +506,36 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             composable(NavRoutes.SIP_CALCULATOR) {
                 SIPCalculatorScreen(onBack = { navController.popBackStack() })
             }
+
+            // 23 — PPF Calculator
+            composable(NavRoutes.PPF_CALCULATOR) {
+                PPFCalculatorScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 24 — GST Calculator
+            composable(NavRoutes.GST_CALCULATOR) {
+                GSTCalculatorScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 25 — Income Tax Calculator
+            composable(NavRoutes.INCOME_TAX_CALCULATOR) {
+                IncomeTaxCalculatorScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 26 — Inflation Calculator
+            composable(NavRoutes.INFLATION_CALCULATOR) {
+                InflationCalculatorScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 27 — HRA Calculator
+            composable(NavRoutes.HRA_CALCULATOR) {
+                HRACalculatorScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 28 — CIBIL Score
+            composable(NavRoutes.CIBIL_SCORE) {
+                CIBILScoreScreen(onBack = { navController.popBackStack() })
+            }
         }
     }
 }
@@ -510,7 +546,7 @@ private fun PillNavBar(currentRoute: String?, onNavigate: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
-            .padding(horizontal = 16.dp, bottom = 10.dp),
+            .padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),

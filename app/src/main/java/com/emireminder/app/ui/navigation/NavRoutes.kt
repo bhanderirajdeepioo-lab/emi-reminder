@@ -41,6 +41,14 @@ object NavRoutes {
     // Kept as a separate route so the standard "emi_calculator" bottom-tab route is unchanged.
     const val EMI_CALCULATOR_PREFILL  = "emi_calculator_prefill/{label}"
 
+    // --- New Finance Tools (HEL-538) ---
+    const val PPF_CALCULATOR          = "ppf_calculator"
+    const val GST_CALCULATOR          = "gst_calculator"
+    const val INCOME_TAX_CALCULATOR   = "income_tax_calculator"
+    const val INFLATION_CALCULATOR    = "inflation_calculator"
+    const val HRA_CALCULATOR          = "hra_calculator"
+    const val CIBIL_SCORE             = "cibil_score"
+
     // --- Helpers ---
     fun loanDetail(loanId: Int)                = "loan_detail/$loanId"
     fun prepaymentCalculatorForLoan(loanId: Int) = "prepayment_calculator_loan/$loanId"

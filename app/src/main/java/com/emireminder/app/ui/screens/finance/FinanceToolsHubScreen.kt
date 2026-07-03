@@ -51,6 +51,12 @@ fun FinanceToolsHubScreen(
     onNavigateToFdRd: () -> Unit,
     onNavigateToSip: () -> Unit,
     onNavigateToLoanCategories: () -> Unit,
+    onNavigateToPpf: () -> Unit,
+    onNavigateToGst: () -> Unit,
+    onNavigateToIncomeTax: () -> Unit,
+    onNavigateToInflation: () -> Unit,
+    onNavigateToHra: () -> Unit,
+    onNavigateToCibil: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -105,7 +111,10 @@ fun FinanceToolsHubScreen(
         ),
     ) }
 
-    val investmentTools = remember(onNavigateToSip, onNavigateToFdRd) { listOf(
+    val investmentTools = remember(
+        onNavigateToSip, onNavigateToFdRd, onNavigateToPpf, onNavigateToGst,
+        onNavigateToIncomeTax, onNavigateToInflation, onNavigateToHra, onNavigateToCibil,
+    ) { listOf(
         GridTool(
             icon = Icons.Default.BarChart,
             iconBg = Indigo50, iconTint = Indigo600,
@@ -122,19 +131,45 @@ fun FinanceToolsHubScreen(
         ),
         GridTool(
             icon = Icons.Default.Lock,
-            iconBg = Color(0xFFF3E8FF), iconTint = Violet600,
+            iconBg = Color(0xFFF0FDF4), iconTint = Color(0xFF16A34A),
             label = "PPF",
             sublabel = "Public Provident\nFund",
-            isComingSoon = true,
-            onClick = { },
+            onClick = onNavigateToPpf,
         ),
         GridTool(
             icon = Icons.Default.Receipt,
             iconBg = Color(0xFFECFEFF), iconTint = CarLoanColor,
             label = "GST",
             sublabel = "Goods & Services\nTax",
-            isComingSoon = true,
-            onClick = { },
+            onClick = onNavigateToGst,
+        ),
+        GridTool(
+            icon = Icons.Default.Calculate,
+            iconBg = Color(0xFFEFF6FF), iconTint = Color(0xFF1D4ED8),
+            label = "Income Tax",
+            sublabel = "Old vs New\nRegime",
+            onClick = onNavigateToIncomeTax,
+        ),
+        GridTool(
+            icon = Icons.Default.TrendingUp,
+            iconBg = Color(0xFFFFF7ED), iconTint = Color(0xFFEA580C),
+            label = "Inflation",
+            sublabel = "Real Returns\nCalculator",
+            onClick = onNavigateToInflation,
+        ),
+        GridTool(
+            icon = Icons.Default.Home,
+            iconBg = Color(0xFFF5F3FF), iconTint = Violet600,
+            label = "HRA",
+            sublabel = "House Rent\nAllowance",
+            onClick = onNavigateToHra,
+        ),
+        GridTool(
+            icon = Icons.Default.CreditScore,
+            iconBg = Color(0xFFFEF2F2), iconTint = Color(0xFFDC2626),
+            label = "CIBIL",
+            sublabel = "Credit Score\nGuide",
+            onClick = onNavigateToCibil,
         ),
     ) }
 
@@ -263,25 +298,6 @@ fun FinanceToolsHubScreen(
                 }
             }
 
-            // MORE TOOLS strip
-            item {
-                Spacer(Modifier.height(12.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Indigo600)
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        "+ 4 more: Income Tax · Inflation · HRA · CIBIL →",
-                        fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
         }
     }
 }
