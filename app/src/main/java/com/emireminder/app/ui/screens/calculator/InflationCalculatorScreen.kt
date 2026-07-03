@@ -438,6 +438,14 @@ private fun ModeAResultCard(result: InflationResultA, onReset: () -> Unit) {
                 accentColor = InfOrange,
             )
 
+            // Stacked bar chart: retained vs eroded
+            PurchasingPowerBar(
+                retainedPct = (result.purchasingPowerPct / 100.0).toFloat(),
+                retainedAmount = result.purchasingPowerValue,
+                erodedAmount = result.purchasingPowerLost,
+                accentColor = InfOrange,
+            )
+
             // Purchasing power lost row
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -612,6 +620,67 @@ private fun RealReturnRow(
             fontWeight = if (bold) FontWeight.ExtraBold else FontWeight.SemiBold,
             color = color,
         )
+    }
+}
+
+@Composable
+private fun PurchasingPowerBar(
+    retainedPct: Float,
+    retainedAmount: Double,
+    erodedAmount: Double,
+    accentColor: Color,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(20.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color(0xFFEF4444).copy(alpha = 0.25f)),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(retainedPct.coerceIn(0f, 1f))
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(accentColor),
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    Modifier
+                        .size(8.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(accentColor),
+                )
+                Text(
+                    "Retained: ${fmtInf(retainedAmount)}",
+                    fontSize = 11.sp, color = accentColor, fontWeight = FontWeight.SemiBold,
+                )
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    Modifier
+                        .size(8.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(Color(0xFFEF4444)),
+                )
+                Text(
+                    "Eroded: ${fmtInf(erodedAmount)}",
+                    fontSize = 11.sp, color = Color(0xFFEF4444), fontWeight = FontWeight.SemiBold,
+                )
+            }
+        }
     }
 }
 

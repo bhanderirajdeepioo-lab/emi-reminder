@@ -144,8 +144,8 @@ fun PPFCalculatorScreen(
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(32.dp)
-                                        .clip(RoundedCornerShape(8.dp))
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(12.dp))
                                         .background(PpfGreen50)
                                         .clickable { viewModel.decrementPeriod() },
                                     contentAlignment = Alignment.Center,
@@ -161,8 +161,8 @@ fun PPFCalculatorScreen(
                                 )
                                 Box(
                                     modifier = Modifier
-                                        .size(32.dp)
-                                        .clip(RoundedCornerShape(8.dp))
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(12.dp))
                                         .background(PpfGreen50)
                                         .clickable { viewModel.incrementPeriod() },
                                     contentAlignment = Alignment.Center,
