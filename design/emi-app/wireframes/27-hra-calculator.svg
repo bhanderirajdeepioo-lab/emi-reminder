@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#A78BFA"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="390" height="844" fill="#F5F3FF"/>
+
+  <!-- Status bar -->
+  <rect width="390" height="48" fill="#7C3AED"/>
+  <text x="16" y="32" font-size="12" fill="#EDE9FE">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#EDE9FE" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#EDE9FE"/>
+
+  <!-- Coming-soon ribbon -->
+  <rect width="390" height="20" y="48" fill="#6D28D9"/>
+  <text x="195" y="62" font-size="10" font-weight="700" text-anchor="middle" fill="#EDE9FE">🔒  COMING SOON — Launching Q3 2026</text>
+
+  <!-- Header -->
+  <rect x="0" y="68" width="390" height="56" fill="url(#hdr)"/>
+  <text x="20" y="104" font-size="20" fill="#FFFFFF">←</text>
+  <text x="195" y="104" font-size="18" font-weight="700" text-anchor="middle" fill="#FFFFFF">HRA Calculator</text>
+
+  <!-- City toggle: Metro / Non-Metro -->
+  <rect x="16" y="136" width="358" height="38" rx="10" fill="#4C1D95"/>
+  <rect x="18" y="138" width="175" height="34" rx="8" fill="#FFFFFF"/>
+  <text x="105" y="159" font-size="13" font-weight="700" text-anchor="middle" fill="#7C3AED">Metro City</text>
+  <text x="286" y="159" font-size="13" text-anchor="middle" fill="#EDE9FE">Non-Metro</text>
+
+  <!-- Basic Salary card -->
+  <rect x="16" y="186" width="358" height="72" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="206" font-size="11" fill="#64748B">Basic Salary (Monthly)</text>
+  <text x="32" y="242" font-size="26" font-weight="800" fill="#1E293B">₹ 50,000</text>
+
+  <!-- HRA Received + Rent Paid row -->
+  <rect x="16" y="270" width="172" height="72" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="290" font-size="11" fill="#64748B">HRA Received</text>
+  <text x="32" y="320" font-size="18" font-weight="700" fill="#7C3AED">₹ 20,000</text>
+  <text x="32" y="336" font-size="10" fill="#94A3B8">per month</text>
+
+  <rect x="202" y="270" width="172" height="72" rx="14" fill="#FFFFFF"/>
+  <text x="218" y="290" font-size="11" fill="#64748B">Actual Rent Paid</text>
+  <text x="218" y="320" font-size="18" font-weight="700" fill="#7C3AED">₹ 25,000</text>
+  <text x="218" y="336" font-size="10" fill="#94A3B8">per month</text>
+
+  <!-- Rule explainer -->
+  <rect x="16" y="354" width="358" height="56" rx="14" fill="#FFFFFF"/>
+  <text x="32" y="374" font-size="11" fill="#64748B">HRA Exemption is least of these 3 rules:</text>
+  <text x="32" y="392" font-size="10" fill="#94A3B8">① Actual HRA received   ② 50% of basic (Metro)   ③ Rent − 10% of basic</text>
+  <text x="32" y="406" font-size="10" fill="#7C3AED">Tap to see each rule calculation →</text>
+
+  <!-- Section label -->
+  <text x="16" y="430" font-size="11" font-weight="700" fill="#64748B">EXEMPTION SUMMARY</text>
+
+  <!-- Hero result (locked) -->
+  <rect x="16" y="438" width="358" height="76" rx="16" fill="#1E293B"/>
+  <text x="195" y="470" font-size="12" text-anchor="middle" fill="#64748B">HRA Exemption (Annual)</text>
+  <text x="195" y="506" font-size="28" font-weight="800" text-anchor="middle" fill="#334155">₹ ——,——,———</text>
+
+  <!-- 3-up result cards (locked) -->
+  <rect x="16" y="526" width="108" height="68" rx="14" fill="#F8FAFC"/>
+  <text x="70" y="548" font-size="10" text-anchor="middle" fill="#94A3B8">Taxable HRA</text>
+  <text x="70" y="580" font-size="13" font-weight="700" text-anchor="middle" fill="#CBD5E1">₹——,——,———</text>
+
+  <rect x="141" y="526" width="108" height="68" rx="14" fill="#F8FAFC"/>
+  <text x="195" y="548" font-size="10" text-anchor="middle" fill="#94A3B8">Tax Saved</text>
+  <text x="195" y="580" font-size="15" font-weight="700" text-anchor="middle" fill="#CBD5E1">₹——,——,———</text>
+
+  <rect x="266" y="526" width="108" height="68" rx="14" fill="#F8FAFC"/>
+  <text x="320" y="548" font-size="10" text-anchor="middle" fill="#94A3B8">Monthly Saving</text>
+  <text x="320" y="580" font-size="13" font-weight="700" text-anchor="middle" fill="#CBD5E1">₹——,———</text>
+
+  <!-- Coming soon card -->
+  <rect x="16" y="606" width="358" height="90" rx="16" fill="#FFFFFF"/>
+  <text x="195" y="642" font-size="24" text-anchor="middle">🔒</text>
+  <text x="195" y="668" font-size="14" font-weight="700" text-anchor="middle" fill="#1E293B">HRA Calculator Coming Soon</text>
+  <text x="195" y="686" font-size="11" text-anchor="middle" fill="#64748B">Sec 10(13A) rule-wise breakdown — launching Q3 2026</text>
+
+  <!-- Proof documents note -->
+  <rect x="16" y="708" width="358" height="36" rx="14" fill="#F8FAFC"/>
+  <text x="195" y="730" font-size="11" text-anchor="middle" fill="#CBD5E1">Documents needed: Rent receipt + Form 16  (guide coming soon)</text>
+
+  <!-- CTA (disabled) -->
+  <rect x="16" y="756" width="358" height="36" rx="14" fill="#EDE9FE"/>
+  <text x="195" y="778" font-size="14" font-weight="700" text-anchor="middle" fill="#C4B5FD">Calculate HRA Exemption →</text>
+
+  <!-- Bottom nav - floating pill bar (Home · Calculator · Reminders · Finance) -->
+  <rect x="12" y="798" width="366" height="42" rx="21" fill="#FFFFFF"/>
+  <rect x="268" y="801" width="104" height="36" rx="18" fill="#4F46E5"/>
+  <text x="60" y="824" font-size="10" text-anchor="middle" fill="#94A3B8">Home</text>
+  <text x="147" y="824" font-size="10" text-anchor="middle" fill="#94A3B8">Calculator</text>
+  <text x="230" y="824" font-size="10" text-anchor="middle" fill="#94A3B8">Reminders</text>
+  <text x="320" y="824" font-size="10" font-weight="700" text-anchor="middle" fill="#FFFFFF">Finance</text>
+</svg>

@@ -174,8 +174,8 @@ fun GSTCalculatorScreen(
                     Spacer(Modifier.height(8.dp))
                     SegmentedToggle(
                         options = listOf(
-                            GstTransactionType.INTRA to "Intra-state (CGST+SGST)",
-                            GstTransactionType.INTER to "Inter-state (IGST)",
+                            GstTransactionType.INTRA to "Intra-State",
+                            GstTransactionType.INTER to "Inter-State",
                         ),
                         selected = state.transactionType,
                         onSelect = viewModel::setTransactionType,
@@ -183,6 +183,14 @@ fun GSTCalculatorScreen(
                         selectedTextColor = Color.White,
                         unselectedTextColor = GstCyanDark,
                         selectedBg = GstCyan,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        if (state.transactionType == GstTransactionType.INTRA)
+                            "Within the same state — CGST + SGST applies"
+                        else
+                            "Between different states — IGST applies",
+                        fontSize = 11.sp, color = Color(0xFF64748B),
                     )
                 }
             }
