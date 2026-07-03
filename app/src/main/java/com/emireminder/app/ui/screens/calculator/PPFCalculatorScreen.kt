@@ -49,9 +49,11 @@ fun PPFCalculatorScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    // Fire interstitial ad 3 s after the screen opens, first time per session.
-    LaunchedEffect(Unit) {
-        if (!state.adShownThisSession) {
+    // Capture initial computed value so we can detect first user-driven change.
+    val initialMaturityValue = remember { state.maturityValue }
+    // Fire interstitial ad 3 s after the user first changes an input (not on screen open).
+    LaunchedEffect(state.maturityValue != initialMaturityValue) {
+        if (state.maturityValue != initialMaturityValue && !state.adShownThisSession) {
             delay(3_000L)
             viewModel.onAdTriggered()
         }
