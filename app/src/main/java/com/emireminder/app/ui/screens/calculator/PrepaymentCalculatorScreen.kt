@@ -194,7 +194,7 @@ fun PrepaymentCalculatorScreen(
                         ) {
                             listOf(
                                 "ONE_TIME" to "One-time",
-                                "MONTHLY" to "Monthly",
+                                "MONTHLY" to "Monthly Extra",
                                 "ANNUAL" to "Annual",
                             ).forEach { (type, label) ->
                                 FilterChip(
@@ -349,6 +349,7 @@ fun PrepaymentCalculatorScreen(
                             CompareRow("Total Interest", fmt.format(res.interestWithout), fmt.format(res.interestWith))
                             CompareRow("Total Payment", fmt.format(res.totalWithout), fmt.format(res.totalWith))
                             CompareRow("Loan Tenure", "${res.originalTenure} months", "${res.newTenure} months")
+                            InterestSavedRow(fmt.format(res.interestWithout - res.interestWith))
                         }
                     }
                 }
@@ -566,6 +567,34 @@ private fun InputField(label: String, value: String, onChange: (String) -> Unit)
         shape = RoundedCornerShape(12.dp),
         singleLine = true,
     )
+}
+
+@Composable
+private fun InterestSavedRow(saved: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color(0xFF059669).copy(alpha = 0.10f))
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            "Interest Saved",
+            modifier = Modifier.weight(1.2f),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF059669),
+        )
+        Text("", modifier = Modifier.weight(1f))
+        Text(
+            saved,
+            modifier = Modifier.weight(1f),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color(0xFF059669),
+        )
+    }
 }
 
 @Composable
