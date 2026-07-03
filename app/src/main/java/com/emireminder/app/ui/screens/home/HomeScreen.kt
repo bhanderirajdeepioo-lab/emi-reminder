@@ -10,10 +10,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,7 +32,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.data.db.entity.Loan
 import com.emireminder.app.domain.model.LoanType
 import com.emireminder.app.domain.model.toLoanType
-import com.emireminder.app.ui.screens.reminders.AddReminderSheet
 import com.emireminder.app.ui.theme.Indigo100
 import com.emireminder.app.ui.theme.Indigo50
 import com.emireminder.app.ui.theme.Indigo600
@@ -47,7 +45,6 @@ import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.util.Calendar
 import java.util.Locale
 
 private val headerGradient = Brush.linearGradient(
@@ -69,11 +66,6 @@ fun HomeScreen(
     val loans by viewModel.activeLoans.collectAsState()
     val reminderCount by viewModel.activeReminderCount.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
-    var showAddReminderSheet by remember { mutableStateOf(false) }
-
-    if (showAddReminderSheet) {
-        AddReminderSheet(onDismiss = { showAddReminderSheet = false })
-    }
 
     Scaffold(
         floatingActionButton = {
@@ -94,7 +86,6 @@ fun HomeScreen(
         ) {
             item {
                 DashboardHeader(
-                    onNavigateToSettings = onNavigateToSettings,
                     onNavigateToReminders = onNavigateToReminders,
                     reminderCount = reminderCount,
                 )
@@ -106,9 +97,9 @@ fun HomeScreen(
                 item { LoanSummarySection(loans, currencySymbol) }
                 item {
                     QuickActionsSection(
-                        onAddReminder = { showAddReminderSheet = true },
-                        onViewAll = onNavigateToReminders,
                         onCalculator = onNavigateToCalculator,
+                        onAddLoan = onNavigateToAddLoan,
+                        onAnalytics = onNavigateToAnalytics,
                     )
                 }
                 item {
@@ -134,7 +125,14 @@ fun HomeScreen(
                         )
                     }
                 }
-                items(loans.take(5), key = { it.id }) { loan ->
+                items(
+                    loans.sortedBy { loan ->
+                        val today = LocalDate.now().dayOfMonth
+                        val due = loan.emiDueDay
+                        if (due >= today) due - today else (LocalDate.now().lengthOfMonth() - today) + due
+                    }.take(2),
+                    key = { it.id },
+                ) { loan ->
                     LoanReminderCard(loan = loan, currencySymbol = currencySymbol, onClick = { onNavigateToLoanDetail(loan.id) })
                 }
             }
@@ -145,29 +143,10 @@ fun HomeScreen(
 // ── Header ────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun DashboardHeader(onNavigateToSettings: () -> Unit, onNavigateToReminders: () -> Unit, reminderCount: Int = 0) {
+private fun DashboardHeader(onNavigateToReminders: () -> Unit, reminderCount: Int = 0) {
     val dateText = remember {
         LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.ENGLISH))
     }
-    // user_name preference is not yet persisted anywhere; avoids a main-thread SharedPreferences
-    // disk read on first composition. Re-introduce once a settings field writes this key.
-    val userName = ""
-    val greeting = remember {
-        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        when {
-            hour < 12 -> "Good morning"
-            hour < 17 -> "Good afternoon"
-            else      -> "Good evening"
-        }
-    }
-    val initials = remember(userName) {
-        if (userName.isBlank()) "₹"
-        else userName.trim().split(" ").take(2).joinToString("") { it.first().uppercase() }
-    }
-    val displayGreeting = remember(userName) {
-        if (userName.isBlank()) greeting else "$greeting, ${userName.trim().split(" ").first()}"
-    }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -179,7 +158,6 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit, onNavigateToRemind
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Avatar initials circle
             Box(
                 modifier = Modifier
                     .size(44.dp)
@@ -187,38 +165,18 @@ private fun DashboardHeader(onNavigateToSettings: () -> Unit, onNavigateToRemind
                     .background(Color(0xFF312E81)),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    initials,
-                    fontSize = if (initials == "₹") 20.sp else 15.sp,
-                    color = Indigo100,
-                    fontWeight = FontWeight.Bold,
-                )
+                Text("₹", fontSize = 20.sp, color = Color(0xFFE0E7FF), fontWeight = FontWeight.Bold)
             }
-
             Spacer(Modifier.width(12.dp))
-
-            // Greeting + date
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    displayGreeting,
+                    "EMI Reminder & Calculator",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White,
                 )
                 Text(dateText, fontSize = 12.sp, color = Color(0xFFC7D2FE))
             }
-
-            // Settings gear
-            IconButton(onClick = onNavigateToSettings) {
-                Icon(
-                    Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    tint = Color(0xFFE0E7FF),
-                    modifier = Modifier.size(22.dp),
-                )
-            }
-
-            // Notification bell with live reminder badge
             IconButton(onClick = onNavigateToReminders) {
                 Box {
                     Box(
@@ -498,7 +456,7 @@ private fun LoanSummarySection(loans: List<Loan>, currencySymbol: String) {
 // ── Quick actions ─────────────────────────────────────────────────────────────
 
 @Composable
-private fun QuickActionsSection(onAddReminder: () -> Unit, onViewAll: () -> Unit, onCalculator: () -> Unit) {
+private fun QuickActionsSection(onCalculator: () -> Unit, onAddLoan: () -> Unit, onAnalytics: () -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Spacer(Modifier.height(16.dp))
         SectionLabel("QUICK ACTIONS")
@@ -517,20 +475,20 @@ private fun QuickActionsSection(onAddReminder: () -> Unit, onViewAll: () -> Unit
                 onClick = onCalculator,
             )
             QuickActionTile(
-                icon = Icons.Default.Notifications,
-                label = "Add Reminder",
+                icon = Icons.Default.Add,
+                label = "Add Loan",
                 bgColor = Color(0xFFF0FDF4),
                 iconColor = Color(0xFF059669),
                 modifier = Modifier.weight(1f),
-                onClick = onAddReminder,
+                onClick = onAddLoan,
             )
             QuickActionTile(
-                icon = Icons.Default.List,
-                label = "View All",
+                icon = Icons.Default.BarChart,
+                label = "Analytics",
                 bgColor = Color(0xFFFFF7ED),
                 iconColor = Color(0xFFD97706),
                 modifier = Modifier.weight(1f),
-                onClick = onViewAll,
+                onClick = onAnalytics,
             )
         }
     }

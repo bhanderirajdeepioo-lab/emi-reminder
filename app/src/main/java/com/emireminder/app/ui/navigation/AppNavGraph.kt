@@ -23,7 +23,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -46,6 +45,7 @@ import com.emireminder.app.ui.screens.reminders.*
 import com.emireminder.app.ui.screens.settings.SettingsScreen
 import com.emireminder.app.ui.screens.sms.SMSImportScreen
 import com.emireminder.app.ui.screens.splash.SplashScreen
+import com.emireminder.app.ui.theme.Indigo50
 import com.emireminder.app.ui.theme.Indigo600
 
 private data class NavItem(
@@ -105,7 +105,7 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                FloatingNavBar(
+                FlatNavBar(
                     currentRoute = currentRoute,
                     onNavigate = { route ->
                         navController.navigate(route) {
@@ -121,10 +121,10 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             }
         },
         containerColor = MaterialTheme.colorScheme.background,
-        // Prevent Scaffold from consuming window insets independently — FloatingNavBar handles
+        // Prevent Scaffold from consuming window insets independently — FlatNavBar handles
         // its own navigation bar insets via navigationBarsPadding(), and each screen handles
         // status bar insets via its own Scaffold/TopAppBar. Without this, Scaffold's default
-        // safeDrawing contentWindowInsets conflicts with FloatingNavBar's navigationBarsPadding(),
+        // safeDrawing contentWindowInsets conflicts with FlatNavBar's navigationBarsPadding(),
         // causing the accessibility hit targets to be offset from the visual nav tab positions
         // (WindowInsets measurement bug, HEL-241).
         contentWindowInsets = WindowInsets(0.dp),
@@ -500,70 +500,61 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
 }
 
 @Composable
-private fun FloatingNavBar(currentRoute: String?, onNavigate: (String) -> Unit) {
-    Box(
+private fun FlatNavBar(currentRoute: String?, onNavigate: (String) -> Unit) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(Color.White)
             .navigationBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
-        Box(
+        HorizontalDivider(color = Color(0xFFE2E8F0), thickness = 1.dp)
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(elevation = 16.dp, shape = RoundedCornerShape(32.dp))
-                .clip(RoundedCornerShape(32.dp))
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 8.dp, vertical = 10.dp)
+                .height(48.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                bottomNavItems.forEach { item ->
-                    val selected = currentRoute == item.route
-                    // weight(1f) gives every tab an equal 25 % touch target so positions
-                    // stay stable regardless of which tab's pill is currently expanded.
-                    NavItem(
-                        item = item,
-                        selected = selected,
-                        onClick = { if (!selected) onNavigate(item.route) },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+            bottomNavItems.forEach { item ->
+                val selected = currentRoute == item.route
+                // weight(1f) gives every tab an equal 25 % touch target so positions
+                // stay stable regardless of which tab's pill is currently expanded.
+                FlatNavItem(
+                    item = item,
+                    selected = selected,
+                    onClick = { if (!selected) onNavigate(item.route) },
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }
 }
 
 @Composable
-private fun NavItem(item: NavItem, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Column(
+private fun FlatNavItem(item: NavItem, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Box(
         modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 2.dp, vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxHeight()
+            .padding(horizontal = 4.dp, vertical = 2.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (selected) Indigo50 else Color.Transparent)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
     ) {
-        if (selected) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Indigo600)
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(item.filledIcon, contentDescription = item.label, tint = Color.White, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.height(2.dp))
-                    Text(item.label, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color.White, maxLines = 1)
-                }
-            }
-        } else {
-            Icon(item.outlinedIcon, contentDescription = item.label,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(24.dp))
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                if (selected) item.filledIcon else item.outlinedIcon,
+                contentDescription = item.label,
+                tint = if (selected) Indigo600 else Color(0xFF94A3B8),
+                modifier = Modifier.size(20.dp),
+            )
             Spacer(Modifier.height(2.dp))
-            Text(item.label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+            Text(
+                item.label,
+                fontSize = 9.sp,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                color = if (selected) Indigo600 else Color(0xFF94A3B8),
+                maxLines = 1,
+            )
         }
     }
 }
