@@ -29,4 +29,8 @@ class HomeViewModel @Inject constructor(
     val currencySymbol = prefsRepository.userPreferences
         .map { it.currencySymbol }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "₹")
+
+    val userName = prefsRepository.userPreferences
+        .map { it.userName }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
 }

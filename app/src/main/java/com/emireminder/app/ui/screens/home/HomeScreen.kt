@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
+import java.time.LocalTime
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -66,6 +68,7 @@ fun HomeScreen(
     val loans by viewModel.activeLoans.collectAsState()
     val reminderCount by viewModel.activeReminderCount.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
+    val userName by viewModel.userName.collectAsState()
 
     Scaffold(
         floatingActionButton = {
@@ -87,12 +90,13 @@ fun HomeScreen(
             item {
                 DashboardHeader(
                     onNavigateToReminders = onNavigateToReminders,
+                    onNavigateToSettings = onNavigateToSettings,
                     reminderCount = reminderCount,
                 )
             }
 
             if (loans.isEmpty()) {
-                item { EmptyState(onNavigateToAddLoan, onNavigateToSmsImport, onNavigateToCalculator) }
+                item { EmptyState(onNavigateToAddLoan, onNavigateToSmsImport, onNavigateToCalculator, userName) }
             } else {
                 item { LoanSummarySection(loans, currencySymbol) }
                 item {
@@ -143,7 +147,11 @@ fun HomeScreen(
 // ── Header ────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun DashboardHeader(onNavigateToReminders: () -> Unit, reminderCount: Int = 0) {
+private fun DashboardHeader(
+    onNavigateToReminders: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    reminderCount: Int = 0,
+) {
     val dateText = remember {
         LocalDate.now().format(DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.ENGLISH))
     }
@@ -212,6 +220,22 @@ private fun DashboardHeader(onNavigateToReminders: () -> Unit, reminderCount: In
                     }
                 }
             }
+            IconButton(onClick = onNavigateToSettings) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF3730A3)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Default.Settings,
+                        contentDescription = "Settings",
+                        tint = Color(0xFFE0E7FF),
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+            }
         }
     }
 }
@@ -224,6 +248,7 @@ private fun EmptyState(
     onAddLoan: () -> Unit,
     onSmsImport: () -> Unit,
     onNavigateToCalculator: () -> Unit,
+    userName: String = "",
 ) {
     val smsPermissionState = rememberPermissionState(android.Manifest.permission.READ_SMS)
 
@@ -233,6 +258,40 @@ private fun EmptyState(
             .padding(horizontal = 16.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        // Personalized greeting when user name is set
+        if (userName.isNotBlank()) {
+            val initials = remember(userName) {
+                userName.trim().split(" ").take(2).mapNotNull { it.firstOrNull()?.uppercase() }.joinToString("")
+            }
+            val greeting = remember {
+                when (LocalTime.now().hour) {
+                    in 5..11 -> "Good morning"
+                    in 12..17 -> "Good afternoon"
+                    else -> "Good evening"
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Indigo600),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(initials, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                }
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    Text("$greeting, $userName", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Slate800)
+                    Text("Let's set up your first loan", fontSize = 13.sp, color = Color(0xFF64748B))
+                }
+            }
+            Spacer(Modifier.height(24.dp))
+        }
+
         // Illustration
         Box(
             modifier = Modifier

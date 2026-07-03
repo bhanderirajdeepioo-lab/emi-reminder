@@ -66,7 +66,7 @@ private val pages = listOf(
     OnboardingPage(
         icon = Icons.Default.Notifications,
         iconBg = Color(0xFF7C3AED),
-        title = "Never Miss a Payment",
+        title = "Stay On Top of Every EMI",
         body = "Get timely notification reminders 3 days, 1 day, and on the day of your EMI due date.",
         permissionLabel = "Enable Notifications",
     ),

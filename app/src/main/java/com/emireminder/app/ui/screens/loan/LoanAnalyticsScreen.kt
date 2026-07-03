@@ -56,7 +56,7 @@ private data class DonutSlice(
 )
 
 private enum class AnalyticsPeriod(val label: String, val months: Int?) {
-    THREE_M("3M", 3), SIX_M("6M", 6), ONE_Y("12M", 12), ALL("All", null)
+    SIX_M("6 Months", 6), ONE_Y("1 Year", 12), THREE_Y("3 Years", 36), ALL("All Time", null)
 }
 
 @Composable
@@ -70,7 +70,7 @@ fun LoanAnalyticsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val loans = uiState.loans
     val fmt = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
-    var period by remember { mutableStateOf(AnalyticsPeriod.ONE_Y) }
+    var period by remember { mutableStateOf(AnalyticsPeriod.SIX_M) }
 
     val totalEmi = uiState.totalEmi
     val totalPrincipal = uiState.totalPrincipal

@@ -308,6 +308,9 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                     initialInterestType = appliedInterestType ?: "REDUCING",
                     onBack = { navController.popBackStack() },
                     onShowResults = { p, r, t, lt -> navController.navigate(NavRoutes.calculatorResults(p, r, t, lt)) },
+                    onNavigateToInterestTypeSelector = { p, r, t, type ->
+                        navController.navigate(NavRoutes.interestTypeSelector(p, r, t, type)) { launchSingleTop = true }
+                    },
                 )
             }
 
@@ -475,6 +478,9 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                     initialInterestType = appliedInterestType ?: "REDUCING",
                     onBack = { navController.popBackStack() },
                     onShowResults = { p, r, t, lt -> navController.navigate(NavRoutes.calculatorResults(p, r, t, lt)) },
+                    onNavigateToInterestTypeSelector = { p, r, t, type ->
+                        navController.navigate(NavRoutes.interestTypeSelector(p, r, t, type)) { launchSingleTop = true }
+                    },
                 )
             }
 

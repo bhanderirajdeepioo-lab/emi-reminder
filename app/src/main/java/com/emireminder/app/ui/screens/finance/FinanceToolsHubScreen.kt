@@ -57,8 +57,15 @@ fun FinanceToolsHubScreen(
 
     val loanTools = remember(
         onNavigateToEmiCalculator,
-        onNavigateToComparison, onNavigateToPrepayment,
+        onNavigateToComparison, onNavigateToPrepayment, onNavigateToLoanCategories,
     ) { listOf(
+        ListTool(
+            icon = Icons.Default.Category,
+            iconBg = Color(0xFFFFF7ED), iconTint = Color(0xFFD97706),
+            label = "Browse by Category",
+            subtitle = "Explore loan types & calculators",
+            onClick = onNavigateToLoanCategories,
+        ),
         ListTool(
             icon = Icons.Default.Calculate,
             iconBg = Indigo50, iconTint = Indigo600,

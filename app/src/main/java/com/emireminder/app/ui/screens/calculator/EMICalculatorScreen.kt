@@ -59,6 +59,7 @@ fun EMICalculatorScreen(
     showBackButton: Boolean = true,
     prefillLabel: String? = null,
     initialInterestType: String = "REDUCING",
+    onNavigateToInterestTypeSelector: ((p: Double, r: Double, t: Int, type: String) -> Unit)? = null,
     viewModel: CalculatorViewModel = hiltViewModel(),
 ) {
     val initialTab = when (prefillLabel) {
@@ -276,6 +277,28 @@ fun EMICalculatorScreen(
                                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                                 )
                             }
+                        }
+                    }
+                }
+
+                // Interest type label + info link
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        "Interest Type",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    if (onNavigateToInterestTypeSelector != null) {
+                        TextButton(
+                            onClick = { onNavigateToInterestTypeSelector(principal, rate, tenure, interestType) },
+                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+                        ) {
+                            Text("Compare types →", fontSize = 12.sp, color = Indigo600)
                         }
                     }
                 }

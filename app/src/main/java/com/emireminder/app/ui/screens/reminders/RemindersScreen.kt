@@ -14,10 +14,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.emireminder.app.ui.screens.sms.SMSImportScreen
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -36,6 +39,7 @@ import java.time.format.DateTimeFormatter
 import java.text.NumberFormat
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RemindersScreen(
     onReminderClick: (Int) -> Unit,
@@ -45,6 +49,7 @@ fun RemindersScreen(
 ) {
     var showAddSheet by remember { mutableStateOf(false) }
     var editingReminderId by remember { mutableStateOf<Int?>(null) }
+    var showSmsSheet by remember { mutableStateOf(false) }
     val onAddReminder: () -> Unit = remember { { showAddSheet = true } }
     val reminders by viewModel.reminders.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
@@ -88,6 +93,34 @@ fun RemindersScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text("Reminders", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterStart),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        IconButton(
+                            onClick = onNavigateToNotificationPreview,
+                            modifier = Modifier.size(36.dp),
+                        ) {
+                            Icon(
+                                Icons.Default.Visibility,
+                                contentDescription = "Preview notification",
+                                tint = Color(0xFFA5B4FC),
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                        IconButton(
+                            onClick = { showSmsSheet = true },
+                            modifier = Modifier.size(36.dp),
+                        ) {
+                            Icon(
+                                Icons.Default.Message,
+                                contentDescription = "SMS Auto-Import",
+                                tint = Color(0xFFA5B4FC),
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                    }
                     Box(modifier = Modifier.align(Alignment.CenterEnd)) {
                         Box(
                             modifier = Modifier
@@ -284,6 +317,17 @@ fun RemindersScreen(
             },
             reminderId = editingReminderId,
         )
+    }
+
+    if (showSmsSheet) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = { showSmsSheet = false },
+            sheetState = sheetState,
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            SMSImportScreen(onBack = { showSmsSheet = false })
+        }
     }
 }
 
