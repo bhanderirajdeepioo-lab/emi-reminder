@@ -100,7 +100,6 @@ fun RemindersScreen(
                     ) {
                         IconButton(
                             onClick = onNavigateToNotificationPreview,
-                            modifier = Modifier.size(36.dp),
                         ) {
                             Icon(
                                 Icons.Default.Visibility,
@@ -111,7 +110,6 @@ fun RemindersScreen(
                         }
                         IconButton(
                             onClick = { showSmsSheet = true },
-                            modifier = Modifier.size(36.dp),
                         ) {
                             Icon(
                                 Icons.Default.Message,
