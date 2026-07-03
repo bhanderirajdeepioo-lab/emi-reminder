@@ -197,6 +197,7 @@ fun RemindersScreen(
             }
         },
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp),
     ) { padding ->
         val showOverdue  = selectedFilter == "All" || selectedFilter == "Overdue"
         val showUpcoming = selectedFilter == "All" || selectedFilter == "Due Soon"
@@ -220,7 +221,7 @@ fun RemindersScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(bottom = 96.dp),
+                contentPadding = PaddingValues(bottom = 72.dp),
             ) {
                 if (showOverdue && filteredOverdue.isNotEmpty()) {
                     item {

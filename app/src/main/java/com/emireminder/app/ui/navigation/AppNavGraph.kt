@@ -509,8 +509,8 @@ private fun PillNavBar(currentRoute: String?, onNavigate: (String) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+            .padding(horizontal = 16.dp, bottom = 10.dp),
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),

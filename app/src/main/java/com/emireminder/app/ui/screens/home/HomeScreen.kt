@@ -80,12 +80,13 @@ fun HomeScreen(
             }
         },
         containerColor = Indigo50,
+        contentWindowInsets = WindowInsets(0.dp),
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(bottom = 88.dp),
+            contentPadding = PaddingValues(bottom = 72.dp),
         ) {
             item {
                 DashboardHeader(

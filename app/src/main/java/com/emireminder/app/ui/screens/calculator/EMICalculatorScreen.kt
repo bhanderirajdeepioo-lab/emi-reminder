@@ -127,6 +127,7 @@ fun EMICalculatorScreen(
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0.dp),
     ) { padding ->
         Column(
             modifier = Modifier

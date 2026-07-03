@@ -132,6 +132,7 @@ fun FinanceMonthlyEMIScreen(
             )
         },
         containerColor = Indigo50,
+        contentWindowInsets = WindowInsets(0.dp),
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
