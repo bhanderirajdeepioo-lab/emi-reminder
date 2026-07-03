@@ -46,6 +46,7 @@ class SmsDashboardViewModel @Inject constructor(
     private val _editingTransaction = MutableStateFlow<ParsedTransaction?>(null)
     private val _editSaveInProgress = MutableStateFlow(false)
     private val _editSaveError = MutableStateFlow<String?>(null)
+    private val _selectedCategoryFilter = MutableStateFlow<TransactionCategory?>(null)
 
     private val _baseState: Flow<SmsDashboardUiState> = combine(
         _yearMonth,
@@ -73,6 +74,8 @@ class SmsDashboardViewModel @Inject constructor(
             summary = computeSummary(current),
             previousSummary = if (previous.isNotEmpty()) computeSummary(previous) else null,
             categorySummaries = buildCategories(current),
+            allTransactions = current.sortedByDescending { it.transactionDate },
+            categoriesWithTransactions = current.map { it.category }.toSet(),
             accountsNeedingLabel = pending,
             accountSummaries = buildAccountSummaries(current, accounts),
             currencySymbol = prefs.currencySymbol,
@@ -86,11 +89,13 @@ class SmsDashboardViewModel @Inject constructor(
         _editingTransaction,
         _editSaveInProgress,
         _editSaveError,
-    ) { base, editing, saving, error ->
+        _selectedCategoryFilter,
+    ) { base, editing, saving, error, filter ->
         base.copy(
             editingTransaction = editing,
             editSaveInProgress = saving,
             editSaveError = error,
+            selectedCategoryFilter = filter,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -100,13 +105,19 @@ class SmsDashboardViewModel @Inject constructor(
 
     fun previousMonth() {
         _yearMonth.value = YearMonth.parse(_yearMonth.value, fmt).minusMonths(1).format(fmt)
+        _selectedCategoryFilter.value = null
     }
 
     fun nextMonth() {
         val next = YearMonth.parse(_yearMonth.value, fmt).plusMonths(1)
         if (!next.isAfter(YearMonth.now())) {
             _yearMonth.value = next.format(fmt)
+            _selectedCategoryFilter.value = null
         }
+    }
+
+    fun setCategoryFilter(category: TransactionCategory?) {
+        _selectedCategoryFilter.value = category
     }
 
     /** Call when the prompt card for [account] is first rendered. Sets label_prompted_at. */

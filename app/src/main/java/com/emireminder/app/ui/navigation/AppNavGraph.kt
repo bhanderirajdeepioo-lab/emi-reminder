@@ -39,6 +39,7 @@ import com.emireminder.app.ui.screens.financeaccounts.FinanceAccountsScreen
 import com.emireminder.app.ui.screens.home.HomeScreen
 import com.emireminder.app.ui.screens.smsdashboard.MonthlyReportScreen
 import com.emireminder.app.ui.screens.smsdashboard.SmsDashboardScreen
+import com.emireminder.app.ui.screens.smsdashboard.TransactionDetailScreen
 import com.emireminder.app.ui.screens.loan.*
 import com.emireminder.app.ui.screens.onboarding.CountrySelectScreen
 import com.emireminder.app.ui.screens.onboarding.LanguageSelectScreen
@@ -533,11 +534,20 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             // 20 — Finance Dashboard (bottom tab, SMS Finance Intelligence)
             composable(NavRoutes.FINANCE) {
                 SmsDashboardScreen(
-                    onNavigateToFinanceToolsHub  = { navController.navigate(NavRoutes.FINANCE_TOOLS_HUB) },
-                    onNavigateToMonthlyReport    = { ym -> navController.navigate(NavRoutes.smsMonthlyReport(ym)) { launchSingleTop = true } },
-                    onNavigateToFinanceAccounts  = { navController.navigate(NavRoutes.FINANCE_ACCOUNTS) { launchSingleTop = true } },
-                    onNavigateToScan             = { navController.navigate(NavRoutes.SMS_HISTORICAL_SCAN) { launchSingleTop = true } },
+                    onNavigateToFinanceToolsHub      = { navController.navigate(NavRoutes.FINANCE_TOOLS_HUB) },
+                    onNavigateToMonthlyReport        = { ym -> navController.navigate(NavRoutes.smsMonthlyReport(ym)) { launchSingleTop = true } },
+                    onNavigateToFinanceAccounts      = { navController.navigate(NavRoutes.FINANCE_ACCOUNTS) { launchSingleTop = true } },
+                    onNavigateToScan                 = { navController.navigate(NavRoutes.SMS_HISTORICAL_SCAN) { launchSingleTop = true } },
+                    onNavigateToTransactionDetail    = { id -> navController.navigate(NavRoutes.transactionDetail(id)) { launchSingleTop = true } },
                 )
+            }
+
+            // 20e — Transaction Detail (HEL-591)
+            composable(
+                NavRoutes.TRANSACTION_DETAIL,
+                arguments = listOf(navArgument("transactionId") { type = NavType.StringType }),
+            ) {
+                TransactionDetailScreen(onBack = { navController.popBackStack() })
             }
 
             // 20d — Finance Accounts (Settings → Finance Accounts / "Manage" button in Finance tab)

@@ -49,6 +49,10 @@ object NavRoutes {
     // --- Finance Accounts (HEL-570) ---
     const val FINANCE_ACCOUNTS        = "finance_accounts"
 
+    // --- Transaction Detail (HEL-591) ---
+    const val TRANSACTION_DETAIL = "transaction_detail/{transactionId}"
+    fun transactionDetail(id: String) = "transaction_detail/$id"
+
     // --- New Finance Tools (HEL-538) ---
     const val PPF_CALCULATOR          = "ppf_calculator"
     const val GST_CALCULATOR          = "gst_calculator"

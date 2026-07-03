@@ -3,13 +3,11 @@ package com.emireminder.app.ui.screens.smsdashboard
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,10 +31,12 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.emireminder.app.data.db.entity.BankAccount
 import com.emireminder.app.data.db.entity.ParsedTransaction
+import com.emireminder.app.domain.model.TransactionCategory
 import com.emireminder.app.domain.model.TransactionDirection
 import com.emireminder.app.ui.theme.*
 import java.text.NumberFormat
 import java.time.Instant
+import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -61,6 +61,54 @@ private fun displayMonth(yearMonth: String): String = runCatching {
     "${ym.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${ym.year}"
 }.getOrElse { yearMonth }
 
+// ─── Category filter order ─────────────────────────────────────────────────────
+
+private val categoryFilterOrder = listOf(
+    TransactionCategory.INCOME,
+    TransactionCategory.EMI_AND_LOANS,
+    TransactionCategory.CREDIT_CARD,
+    TransactionCategory.UTILITIES,
+    TransactionCategory.FOOD_AND_DINING,
+    TransactionCategory.TRANSPORT,
+    TransactionCategory.SHOPPING,
+    TransactionCategory.HEALTH,
+    TransactionCategory.ENTERTAINMENT,
+    TransactionCategory.INVESTMENTS,
+    TransactionCategory.INSURANCE,
+    TransactionCategory.ATM_AND_CASH,
+    TransactionCategory.BANK_CHARGES,
+    TransactionCategory.UNCATEGORISED,
+)
+
+// ─── Date-grouped flat list helpers ───────────────────────────────────────────
+
+private sealed interface TransactionListItem {
+    data class DateHeader(val label: String) : TransactionListItem
+    data class TxnCard(val txn: ParsedTransaction) : TransactionListItem
+}
+
+private fun buildTransactionListItems(transactions: List<ParsedTransaction>): List<TransactionListItem> {
+    if (transactions.isEmpty()) return emptyList()
+    val now = LocalDate.now()
+    val yesterday = now.minusDays(1)
+    val items = mutableListOf<TransactionListItem>()
+    var lastDate: LocalDate? = null
+    for (txn in transactions) {
+        val date = Instant.ofEpochMilli(txn.transactionDate).atZone(ZoneId.systemDefault()).toLocalDate()
+        if (date != lastDate) {
+            val label = when (date) {
+                now -> "Today"
+                yesterday -> "Yesterday"
+                else -> "${date.dayOfMonth} ${date.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())}"
+            }
+            items.add(TransactionListItem.DateHeader(label))
+            lastDate = date
+        }
+        items.add(TransactionListItem.TxnCard(txn))
+    }
+    return items
+}
+
 // ─── Entry point ────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
@@ -70,6 +118,7 @@ fun SmsDashboardScreen(
     onNavigateToMonthlyReport: (String) -> Unit,
     onNavigateToFinanceAccounts: () -> Unit = {},
     onNavigateToScan: () -> Unit = {},
+    onNavigateToTransactionDetail: (String) -> Unit = {},
     viewModel: SmsDashboardViewModel = hiltViewModel(),
 ) {
     val smsPermissions = rememberMultiplePermissionsState(
@@ -89,7 +138,6 @@ fun SmsDashboardScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // Auto-redirect to historical scan on first visit (permissions already granted at this point)
     LaunchedEffect(uiState.smsHistoricalScanDone, uiState.isLoading) {
         if (!uiState.isLoading && !uiState.smsHistoricalScanDone) {
             onNavigateToScan()
@@ -114,6 +162,11 @@ fun SmsDashboardScreen(
             },
             onDismiss = viewModel::dismissEditSheet,
         )
+    }
+
+    // Memoize the date-grouped list to avoid rebuilding on every recomposition
+    val transactionListItems = remember(uiState.filteredTransactions) {
+        buildTransactionListItems(uiState.filteredTransactions)
     }
 
     Scaffold(
@@ -168,7 +221,7 @@ fun SmsDashboardScreen(
                 }
 
                 else -> {
-                    // Account labelling prompt — shown first when a new account needs a label
+                    // Account labelling prompt
                     if (uiState.accountsNeedingLabel.isNotEmpty()) {
                         item(key = "label_prompt") {
                             Spacer(Modifier.height(12.dp))
@@ -191,28 +244,57 @@ fun SmsDashboardScreen(
                         )
                     }
 
-                    item {
-                        Spacer(Modifier.height(16.dp))
-                        Text(
-                            "By Category",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp,
-                            color = Color(0xFF64748B),
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                        )
+                    // Category filter chips
+                    item(key = "filter_chips") {
                         Spacer(Modifier.height(8.dp))
+                        CategoryFilterChipBar(
+                            categoriesWithTransactions = uiState.categoriesWithTransactions,
+                            selectedFilter = uiState.selectedCategoryFilter,
+                            onFilterSelected = viewModel::setCategoryFilter,
+                        )
                     }
 
-                    items(
-                        items = uiState.categorySummaries,
-                        key = { it.category.name },
-                    ) { catSummary ->
-                        CategoryRow(
-                            summary = catSummary,
+                    // Summary strip
+                    item(key = "summary_strip") {
+                        FilterSummaryStrip(
+                            count = uiState.filteredTransactions.size,
+                            totalAmount = uiState.filteredTransactions.sumOf { it.amount },
                             currencySymbol = uiState.currencySymbol,
-                            onTransactionClick = viewModel::openEditSheet,
                         )
-                        Spacer(Modifier.height(8.dp))
+                    }
+
+                    // Empty filter state
+                    val activeFilter = uiState.selectedCategoryFilter
+                    if (uiState.filteredTransactions.isEmpty() && activeFilter != null) {
+                        item(key = "empty_filter") {
+                            EmptyFilterState(
+                                categoryLabel = activeFilter.meta().label,
+                                onClearFilter = { viewModel.setCategoryFilter(null) },
+                            )
+                        }
+                    } else {
+                        // Date-grouped smart card list
+                        items(
+                            items = transactionListItems,
+                            key = { item ->
+                                when (item) {
+                                    is TransactionListItem.DateHeader -> "header_${item.label}"
+                                    is TransactionListItem.TxnCard -> "txn_${item.txn.id}"
+                                }
+                            },
+                        ) { item ->
+                            when (item) {
+                                is TransactionListItem.DateHeader -> DateGroupHeader(label = item.label)
+                                is TransactionListItem.TxnCard -> {
+                                    TransactionSmartCard(
+                                        txn = item.txn,
+                                        currencySymbol = uiState.currencySymbol,
+                                        onClick = { onNavigateToTransactionDetail(item.txn.id) },
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                }
+                            }
+                        }
                     }
 
                     // By Account section
@@ -382,6 +464,26 @@ private fun MonthlySummaryCard(
                     modifier = Modifier.weight(1f),
                 )
             }
+
+            Spacer(Modifier.height(12.dp))
+
+            val progress = if (summary.totalIncome > 0)
+                (summary.totalExpenses / summary.totalIncome).coerceIn(0.0, 1.0).toFloat()
+            else 0f
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp)),
+                color = Amber700,
+                trackColor = Color(0xFF334155),
+            )
+            if (summary.netSavings > 0 && summary.totalIncome > 0) {
+                val savingsPct = (summary.netSavings / summary.totalIncome * 100).toInt()
+                Spacer(Modifier.height(4.dp))
+                Text("💡 $savingsPct% saved", fontSize = 12.sp, color = SafeGreen)
+            }
         }
     }
 }
@@ -414,31 +516,137 @@ private fun SummaryMetric(
     }
 }
 
-// ─── Category row ──────────────────────────────────────────────────────────────
+// ─── Category filter chip bar ──────────────────────────────────────────────────
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryFilterChipBar(
+    categoriesWithTransactions: Set<TransactionCategory>,
+    selectedFilter: TransactionCategory?,
+    onFilterSelected: (TransactionCategory?) -> Unit,
+) {
+    val visibleCategories = remember(categoriesWithTransactions) {
+        categoryFilterOrder.filter { it in categoriesWithTransactions }
+    }
+
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item(key = "chip_all") {
+            FilterChip(
+                selected = selectedFilter == null,
+                onClick = { onFilterSelected(null) },
+                label = { Text("All", fontSize = 13.sp) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = Indigo600.copy(alpha = 0.15f),
+                    selectedLabelColor = Indigo600,
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = true,
+                    selected = selectedFilter == null,
+                    selectedBorderColor = Indigo600,
+                    borderColor = Color(0xFFE2E8F0),
+                ),
+            )
+        }
+        items(visibleCategories, key = { "chip_${it.name}" }) { cat ->
+            val meta = cat.meta()
+            val isSelected = selectedFilter == cat
+            FilterChip(
+                selected = isSelected,
+                onClick = { onFilterSelected(if (isSelected) null else cat) },
+                label = { Text(meta.label, fontSize = 13.sp) },
+                leadingIcon = {
+                    Icon(meta.icon, contentDescription = null, modifier = Modifier.size(16.dp))
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = meta.color.copy(alpha = 0.15f),
+                    selectedLabelColor = meta.color,
+                    selectedLeadingIconColor = meta.color,
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = true,
+                    selected = isSelected,
+                    selectedBorderColor = meta.color,
+                    borderColor = Color(0xFFE2E8F0),
+                ),
+            )
+        }
+    }
+}
+
+// ─── Filter summary strip ──────────────────────────────────────────────────────
 
 @Composable
-private fun CategoryRow(
-    summary: CategorySummary,
+private fun FilterSummaryStrip(count: Int, totalAmount: Double, currencySymbol: String) {
+    Text(
+        "$count transaction${if (count != 1) "s" else ""} · $currencySymbol${amtFmt.format(totalAmount.toLong())} total",
+        fontSize = 12.sp,
+        color = Color(0xFF94A3B8),
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 2.dp),
+    )
+}
+
+// ─── Date group header ─────────────────────────────────────────────────────────
+
+@Composable
+private fun DateGroupHeader(label: String) {
+    Text(
+        label,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = Color(0xFF64748B),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 16.dp, top = 12.dp, bottom = 4.dp),
+    )
+}
+
+// ─── Transaction smart card ────────────────────────────────────────────────────
+
+@Composable
+private fun TransactionSmartCard(
+    txn: ParsedTransaction,
     currencySymbol: String,
-    onTransactionClick: (ParsedTransaction) -> Unit = {},
+    onClick: () -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val meta = summary.category.meta()
+    val meta = txn.category.meta()
+    val isCredit = txn.direction == TransactionDirection.CREDIT
+    val prefix = if (isCredit) "+" else "-"
+    val amtColor = if (isCredit) SafeGreen else UrgentRed
+    val primaryLabel = txn.merchantName?.takeIf { it.isNotBlank() } ?: txn.bankName
+    val subtitle = buildString {
+        append(txn.bankName)
+        if (txn.accountLast4.isNotBlank()) append(" ···· ${txn.accountLast4}")
+        append(" · ")
+        append(fmtDate(txn.transactionDate))
+    }
 
     Card(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
-        Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .fillMaxHeight()
+                    .background(meta.color),
+            )
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { expanded = !expanded }
-                    .padding(12.dp),
+                    .weight(1f)
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
@@ -454,117 +662,88 @@ private fun CategoryRow(
                 Spacer(Modifier.width(12.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(meta.label, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Slate800)
-                    Text(
-                        "${summary.transactionCount} transaction${if (summary.transactionCount != 1) "s" else ""}",
-                        fontSize = 12.sp,
-                        color = Color(0xFF94A3B8),
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            primaryLabel,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Slate800,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        if (txn.userVerified) {
+                            Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = "Verified",
+                                tint = SafeGreen,
+                                modifier = Modifier.size(14.dp),
+                            )
+                        }
+                        if (txn.isEmi) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Indigo600.copy(alpha = 0.12f))
+                                    .padding(horizontal = 5.dp, vertical = 1.dp),
+                            ) {
+                                Text("EMI", fontSize = 9.sp, color = Indigo600, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                    Text(subtitle, fontSize = 12.sp, color = Color(0xFF94A3B8))
                 }
 
-                Text(fmtAmt(currencySymbol, summary.totalAmount), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Slate800)
                 Spacer(Modifier.width(8.dp))
-                Icon(
-                    if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = if (expanded) "Collapse" else "Expand",
-                    tint = Color(0xFF94A3B8),
-                    modifier = Modifier.size(20.dp),
-                )
-            }
 
-            AnimatedVisibility(
-                visible = expanded,
-                enter = expandVertically(),
-                exit = shrinkVertically(),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFFF8FAFC)),
-                ) {
-                    HorizontalDivider(color = Color(0xFFF1F5F9))
-                    summary.transactions.forEach { txn ->
-                        TransactionRow(
-                            transaction = txn,
-                            currencySymbol = currencySymbol,
-                            onClick = onTransactionClick,
-                        )
-                        HorizontalDivider(color = Color(0xFFF1F5F9))
-                    }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        "$prefix${fmtAmt(currencySymbol, txn.amount)}",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = amtColor,
+                    )
+                    Text(
+                        if (isCredit) "CREDIT" else "DEBIT",
+                        fontSize = 10.sp,
+                        color = Color(0xFF94A3B8),
+                    )
                 }
             }
         }
     }
 }
 
+// ─── Empty filter state ────────────────────────────────────────────────────────
+
 @Composable
-private fun TransactionRow(
-    transaction: ParsedTransaction,
-    currencySymbol: String,
-    onClick: (ParsedTransaction) -> Unit = {},
-) {
-    Row(
+private fun EmptyFilterState(categoryLabel: String, onClearFilter: () -> Unit) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick(transaction) }
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(horizontal = 32.dp, vertical = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(
-                    if (transaction.direction == TransactionDirection.CREDIT) SafeGreen else UrgentRed,
-                ),
+        Icon(
+            Icons.Default.FilterList,
+            contentDescription = null,
+            tint = Color(0xFFCBD5E1),
+            modifier = Modifier.size(48.dp),
         )
-
-        Spacer(Modifier.width(10.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                val primaryLabel = transaction.merchantName?.takeIf { it.isNotBlank() }
-                    ?: transaction.bankName
-                Text(
-                    primaryLabel,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Slate800,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false),
-                )
-                if (transaction.userVerified) {
-                    Spacer(Modifier.width(4.dp))
-                    Icon(
-                        Icons.Default.CheckCircle,
-                        contentDescription = "Manually verified",
-                        tint = SafeGreen,
-                        modifier = Modifier.size(14.dp),
-                    )
-                }
-            }
-            val accountLabel = transaction.accountLast4
-                .takeIf { it.isNotBlank() }
-                ?.let { "${transaction.bankName} ·· $it" }
-                ?: transaction.bankName
-            Text(
-                "${fmtDate(transaction.transactionDate)}  ·  $accountLabel",
-                fontSize = 11.sp,
-                color = Color(0xFF94A3B8),
-            )
-        }
-
-        Spacer(Modifier.width(8.dp))
-
-        val prefix = if (transaction.direction == TransactionDirection.CREDIT) "+" else "-"
-        val amtColor = if (transaction.direction == TransactionDirection.CREDIT) SafeGreen else UrgentRed
+        Spacer(Modifier.height(12.dp))
         Text(
-            "$prefix${fmtAmt(currencySymbol, transaction.amount)}",
-            fontSize = 13.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = amtColor,
+            "No $categoryLabel transactions this month.",
+            fontSize = 14.sp,
+            color = Color(0xFF64748B),
+            textAlign = TextAlign.Center,
         )
+        Spacer(Modifier.height(12.dp))
+        TextButton(onClick = onClearFilter) {
+            Text("Clear filter", color = Indigo600, fontWeight = FontWeight.SemiBold)
+        }
     }
 }
 
@@ -802,6 +981,7 @@ private fun AccountSummaryRow(summary: AccountSummary, currencySymbol: String) {
 
 // ─── SMS Permission gate ────────────────────────────────────────────────────────
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SmsPermissionScreen(
     onNavigateToFinanceToolsHub: () -> Unit,

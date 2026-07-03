@@ -3,7 +3,6 @@ package com.emireminder.app.ui.screens.smsdashboard
 import com.emireminder.app.data.db.entity.BankAccount
 import com.emireminder.app.data.db.entity.ParsedTransaction
 import com.emireminder.app.domain.model.TransactionCategory
-import com.emireminder.app.domain.model.TransactionDirection
 
 data class MonthlySummaryData(
     val totalIncome: Double = 0.0,
@@ -38,6 +37,10 @@ data class SmsDashboardUiState(
     val summary: MonthlySummaryData = MonthlySummaryData(),
     val previousSummary: MonthlySummaryData? = null,
     val categorySummaries: List<CategorySummary> = emptyList(),
+    /** All transactions for the selected month, sorted descending by date. */
+    val allTransactions: List<ParsedTransaction> = emptyList(),
+    /** Categories that have ≥ 1 transaction in the selected month (for filter chip visibility). */
+    val categoriesWithTransactions: Set<TransactionCategory> = emptySet(),
     /** Accounts that have a sibling account at the same bank and haven't been labelled yet. */
     val accountsNeedingLabel: List<BankAccount> = emptyList(),
     val accountSummaries: List<AccountSummary> = emptyList(),
@@ -49,4 +52,10 @@ data class SmsDashboardUiState(
     val editingTransaction: ParsedTransaction? = null,
     val editSaveInProgress: Boolean = false,
     val editSaveError: String? = null,
-)
+    /** Null = show All; non-null = filter to this category. */
+    val selectedCategoryFilter: TransactionCategory? = null,
+) {
+    val filteredTransactions: List<ParsedTransaction>
+        get() = if (selectedCategoryFilter == null) allTransactions
+                else allTransactions.filter { it.category == selectedCategoryFilter }
+}
