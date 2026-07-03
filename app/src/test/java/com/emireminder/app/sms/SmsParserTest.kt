@@ -270,6 +270,24 @@ class SmsParserTest {
         assertEquals(TransactionCategory.SUBSCRIPTION, result!!.category)
     }
 
+    @Test fun parseTransaction_youtubePremium_subscriptionCategory() {
+        val result = SmsParser.parseTransaction(
+            "VM-GOOGL",
+            "Your YouTube Premium subscription of Rs.129 has been debited from a/c XX5678 on 01-Jul-26.",
+        )
+        assertNotNull(result)
+        assertEquals(TransactionCategory.SUBSCRIPTION, result!!.category)
+    }
+
+    @Test fun parseTransaction_licPremium_insuranceCategory() {
+        val result = SmsParser.parseTransaction(
+            "VM-LICAGNT",
+            "LIC of India: Your premium of Rs.12,500 for policy 123456789 has been deducted via auto-pay on 01-Jul-26.",
+        )
+        assertNotNull(result)
+        assertEquals(TransactionCategory.INSURANCE_PREMIUM, result!!.category)
+    }
+
     @Test fun parseTransaction_balanceAlertOnly_returnsNull() {
         val result = SmsParser.parseTransaction(
             "HDFCBK",

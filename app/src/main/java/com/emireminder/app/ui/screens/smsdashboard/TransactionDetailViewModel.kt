@@ -17,6 +17,7 @@ import javax.inject.Inject
 data class TransactionDetailUiState(
     val transaction: ParsedTransaction? = null,
     val isLoading: Boolean = true,
+    val error: String? = null,
     val editSheetOpen: Boolean = false,
     val editSaveInProgress: Boolean = false,
     val editSaveError: String? = null,
@@ -36,8 +37,12 @@ class TransactionDetailViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val txn = transactionDao.getById(transactionId)
-            _uiState.value = TransactionDetailUiState(transaction = txn, isLoading = false)
+            try {
+                val txn = transactionDao.getById(transactionId)
+                _uiState.value = TransactionDetailUiState(transaction = txn, isLoading = false)
+            } catch (e: Exception) {
+                _uiState.value = TransactionDetailUiState(isLoading = false, error = e.message ?: "Failed to load transaction")
+            }
         }
     }
 

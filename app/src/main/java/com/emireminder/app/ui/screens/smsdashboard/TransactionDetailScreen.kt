@@ -129,6 +129,13 @@ fun TransactionDetailScreen(
                 CircularProgressIndicator(color = Indigo600)
             }
 
+            uiState.error != null -> Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(uiState.error ?: "Unknown error", color = Color(0xFFEF4444), textAlign = TextAlign.Center)
+            }
+
             uiState.transaction == null -> Box(
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentAlignment = Alignment.Center,
@@ -262,8 +269,7 @@ private fun DetailsCard(txn: ParsedTransaction, onReassign: () -> Unit) {
                 )
                 OutlinedButton(
                     onClick = onReassign,
-                    modifier = Modifier.height(30.dp),
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         containerColor = meta.color.copy(alpha = 0.1f),
                         contentColor = meta.color,
