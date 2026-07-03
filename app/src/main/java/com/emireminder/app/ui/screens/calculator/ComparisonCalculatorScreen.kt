@@ -61,10 +61,11 @@ fun ComparisonCalculatorScreen(
             modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
-            // Two loan input panels side by side
+            // Two loan input panels with swap icon between them
             Row(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(0.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 LoanInputPanel(
                     label = "Loan A",
@@ -74,6 +75,22 @@ fun ComparisonCalculatorScreen(
                     tenure = t1, onTenureChange = { t1 = it },
                     modifier = Modifier.weight(1f),
                 )
+                Box(
+                    modifier = Modifier.size(40.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    FilledIconButton(
+                        onClick = {
+                            val tmpP = p1; p1 = p2; p2 = tmpP
+                            val tmpR = r1; r1 = r2; r2 = tmpR
+                            val tmpT = t1; t1 = t2; t2 = tmpT
+                        },
+                        modifier = Modifier.size(32.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = Indigo600),
+                    ) {
+                        Icon(Icons.Default.CompareArrows, contentDescription = "Swap loans", tint = Color.White, modifier = Modifier.size(18.dp))
+                    }
+                }
                 LoanInputPanel(
                     label = "Loan B",
                     labelColor = Color(0xFF0891B2),
@@ -136,12 +153,12 @@ fun ComparisonCalculatorScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(containerColor = winnerColor.copy(alpha = 0.1f)),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
                     ) {
                         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text("🏆", fontSize = 28.sp)
                             Spacer(Modifier.width(12.dp))
-                            Text(winnerText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = winnerColor, lineHeight = 20.sp)
+                            Text(winnerText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White, lineHeight = 20.sp)
                         }
                     }
                 }
