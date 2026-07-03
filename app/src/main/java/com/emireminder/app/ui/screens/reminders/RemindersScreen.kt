@@ -50,9 +50,12 @@ fun RemindersScreen(
     var showAddSheet by remember { mutableStateOf(false) }
     var editingReminderId by remember { mutableStateOf<Int?>(null) }
     var showSmsSheet by remember { mutableStateOf(false) }
+    var emiConfirmData by remember { mutableStateOf<DetectedEmiUiState?>(null) }
+    var showEmiConfirmSheet by remember { mutableStateOf(false) }
     val onAddReminder: () -> Unit = remember { { showAddSheet = true } }
     val reminders by viewModel.reminders.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
+    val detectedEmis by viewModel.detectedEmis.collectAsState()
     val today = remember { LocalDate.now() }
     val todayDay = today.dayOfMonth
 
@@ -208,7 +211,8 @@ fun RemindersScreen(
                                else applyFilters(upcoming)
         val filteredDone     = applyFilters(done)
 
-        val hasAny = (showOverdue && filteredOverdue.isNotEmpty()) ||
+        val hasAny = detectedEmis.isNotEmpty() ||
+                     (showOverdue && filteredOverdue.isNotEmpty()) ||
                      (showUpcoming && filteredUpcoming.isNotEmpty()) ||
                      (showDone && filteredDone.isNotEmpty())
 
@@ -223,6 +227,32 @@ fun RemindersScreen(
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentPadding = PaddingValues(bottom = 72.dp),
             ) {
+                // ── EMI Auto-Detection cards (top banner, AC #2) ───────────────────
+                if (detectedEmis.isNotEmpty()) {
+                    item {
+                        SectionHeader(
+                            label = "DETECTED EMIs",
+                            count = detectedEmis.size,
+                            color = Indigo600,
+                        )
+                    }
+                    items(detectedEmis, key = { it.emi.id }) { state ->
+                        EmiDetectionCard(
+                            emi = state.emi,
+                            isUpdate = state.isUpdate,
+                            previousAmount = state.previousAmount,
+                            currencySymbol = currencySymbol,
+                            onAddReminder = {
+                                emiConfirmData = state
+                                showEmiConfirmSheet = true
+                            },
+                            onDismiss = { viewModel.dismissEmi(state.emi.id) },
+                        )
+                    }
+                    item { EmiDetectionAdBanner(modifier = Modifier.padding(vertical = 4.dp)) }
+                    item { Spacer(Modifier.height(4.dp)) }
+                }
+
                 if (showOverdue && filteredOverdue.isNotEmpty()) {
                     item {
                         SectionHeader(label = "OVERDUE", count = filteredOverdue.size, color = UrgentRed)
@@ -316,6 +346,23 @@ fun RemindersScreen(
             },
             reminderId = editingReminderId,
         )
+    }
+
+    // EMI auto-detect pre-fill sheet (AC #3–#5)
+    if (showEmiConfirmSheet) {
+        val state = emiConfirmData
+        if (state != null) {
+            AddReminderSheet(
+                onDismiss = {
+                    showEmiConfirmSheet = false
+                    emiConfirmData = null
+                },
+                autoDetectedEmiId = state.emi.id,
+                prefillLenderName = state.emi.lenderName,
+                prefillEmiAmount = state.emi.emiAmount,
+                prefillRecurringDay = state.emi.recurringDay,
+            )
+        }
     }
 
     if (showSmsSheet) {

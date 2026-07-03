@@ -18,7 +18,7 @@ class FinanceAccountsViewModel @Inject constructor(
     val uiState = bankAccountRepository.getAllAccounts()
         .map { accounts ->
             if (accounts.isEmpty()) FinanceAccountsUiState.Empty
-            else FinanceAccountsUiState.Success(accounts)
+            else FinanceAccountsUiState.Success(accounts.sortedBy { it.bankName })
         }
         .stateIn(
             scope = viewModelScope,

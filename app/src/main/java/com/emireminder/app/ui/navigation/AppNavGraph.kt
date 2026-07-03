@@ -46,6 +46,7 @@ import com.emireminder.app.ui.screens.onboarding.OnboardingScreen
 import com.emireminder.app.ui.screens.onboarding.OnboardingViewModel
 import com.emireminder.app.ui.screens.reminders.*
 import com.emireminder.app.ui.screens.settings.SettingsScreen
+import com.emireminder.app.ui.screens.sms.HistoricalScanScreen
 import com.emireminder.app.ui.screens.sms.SMSImportScreen
 import com.emireminder.app.ui.screens.sms.SmsIntelligenceOnboardingScreen
 import com.emireminder.app.ui.screens.splash.SplashScreen
@@ -413,11 +414,24 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             composable(NavRoutes.SMS_INTELLIGENCE_ONBOARDING) {
                 SmsIntelligenceOnboardingScreen(
                     onGranted = {
-                        navController.navigate(NavRoutes.SMS_IMPORT) {
+                        // Navigate to historical scan — it determines first-vs-rescan internally.
+                        navController.navigate(NavRoutes.SMS_HISTORICAL_SCAN) {
                             popUpTo(NavRoutes.SMS_INTELLIGENCE_ONBOARDING) { inclusive = true }
                         }
                     },
                     onBack = { navController.popBackStack() },
+                )
+            }
+
+            // 15b — Historical SMS Scan (first-time background scan, HEL-572)
+            composable(NavRoutes.SMS_HISTORICAL_SCAN) {
+                HistoricalScanScreen(
+                    onNavigateToFinanceDashboard = {
+                        navController.navigate(NavRoutes.FINANCE) {
+                            popUpTo(NavRoutes.SMS_HISTORICAL_SCAN) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
@@ -443,6 +457,9 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                     },
                     onNavigateToFinanceAccounts = {
                         navController.navigate(NavRoutes.FINANCE_ACCOUNTS) { launchSingleTop = true }
+                    },
+                    onNavigateToSmsHistoricalScan = {
+                        navController.navigate(NavRoutes.SMS_HISTORICAL_SCAN) { launchSingleTop = true }
                     },
                 )
             }

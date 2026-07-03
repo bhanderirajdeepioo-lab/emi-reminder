@@ -136,6 +136,9 @@ class SmsFinanceRepository @Inject constructor(
         val rowId = parsedTransactionDao.insert(entity)
         if (rowId != -1L) {
             updateMonthSummary(yearMonth, entity)
+            if (isEmi) {
+                autoDetectedEmiRepository.processEmiTransaction(entity)
+            }
         }
         return rowId != -1L
     }

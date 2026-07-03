@@ -50,6 +50,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onNavigateToSmsIntelligence: () -> Unit = {},
     onNavigateToFinanceAccounts: () -> Unit = {},
+    onNavigateToSmsHistoricalScan: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val prefs by viewModel.prefs.collectAsStateWithLifecycle()
@@ -436,6 +437,17 @@ fun SettingsScreen(
                             "Tap to set up SMS Intelligence",
                         value = null,
                         onClick = onNavigateToSmsIntelligence,
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
+                    HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
+                    NavigableSettingRow(
+                        icon = Icons.Default.Refresh,
+                        iconBg = Color(0xFFECFDF5),
+                        iconTint = Color(0xFF059669),
+                        label = "Rescan SMS History",
+                        subtitle = "Re-import the last 6 months of bank SMS",
+                        value = null,
+                        onClick = onNavigateToSmsHistoricalScan,
                     )
                     HorizontalDivider(modifier = Modifier.padding(start = 60.dp))
                     NavigableSettingRow(

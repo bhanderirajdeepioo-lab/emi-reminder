@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import com.emireminder.app.data.repository.AutoDetectedEmiRepository
 import com.emireminder.app.data.repository.ReminderRepository
 import com.emireminder.app.notification.NotificationScheduler
 
@@ -25,13 +26,14 @@ class AddReminderViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val repository: ReminderRepository = mockk()
     private val scheduler: NotificationScheduler = mockk(relaxed = true)
+    private val autoDetectedEmiRepository: AutoDetectedEmiRepository = mockk(relaxed = true)
 
     private lateinit var viewModel: AddReminderViewModel
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = AddReminderViewModel(repository, scheduler)
+        viewModel = AddReminderViewModel(repository, scheduler, autoDetectedEmiRepository)
         viewModel.onLoanNameChange("Test Loan")
         viewModel.onEmiAmountChange("5000")
         viewModel.onDueDayChange("10")

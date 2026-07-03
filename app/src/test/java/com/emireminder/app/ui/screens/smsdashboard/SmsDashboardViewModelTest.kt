@@ -19,6 +19,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import com.emireminder.app.data.db.dao.AutoDetectedEmiDao
 import com.emireminder.app.data.db.dao.ParsedTransactionDao
 import com.emireminder.app.data.db.entity.BankAccount
 import com.emireminder.app.data.db.entity.ParsedTransaction
@@ -36,6 +37,7 @@ class SmsDashboardViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private val transactionDao: ParsedTransactionDao = mockk(relaxed = true)
+    private val autoDetectedEmiDao: AutoDetectedEmiDao = mockk(relaxed = true)
     private val bankAccountRepository: BankAccountRepository = mockk(relaxed = true)
     private val prefsRepository: UserPreferencesRepository = mockk(relaxed = true)
     private val fmt = DateTimeFormatter.ofPattern("yyyy-MM")
@@ -49,7 +51,7 @@ class SmsDashboardViewModelTest {
         every { transactionDao.getByMonth(any()) } returns flowOf(emptyList())
         every { bankAccountRepository.getAllAccounts() } returns flowOf(emptyList())
         every { bankAccountRepository.getAccountsNeedingPrompt() } returns flowOf(emptyList())
-        viewModel = SmsDashboardViewModel(transactionDao, bankAccountRepository, prefsRepository)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
     }
 
     @After
@@ -88,7 +90,7 @@ class SmsDashboardViewModelTest {
     @Test
     fun `uiState hasTransactions is false when no transactions`() = runTest {
         every { transactionDao.getByMonth(any()) } returns flowOf(emptyList())
-        viewModel = SmsDashboardViewModel(transactionDao, bankAccountRepository, prefsRepository)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
         var state = viewModel.uiState.value
         backgroundScope.launch { viewModel.uiState.collect { state = it } }
         advanceUntilIdle()
@@ -99,7 +101,7 @@ class SmsDashboardViewModelTest {
     fun `uiState hasTransactions is true when transactions present`() = runTest {
         val txns = listOf(makeTxn(TransactionCategory.INCOME, TransactionDirection.CREDIT, 50000.0))
         every { transactionDao.getByMonth(any()) } returns flowOf(txns)
-        viewModel = SmsDashboardViewModel(transactionDao, bankAccountRepository, prefsRepository)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
         var state = viewModel.uiState.value
         backgroundScope.launch { viewModel.uiState.collect { state = it } }
         advanceUntilIdle()
@@ -113,7 +115,7 @@ class SmsDashboardViewModelTest {
             makeTxn(TransactionCategory.FOOD_AND_DINING, TransactionDirection.DEBIT,   2000.0),
         )
         every { transactionDao.getByMonth(any()) } returns flowOf(txns)
-        viewModel = SmsDashboardViewModel(transactionDao, bankAccountRepository, prefsRepository)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
         var state = viewModel.uiState.value
         backgroundScope.launch { viewModel.uiState.collect { state = it } }
         advanceUntilIdle()
@@ -127,7 +129,7 @@ class SmsDashboardViewModelTest {
             makeTxn(TransactionCategory.INCOME,         TransactionDirection.CREDIT, 50000.0),
         )
         every { transactionDao.getByMonth(any()) } returns flowOf(txns)
-        viewModel = SmsDashboardViewModel(transactionDao, bankAccountRepository, prefsRepository)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
         var state = viewModel.uiState.value
         backgroundScope.launch { viewModel.uiState.collect { state = it } }
         advanceUntilIdle()
@@ -142,7 +144,7 @@ class SmsDashboardViewModelTest {
             makeTxn(TransactionCategory.TRANSPORT,        TransactionDirection.DEBIT,  1000.0),
         )
         every { transactionDao.getByMonth(any()) } returns flowOf(txns)
-        viewModel = SmsDashboardViewModel(transactionDao, bankAccountRepository, prefsRepository)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
         var state = viewModel.uiState.value
         backgroundScope.launch { viewModel.uiState.collect { state = it } }
         advanceUntilIdle()
@@ -157,7 +159,7 @@ class SmsDashboardViewModelTest {
             makeTxn(TransactionCategory.FOOD_AND_DINING, TransactionDirection.DEBIT,   5000.0),
         )
         every { transactionDao.getByMonth(any()) } returns flowOf(txns)
-        viewModel = SmsDashboardViewModel(transactionDao, bankAccountRepository, prefsRepository)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
         var state = viewModel.uiState.value
         backgroundScope.launch { viewModel.uiState.collect { state = it } }
         advanceUntilIdle()
@@ -172,7 +174,7 @@ class SmsDashboardViewModelTest {
             makeTxn(TransactionCategory.TRANSPORT,        TransactionDirection.DEBIT,  200.0),
         )
         every { transactionDao.getByMonth(any()) } returns flowOf(txns)
-        viewModel = SmsDashboardViewModel(transactionDao, bankAccountRepository, prefsRepository)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
         var state = viewModel.uiState.value
         backgroundScope.launch { viewModel.uiState.collect { state = it } }
         advanceUntilIdle()
@@ -191,7 +193,7 @@ class SmsDashboardViewModelTest {
             makeTxn(TransactionCategory.SHOPPING,         TransactionDirection.DEBIT, 1500.0),
         )
         every { transactionDao.getByMonth(any()) } returns flowOf(txns)
-        viewModel = SmsDashboardViewModel(transactionDao, bankAccountRepository, prefsRepository)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
         var state = viewModel.uiState.value
         backgroundScope.launch { viewModel.uiState.collect { state = it } }
         advanceUntilIdle()
@@ -207,7 +209,7 @@ class SmsDashboardViewModelTest {
             listOf(makeTxn(TransactionCategory.INCOME, TransactionDirection.CREDIT, 50000.0))
         )
         every { transactionDao.getByMonth(prevYm) } returns flowOf(emptyList())
-        viewModel = SmsDashboardViewModel(transactionDao, bankAccountRepository, prefsRepository)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
         var state = viewModel.uiState.value
         backgroundScope.launch { viewModel.uiState.collect { state = it } }
         advanceUntilIdle()
@@ -224,7 +226,7 @@ class SmsDashboardViewModelTest {
         every { transactionDao.getByMonth(prevYm) } returns flowOf(
             listOf(makeTxn(TransactionCategory.INCOME, TransactionDirection.CREDIT, 50000.0))
         )
-        viewModel = SmsDashboardViewModel(transactionDao, bankAccountRepository, prefsRepository)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
         var state = viewModel.uiState.value
         backgroundScope.launch { viewModel.uiState.collect { state = it } }
         advanceUntilIdle()

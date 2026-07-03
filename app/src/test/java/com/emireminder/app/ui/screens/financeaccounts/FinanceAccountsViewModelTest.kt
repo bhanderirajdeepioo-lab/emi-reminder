@@ -6,6 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -57,8 +58,10 @@ class FinanceAccountsViewModelTest {
     fun `empty list produces Empty state`() = runTest {
         every { bankAccountRepository.getAllAccounts() } returns flowOf(emptyList())
         val vm = FinanceAccountsViewModel(bankAccountRepository)
+        var state: FinanceAccountsUiState = vm.uiState.value
+        backgroundScope.launch { vm.uiState.collect { state = it } }
         advanceUntilIdle()
-        assertTrue(vm.uiState.value is FinanceAccountsUiState.Empty)
+        assertTrue(state is FinanceAccountsUiState.Empty)
     }
 
     @Test
@@ -66,8 +69,9 @@ class FinanceAccountsViewModelTest {
         val accounts = listOf(makeAccount("a1"), makeAccount("a2", last4 = "5678"))
         every { bankAccountRepository.getAllAccounts() } returns flowOf(accounts)
         val vm = FinanceAccountsViewModel(bankAccountRepository)
+        var state: FinanceAccountsUiState = vm.uiState.value
+        backgroundScope.launch { vm.uiState.collect { state = it } }
         advanceUntilIdle()
-        val state = vm.uiState.value
         assertTrue(state is FinanceAccountsUiState.Success)
         assertEquals(2, (state as FinanceAccountsUiState.Success).accounts.size)
     }
@@ -76,6 +80,7 @@ class FinanceAccountsViewModelTest {
     fun `renameAccount delegates to repository`() = runTest {
         every { bankAccountRepository.getAllAccounts() } returns flowOf(listOf(makeAccount()))
         val vm = FinanceAccountsViewModel(bankAccountRepository)
+        backgroundScope.launch { vm.uiState.collect {} }
         vm.renameAccount("acc-1", "Salary Account")
         advanceUntilIdle()
         coVerify { bankAccountRepository.renameAccount("acc-1", "Salary Account") }
@@ -89,9 +94,11 @@ class FinanceAccountsViewModelTest {
         )
         every { bankAccountRepository.getAllAccounts() } returns flowOf(accounts)
         val vm = FinanceAccountsViewModel(bankAccountRepository)
+        var state: FinanceAccountsUiState = vm.uiState.value
+        backgroundScope.launch { vm.uiState.collect { state = it } }
         advanceUntilIdle()
-        val state = vm.uiState.value as FinanceAccountsUiState.Success
+        val success = state as FinanceAccountsUiState.Success
         // BankAccountDao.getAll() orders by bank_name ASC — first item is HDFC Bank
-        assertEquals("HDFC Bank", state.accounts.first().bankName)
+        assertEquals("HDFC Bank", success.accounts.first().bankName)
     }
 }

@@ -41,14 +41,25 @@ fun AddReminderSheet(
     reminderId: Int? = null,
     prefillEmiAmount: Double? = null,
     prefillLoanName: String? = null,
+    autoDetectedEmiId: String? = null,
+    prefillLenderName: String? = null,
+    prefillRecurringDay: Int? = null,
     viewModel: AddReminderViewModel = hiltViewModel(),
 ) {
     var showDayPicker by remember { mutableStateOf(false) }
     var showRepeatDropdown by remember { mutableStateOf(false) }
 
-    LaunchedEffect(reminderId, prefillEmiAmount, prefillLoanName) {
+    LaunchedEffect(reminderId, prefillEmiAmount, prefillLoanName, autoDetectedEmiId) {
         if (reminderId != null) {
             viewModel.loadReminder(reminderId)
+        } else if (autoDetectedEmiId != null) {
+            viewModel.resetForm()
+            viewModel.prefillFromAutoDetectedEmi(
+                emiId = autoDetectedEmiId,
+                lenderName = prefillLenderName ?: "",
+                emiAmount = prefillEmiAmount ?: 0.0,
+                recurringDay = prefillRecurringDay ?: 1,
+            )
         } else {
             viewModel.resetForm()
             if (prefillEmiAmount != null || prefillLoanName != null) {
