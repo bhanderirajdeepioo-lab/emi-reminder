@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -135,6 +136,7 @@ fun CalculatorResultsScreen(
                         DonutPieChart(
                             principal = principal,
                             interest = totalInterest,
+                            centreText = fmtAmt(totalPayment),
                             modifier = Modifier.size(130.dp),
                         )
                         Spacer(Modifier.width(20.dp))
@@ -150,22 +152,24 @@ fun CalculatorResultsScreen(
                     }
                 }
 
-                // Breakdown table
+                // 3-column summary card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 ) {
-                    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("Payment Breakdown", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                        ResultRow("Loan Amount", fmtAmt(principal))
-                        ResultRow("Annual Rate", "%.2f%%".format(rate))
-                        ResultRow("Loan Tenure", "$tenureMonths months (${tenureMonths / 12}y ${tenureMonths % 12}m)")
-                        Divider()
-                        ResultRow("Monthly EMI", fmtAmt(emi), bold = true, color = Indigo600)
-                        ResultRow("Total Interest", fmtAmt(totalInterest), color = WarnOrange)
-                        ResultRow("Total Payment", fmtAmt(totalPayment), bold = true)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        SummaryColumn("Total Payment", fmtAmt(totalPayment), Modifier.weight(1f), color = Indigo600)
+                        Box(modifier = Modifier.width(1.dp).height(48.dp).background(MaterialTheme.colorScheme.outlineVariant))
+                        SummaryColumn("Total Interest", fmtAmt(totalInterest), Modifier.weight(1f), color = WarnOrange)
+                        Box(modifier = Modifier.width(1.dp).height(48.dp).background(MaterialTheme.colorScheme.outlineVariant))
+                        SummaryColumn("Principal", fmtAmt(principal), Modifier.weight(1f))
                     }
                 }
 
@@ -223,7 +227,7 @@ private fun loanTypeToDisplayName(loanType: String) = when (loanType) {
 }
 
 @Composable
-private fun DonutPieChart(principal: Double, interest: Double, modifier: Modifier) {
+private fun DonutPieChart(principal: Double, interest: Double, centreText: String, modifier: Modifier) {
     val total = principal + interest
     val principalSweep = if (total > 0) (principal / total * 300f).toFloat() else 150f
     val interestSweep = 300f - principalSweep
@@ -239,8 +243,8 @@ private fun DonutPieChart(principal: Double, interest: Double, modifier: Modifie
             drawArc(Color(0xFFD97706), -210f + principalSweep, interestSweep, false, topLeft, arcSize, style = stroke)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("%.0f%%".format(if (total > 0) interest / total * 100 else 0.0), fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = WarnOrange)
-            Text("interest", fontSize = 10.sp, color = Color(0xFF64748B))
+            Text(centreText, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Indigo600, textAlign = TextAlign.Center)
+            Text("Total", fontSize = 10.sp, color = Color(0xFF64748B))
         }
     }
 }
@@ -259,10 +263,14 @@ private fun LegendRow(label: String, value: String, color: Color, ratio: Double)
 }
 
 @Composable
-private fun ResultRow(label: String, value: String, bold: Boolean = false, color: Color = MaterialTheme.colorScheme.onSurface) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, fontSize = 13.sp, fontWeight = if (bold) FontWeight.ExtraBold else FontWeight.Medium, color = color)
+private fun SummaryColumn(label: String, value: String, modifier: Modifier, color: Color = MaterialTheme.colorScheme.onSurface) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(4.dp))
+        Text(value, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = color, textAlign = TextAlign.Center)
     }
 }
 
