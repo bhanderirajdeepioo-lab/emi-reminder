@@ -42,6 +42,9 @@ object NavRoutes {
     // Kept as a separate route so the standard "emi_calculator" bottom-tab route is unchanged.
     const val EMI_CALCULATOR_PREFILL  = "emi_calculator_prefill/{label}"
 
+    // --- SMS Finance Dashboard (HEL-569) ---
+    const val SMS_MONTHLY_REPORT      = "sms_monthly_report/{yearMonth}"
+
     // --- New Finance Tools (HEL-538) ---
     const val PPF_CALCULATOR          = "ppf_calculator"
     const val GST_CALCULATOR          = "gst_calculator"
@@ -51,6 +54,7 @@ object NavRoutes {
     const val CIBIL_SCORE             = "cibil_score"
 
     // --- Helpers ---
+    fun smsMonthlyReport(yearMonth: String) = "sms_monthly_report/$yearMonth"
     fun loanDetail(loanId: Int)                = "loan_detail/$loanId"
     fun prepaymentCalculatorForLoan(loanId: Int) = "prepayment_calculator_loan/$loanId"
     fun calculatorResults(p: Double, r: Double, t: Int, loanType: String = "HOME") = "calculator_results/$p/$r/$t/$loanType"

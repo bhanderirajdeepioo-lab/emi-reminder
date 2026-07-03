@@ -36,6 +36,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.ui.screens.calculator.*
 import com.emireminder.app.ui.screens.finance.*
 import com.emireminder.app.ui.screens.home.HomeScreen
+import com.emireminder.app.ui.screens.smsdashboard.MonthlyReportScreen
+import com.emireminder.app.ui.screens.smsdashboard.SmsDashboardScreen
 import com.emireminder.app.ui.screens.loan.*
 import com.emireminder.app.ui.screens.onboarding.CountrySelectScreen
 import com.emireminder.app.ui.screens.onboarding.LanguageSelectScreen
@@ -507,10 +509,29 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 )
             }
 
-            // 20 — Finance Monthly EMI (bottom tab)
+            // 20 — Finance Dashboard (bottom tab, SMS Finance Intelligence)
             composable(NavRoutes.FINANCE) {
+                SmsDashboardScreen(
+                    onNavigateToFinanceToolsHub = { navController.navigate(NavRoutes.FINANCE_TOOLS_HUB) },
+                    onNavigateToMonthlyReport   = { ym -> navController.navigate(NavRoutes.smsMonthlyReport(ym)) { launchSingleTop = true } },
+                )
+            }
+
+            // 20b — SMS Monthly Report (drill-down from Finance Dashboard)
+            composable(
+                NavRoutes.SMS_MONTHLY_REPORT,
+                arguments = listOf(navArgument("yearMonth") { type = NavType.StringType }),
+            ) { back ->
+                MonthlyReportScreen(
+                    yearMonth = back.arguments?.getString("yearMonth").orEmpty(),
+                    onBack = { navController.popBackStack() },
+                )
+            }
+
+            // 20c — Finance Monthly EMI (legacy EMI tracker; accessible from Finance Tools Hub)
+            composable("finance_monthly_emi") {
                 FinanceMonthlyEMIScreen(
-                    onNavigateToLoanDetail     = { id -> navController.navigate(NavRoutes.loanDetail(id)) },
+                    onNavigateToLoanDetail      = { id -> navController.navigate(NavRoutes.loanDetail(id)) },
                     onNavigateToFinanceToolsHub = { navController.navigate(NavRoutes.FINANCE_TOOLS_HUB) },
                 )
             }
