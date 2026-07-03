@@ -1,6 +1,7 @@
 package com.emireminder.app.data.db.entity
 
 import androidx.compose.runtime.Immutable
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
@@ -25,6 +26,7 @@ data class Loan(
     val accountNumber: String = "",
     val interestType: String = "REDUCING", // "REDUCING" or "FLAT"
     val emiDueDay: Int = 1,               // day of month (1–28) when EMI is due
+    @ColumnInfo(defaultValue = "")
     val upiVpa: String = "",              // UPI Virtual Payment Address for Pay Now in Loan Detail
 ) {
     @get:Ignore
