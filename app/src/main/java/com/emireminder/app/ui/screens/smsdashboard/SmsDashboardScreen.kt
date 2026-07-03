@@ -69,6 +69,7 @@ fun SmsDashboardScreen(
     onNavigateToFinanceToolsHub: () -> Unit,
     onNavigateToMonthlyReport: (String) -> Unit,
     onNavigateToFinanceAccounts: () -> Unit = {},
+    onNavigateToScan: () -> Unit = {},
     viewModel: SmsDashboardViewModel = hiltViewModel(),
 ) {
     val smsPermissions = rememberMultiplePermissionsState(
@@ -87,6 +88,13 @@ fun SmsDashboardScreen(
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Auto-redirect to historical scan on first visit (permissions already granted at this point)
+    LaunchedEffect(uiState.smsHistoricalScanDone, uiState.isLoading) {
+        if (!uiState.isLoading && !uiState.smsHistoricalScanDone) {
+            onNavigateToScan()
+        }
+    }
 
     if (uiState.editingTransaction != null) {
         TransactionEditSheet(
@@ -155,6 +163,7 @@ fun SmsDashboardScreen(
                     EmptyStateContent(
                         month = if (uiState.selectedYearMonth.isNotEmpty())
                             displayMonth(uiState.selectedYearMonth) else "",
+                        onScanCta = onNavigateToScan,
                     )
                 }
 
@@ -574,7 +583,7 @@ private fun LoadingContent() {
 }
 
 @Composable
-private fun EmptyStateContent(month: String) {
+private fun EmptyStateContent(month: String, onScanCta: () -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -594,12 +603,21 @@ private fun EmptyStateContent(month: String) {
         Text("No transactions found", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Slate800, textAlign = TextAlign.Center)
         Spacer(Modifier.height(8.dp))
         Text(
-            "No bank SMS detected${if (month.isNotEmpty()) " for $month" else ""}. Make sure SMS monitoring is enabled.",
+            "No bank SMS detected${if (month.isNotEmpty()) " for $month" else ""}. Scan your messages to get started.",
             fontSize = 14.sp,
             color = Color(0xFF64748B),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
         )
+        Spacer(Modifier.height(24.dp))
+        Button(
+            onClick = onScanCta,
+            colors = ButtonDefaults.buttonColors(containerColor = Indigo600),
+        ) {
+            Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Text("Scan my bank SMS")
+        }
     }
 }
 

@@ -536,6 +536,7 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                     onNavigateToFinanceToolsHub  = { navController.navigate(NavRoutes.FINANCE_TOOLS_HUB) },
                     onNavigateToMonthlyReport    = { ym -> navController.navigate(NavRoutes.smsMonthlyReport(ym)) { launchSingleTop = true } },
                     onNavigateToFinanceAccounts  = { navController.navigate(NavRoutes.FINANCE_ACCOUNTS) { launchSingleTop = true } },
+                    onNavigateToScan             = { navController.navigate(NavRoutes.SMS_HISTORICAL_SCAN) { launchSingleTop = true } },
                 )
             }
 

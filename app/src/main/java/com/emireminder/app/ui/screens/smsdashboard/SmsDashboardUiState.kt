@@ -43,6 +43,7 @@ data class SmsDashboardUiState(
     val accountSummaries: List<AccountSummary> = emptyList(),
     val currencySymbol: String = "₹",
     val hasTransactions: Boolean = false,
+    val smsHistoricalScanDone: Boolean = false,
     val error: String? = null,
     /** Non-null when the edit bottom sheet is open. */
     val editingTransaction: ParsedTransaction? = null,

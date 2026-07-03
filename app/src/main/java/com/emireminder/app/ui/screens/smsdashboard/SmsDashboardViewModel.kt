@@ -64,7 +64,7 @@ class SmsDashboardViewModel @Inject constructor(
         @Suppress("UNCHECKED_CAST")
         val pending = args[4] as List<BankAccount>
         Triple(ym, current to previous, accounts to pending)
-    }.combine(prefsRepository.userPreferences.map { it.currencySymbol }) { (ym, txPair, acctPair), currency ->
+    }.combine(prefsRepository.userPreferences) { (ym, txPair, acctPair), prefs ->
         val (current, previous) = txPair
         val (accounts, pending) = acctPair
         SmsDashboardUiState(
@@ -75,8 +75,9 @@ class SmsDashboardViewModel @Inject constructor(
             categorySummaries = buildCategories(current),
             accountsNeedingLabel = pending,
             accountSummaries = buildAccountSummaries(current, accounts),
-            currencySymbol = currency,
+            currencySymbol = prefs.currencySymbol,
             hasTransactions = current.isNotEmpty(),
+            smsHistoricalScanDone = prefs.smsHistoricalScanDone,
         )
     }
 
