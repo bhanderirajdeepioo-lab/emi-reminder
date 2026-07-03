@@ -1,7 +1,10 @@
 package com.emireminder.app.sms
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.core.content.ContextCompat
 import com.emireminder.app.data.repository.SmsFinanceRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +27,7 @@ class HistoricalSmsScanner @Inject constructor(
 ) {
     /**
      * Queries the SMS inbox for the last 6 months, parses every message, and inserts
-     * import-eligible transactions (confidence > 50) into Room.
+     * import-eligible transactions (confidence >= 50) into Room.
      *
      * The unique `_id` from the ContentProvider is used as `smsId` so re-scans
      * skip already-imported messages via the UNIQUE index on parsed_transactions.sms_id.
@@ -32,6 +35,11 @@ class HistoricalSmsScanner @Inject constructor(
      * Emits [ScanProgress] every [PROGRESS_EMIT_INTERVAL] messages and once at the end.
      */
     fun scan(): Flow<ScanProgress> = flow {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS)
+            != PackageManager.PERMISSION_GRANTED) {
+            return@flow
+        }
+
         val cutoffMs = System.currentTimeMillis() - SIX_MONTHS_MS
 
         val cursor = context.contentResolver.query(

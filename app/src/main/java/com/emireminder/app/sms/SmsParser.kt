@@ -9,8 +9,8 @@ package com.emireminder.app.sms
  *   < 0.4   → skip
  *
  * Confidence tiers (parseTransaction() integer 0–100 scale per PRD §5.4):
- *   > 50    → import-eligible
- *   ≤ 50    → analytics-only, silently skip import
+ *   >= 50   → import-eligible
+ *   < 50    → analytics-only, silently skip import
  *   null    → not created at all (OTP, promo, unknown sender)
  */
 object SmsParser {
@@ -122,21 +122,51 @@ object SmsParser {
         // Federal Bank
         "FEDBK", "FEDBNK",
         // IDFC First Bank
-        "IDFCFB",
+        "IDFCFB", "IDFCFST",
         // RBL Bank
         "RBLBNK",
         // AU Small Finance Bank
         "AUBANK",
+        // Bajaj Finserv / Bajaj Finance
+        "BAJAJF", "BAJFINSERV", "BJFINSERV", "BAJAJFIN",
+        // Muthoot Finance
+        "MUTHOOT", "MUTHOOTF", "MUTHOOTFIN",
+        // Manappuram Finance
+        "MANAPL", "MANAPPURAM", "MANAPM",
+        // HDB Financial Services
+        "HDBFSL", "HDBFIN",
+        // Tata Capital
+        "TATACAP", "TATACAPF", "TATAFIN",
+        // L&T Finance
+        "LNTFIN", "LTFINANCE", "LNTFSL",
+        // Slice
+        "SLICEIT", "SLICEPAY",
+        // BharatPe
+        "BHARATPE", "BHRTPE",
+        // Navi Finance
+        "NAVIFIN", "NAVIFSV",
+        // KreditBee
+        "KREDITB", "KREDITBEE",
+        // Piramal Finance
+        "PIRAMALF", "PIRAMALC",
+        // DMI Finance
+        "DMIFIN",
+        // Aditya Birla Finance
+        "ABFSSL", "ABFINANCE",
+        // Shriram Finance
+        "SHRIRAM", "SHRIRAMF",
+        // Fullerton India
+        "FULLERTONIN", "FULLRTN",
     )
 
     // Matches the bank portion of a DLT sender ID like "AX-HDFCBK" or bare "HDFCBK"
     private val SENDER_BANK_KEYWORD_RE = Regex(
-        """(?i)(?:HDFC|SBI|ICICI|AXIS|KOTAK|PNB|BOI|CANARA|UCO|IDBI|YES|INDUSLND|BARODA|CENTB|PAYTMB|FEDERAL|IDFCFB|RBL|AUBANK|INDUS|INDBK)"""
+        """(?i)(?:HDFC|SBI|ICICI|AXIS|KOTAK|PNB|BOI|CANARA|UCO|IDBI|YES|INDUSLND|BARODA|CENTB|PAYTMB|FEDERAL|IDFCFB|RBL|AUBANK|INDUS|INDBK|BAJAJ|MUTHOOT|MANAPL|HDBFSL|TATACAP|LNTFIN|SLICE|BHARATPE|NAVIFIN|KREDITB|PIRAMALF|DMIFIN|ABFSSL|SHRIRAM|FULLRTN)"""
     )
 
-    // Bank name mentions in SMS body (fallback when sender ID isn't whitelisted)
+    // Bank/NBFC name mentions in SMS body (fallback when sender ID isn't whitelisted)
     private val BODY_BANK_RE = Regex(
-        """(?i)(?:HDFC\s*Bank|State\s*Bank\s*of\s*India|ICICI\s*Bank|Axis\s*Bank|Kotak\s*(?:Mahindra\s*)?Bank|Punjab\s*National\s*Bank|Bank\s*of\s*India|Canara\s*Bank|UCO\s*Bank|IDBI\s*Bank|Yes\s*Bank|IndusInd\s*Bank|Bank\s*of\s*Baroda|IDFC\s*First\s*Bank|Federal\s*Bank|RBL\s*Bank|Central\s*Bank\s*of\s*India|Paytm\s*(?:Payments\s*)?Bank)"""
+        """(?i)(?:HDFC\s*Bank|State\s*Bank\s*of\s*India|ICICI\s*Bank|Axis\s*Bank|Kotak\s*(?:Mahindra\s*)?Bank|Punjab\s*National\s*Bank|Bank\s*of\s*India|Canara\s*Bank|UCO\s*Bank|IDBI\s*Bank|Yes\s*Bank|IndusInd\s*Bank|Bank\s*of\s*Baroda|IDFC\s*First\s*Bank|Federal\s*Bank|RBL\s*Bank|Central\s*Bank\s*of\s*India|Paytm\s*(?:Payments\s*)?Bank|Bajaj\s*Finserv|Bajaj\s*Finance|Muthoot\s*Finance|Manappuram\s*Finance|HDB\s*Financial|Tata\s*Capital|L\s*&\s*T\s*Finance|Slice|BharatPe|Navi|KreditBee|Piramal\s*(?:Capital|Finance)|DMI\s*Finance|Aditya\s*Birla\s*(?:Finance|Capital)|Shriram\s*Finance|Fullerton\s*India)"""
     )
 
     // ── OTP / promo filters ───────────────────────────────────────────────────
@@ -233,10 +263,13 @@ object SmsParser {
         // 2. Promotional with no financial content — ignore
         if (PROMO_RE.containsMatchIn(body) && !FINANCIAL_KEYWORD_RE.containsMatchIn(body)) return null
 
-        // 3. Sender whitelist — unknown senders ignored completely (AC #4)
+        // 3. Sender whitelist — unknown senders pass only if body signals EMI + amount (NBFC fallback)
         val knownById   = isKnownSenderId(senderAddress)
         val knownByBody = BODY_BANK_RE.containsMatchIn(body)
-        if (!knownById && !knownByBody) return null
+        if (!knownById && !knownByBody) {
+            val hasEmiSignal = EMI_RE.containsMatchIn(body) && AMOUNT_RE_V2.containsMatchIn(body)
+            if (!hasEmiSignal) return null
+        }
 
         // 4. Extract fields
         val amount       = extractAmountV2(body)

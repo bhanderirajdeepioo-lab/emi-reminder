@@ -4,8 +4,8 @@ package com.emireminder.app.sms
  * Structured output of [SmsParser.parseTransaction].
  *
  * confidenceScore — 0–100 scale:
- *   > 50  → import-eligible
- *   ≤ 50  → analytics-only (surface via logging, never create user-visible reminders)
+ *   >= 50 → import-eligible
+ *   < 50  → analytics-only (surface via logging, never create user-visible reminders)
  */
 data class ParsedTransaction(
     val category: TransactionCategory,
@@ -18,5 +18,5 @@ data class ParsedTransaction(
     val confidenceScore: Int,
     val rawBody: String,
 ) {
-    val isImportEligible: Boolean get() = confidenceScore > 50
+    val isImportEligible: Boolean get() = confidenceScore >= 50
 }
