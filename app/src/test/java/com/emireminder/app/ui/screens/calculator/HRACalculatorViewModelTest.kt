@@ -20,6 +20,7 @@ class HRACalculatorViewModelTest {
         val state = vm.uiState.value
         assertEquals(13_000.0 * 12, state.hraExemptionAnnual, 1.0)
         assertEquals(7_000.0 * 12, state.taxableHraAnnual, 1.0)
+        assertEquals(3, state.limitingComponent)
     }
 
     @Test
@@ -49,6 +50,7 @@ class HRACalculatorViewModelTest {
         val state = vm.uiState.value
         assertEquals(0.0, state.hraExemptionAnnual, 0.01)
         assertEquals(20_000.0 * 12, state.taxableHraAnnual, 1.0)
+        assertEquals(3, state.limitingComponent)
     }
 
     @Test
@@ -63,6 +65,22 @@ class HRACalculatorViewModelTest {
 
         val state = vm.uiState.value
         assertEquals(5_000.0 * 12, state.hraExemptionAnnual, 1.0)
+        assertEquals(1, state.limitingComponent)
+    }
+
+    @Test
+    fun `component 2 is limiting when percentage of basic is smallest`() {
+        val vm = viewModel()
+        // Basic=10000, HRA=30000, Rent=50000, Metro
+        // C1=30000, C2=5000, C3=50000-1000=49000 → min=5000 (C2)
+        vm.setBasicSalary("10000")
+        vm.setHraReceived("30000")
+        vm.setRentPaid("50000")
+        vm.setCityType(CityType.METRO)
+
+        val state = vm.uiState.value
+        assertEquals(5_000.0 * 12, state.hraExemptionAnnual, 1.0)
+        assertEquals(2, state.limitingComponent)
     }
 
     @Test
@@ -74,6 +92,53 @@ class HRACalculatorViewModelTest {
         vm.setCityType(CityType.METRO)
 
         val state = vm.uiState.value
-        assertEquals(state.hraExemptionAnnual, state.hraExemptionAnnual / 12 * 12, 0.01)
+        assertEquals(state.hraExemptionMonthly * 12, state.hraExemptionAnnual, 0.01)
+    }
+
+    @Test
+    fun `da is included in basic plus da for rule calculations`() {
+        val vm = viewModel()
+        // Basic=40000, DA=10000 → Basic+DA=50000, Metro
+        // HRA=20000, Rent=18000
+        // C1=20000, C2=50000*0.5=25000, C3=18000-5000=13000 → min=13000
+        vm.setBasicSalary("40000")
+        vm.setDearness("10000")
+        vm.setHraReceived("20000")
+        vm.setRentPaid("18000")
+        vm.setCityType(CityType.METRO)
+
+        val state = vm.uiState.value
+        assertEquals(13_000.0 * 12, state.hraExemptionAnnual, 1.0)
+        assertEquals(3, state.limitingComponent)
+    }
+
+    @Test
+    fun `da default zero matches basic-only calculation`() {
+        val vmWithDa = viewModel().also {
+            it.setBasicSalary("50000")
+            it.setDearness("0")
+            it.setHraReceived("20000")
+            it.setRentPaid("25000")
+            it.setCityType(CityType.METRO)
+        }
+        val vmWithout = viewModel().also {
+            it.setBasicSalary("50000")
+            it.setHraReceived("20000")
+            it.setRentPaid("25000")
+            it.setCityType(CityType.METRO)
+        }
+        assertEquals(vmWithout.uiState.value.hraExemptionAnnual, vmWithDa.uiState.value.hraExemptionAnnual, 0.01)
+    }
+
+    @Test
+    fun `monthly saving is one twelfth of annual tax saved`() {
+        val vm = viewModel()
+        vm.setBasicSalary("50000")
+        vm.setHraReceived("20000")
+        vm.setRentPaid("25000")
+        vm.setCityType(CityType.METRO)
+
+        val state = vm.uiState.value
+        assertEquals(state.taxSavedAnnual / 12, state.monthlySaving, 0.01)
     }
 }
