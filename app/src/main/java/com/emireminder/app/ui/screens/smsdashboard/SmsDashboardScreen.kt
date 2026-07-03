@@ -63,7 +63,7 @@ private fun displayMonth(yearMonth: String): String = runCatching {
 
 // ─── Entry point ────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SmsDashboardScreen(
     onNavigateToFinanceToolsHub: () -> Unit,
@@ -87,6 +87,26 @@ fun SmsDashboardScreen(
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    if (uiState.editingTransaction != null) {
+        TransactionEditSheet(
+            transaction = uiState.editingTransaction!!,
+            isSaving = uiState.editSaveInProgress,
+            saveError = uiState.editSaveError,
+            onSave = { amount, category, subCat, merchant, notes, lender ->
+                viewModel.saveTransaction(
+                    id = uiState.editingTransaction!!.id,
+                    amount = amount,
+                    category = category,
+                    subCategory = subCat,
+                    merchantName = merchant,
+                    notes = notes,
+                    lenderName = lender,
+                )
+            },
+            onDismiss = viewModel::dismissEditSheet,
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -178,7 +198,11 @@ fun SmsDashboardScreen(
                         items = uiState.categorySummaries,
                         key = { it.category.name },
                     ) { catSummary ->
-                        CategoryRow(summary = catSummary, currencySymbol = uiState.currencySymbol)
+                        CategoryRow(
+                            summary = catSummary,
+                            currencySymbol = uiState.currencySymbol,
+                            onTransactionClick = viewModel::openEditSheet,
+                        )
                         Spacer(Modifier.height(8.dp))
                     }
 
@@ -384,7 +408,11 @@ private fun SummaryMetric(
 // ─── Category row ──────────────────────────────────────────────────────────────
 
 @Composable
-private fun CategoryRow(summary: CategorySummary, currencySymbol: String) {
+private fun CategoryRow(
+    summary: CategorySummary,
+    currencySymbol: String,
+    onTransactionClick: (ParsedTransaction) -> Unit = {},
+) {
     var expanded by remember { mutableStateOf(false) }
     val meta = summary.category.meta()
 
@@ -447,7 +475,11 @@ private fun CategoryRow(summary: CategorySummary, currencySymbol: String) {
                 ) {
                     HorizontalDivider(color = Color(0xFFF1F5F9))
                     summary.transactions.forEach { txn ->
-                        TransactionRow(transaction = txn, currencySymbol = currencySymbol)
+                        TransactionRow(
+                            transaction = txn,
+                            currencySymbol = currencySymbol,
+                            onClick = onTransactionClick,
+                        )
                         HorizontalDivider(color = Color(0xFFF1F5F9))
                     }
                 }
@@ -457,10 +489,15 @@ private fun CategoryRow(summary: CategorySummary, currencySymbol: String) {
 }
 
 @Composable
-private fun TransactionRow(transaction: ParsedTransaction, currencySymbol: String) {
+private fun TransactionRow(
+    transaction: ParsedTransaction,
+    currencySymbol: String,
+    onClick: (ParsedTransaction) -> Unit = {},
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { onClick(transaction) }
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -476,16 +513,28 @@ private fun TransactionRow(transaction: ParsedTransaction, currencySymbol: Strin
         Spacer(Modifier.width(10.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            val primaryLabel = transaction.merchantName?.takeIf { it.isNotBlank() }
-                ?: transaction.bankName
-            Text(
-                primaryLabel,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-                color = Slate800,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val primaryLabel = transaction.merchantName?.takeIf { it.isNotBlank() }
+                    ?: transaction.bankName
+                Text(
+                    primaryLabel,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Slate800,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                if (transaction.userVerified) {
+                    Spacer(Modifier.width(4.dp))
+                    Icon(
+                        Icons.Default.CheckCircle,
+                        contentDescription = "Manually verified",
+                        tint = SafeGreen,
+                        modifier = Modifier.size(14.dp),
+                    )
+                }
+            }
             val accountLabel = transaction.accountLast4
                 .takeIf { it.isNotBlank() }
                 ?.let { "${transaction.bankName} ·· $it" }
@@ -496,6 +545,8 @@ private fun TransactionRow(transaction: ParsedTransaction, currencySymbol: Strin
                 color = Color(0xFF94A3B8),
             )
         }
+
+        Spacer(Modifier.width(8.dp))
 
         val prefix = if (transaction.direction == TransactionDirection.CREDIT) "+" else "-"
         val amtColor = if (transaction.direction == TransactionDirection.CREDIT) SafeGreen else UrgentRed

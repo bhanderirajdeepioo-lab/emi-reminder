@@ -2,6 +2,7 @@ package com.emireminder.app.ui.screens.smsdashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.emireminder.app.data.db.dao.AutoDetectedEmiDao
 import com.emireminder.app.data.db.dao.ParsedTransactionDao
 import com.emireminder.app.data.db.entity.BankAccount
 import com.emireminder.app.data.db.entity.ParsedTransaction
@@ -21,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SmsDashboardViewModel @Inject constructor(
     private val transactionDao: ParsedTransactionDao,
+    private val autoDetectedEmiDao: AutoDetectedEmiDao,
     private val bankAccountRepository: BankAccountRepository,
     private val prefsRepository: UserPreferencesRepository,
 ) : ViewModel() {
@@ -41,7 +43,11 @@ class SmsDashboardViewModel @Inject constructor(
     private val allAccounts: Flow<List<BankAccount>> = bankAccountRepository.getAllAccounts()
     private val pendingLabelAccounts: Flow<List<BankAccount>> = bankAccountRepository.getAccountsNeedingPrompt()
 
-    val uiState: StateFlow<SmsDashboardUiState> = combine(
+    private val _editingTransaction = MutableStateFlow<ParsedTransaction?>(null)
+    private val _editSaveInProgress = MutableStateFlow(false)
+    private val _editSaveError = MutableStateFlow<String?>(null)
+
+    private val _baseState: Flow<SmsDashboardUiState> = combine(
         _yearMonth,
         currentTxns,
         previousTxns,
@@ -71,6 +77,19 @@ class SmsDashboardViewModel @Inject constructor(
             accountSummaries = buildAccountSummaries(current, accounts),
             currencySymbol = currency,
             hasTransactions = current.isNotEmpty(),
+        )
+    }
+
+    val uiState: StateFlow<SmsDashboardUiState> = combine(
+        _baseState,
+        _editingTransaction,
+        _editSaveInProgress,
+        _editSaveError,
+    ) { base, editing, saving, error ->
+        base.copy(
+            editingTransaction = editing,
+            editSaveInProgress = saving,
+            editSaveError = error,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -107,6 +126,64 @@ class SmsDashboardViewModel @Inject constructor(
     fun skipLabel(account: BankAccount) {
         viewModelScope.launch {
             bankAccountRepository.skipLabel(account.id)
+        }
+    }
+
+    // ── Transaction edit sheet ─────────────────────────────────────────────────
+
+    fun openEditSheet(transaction: ParsedTransaction) {
+        _editSaveError.value = null
+        _editingTransaction.value = transaction
+    }
+
+    fun dismissEditSheet() {
+        _editingTransaction.value = null
+        _editSaveError.value = null
+    }
+
+    /**
+     * Persists user edits to the selected transaction.
+     * Sets [ParsedTransaction.userVerified] = true.
+     * If [isEmi] and [lenderName] changed, also updates the linked [AutoDetectedEmi].
+     */
+    fun saveTransaction(
+        id: String,
+        amount: Double,
+        category: TransactionCategory,
+        subCategory: String?,
+        merchantName: String?,
+        notes: String?,
+        lenderName: String?,
+    ) {
+        val original = _editingTransaction.value ?: return
+        _editSaveInProgress.value = true
+        _editSaveError.value = null
+
+        viewModelScope.launch {
+            try {
+                val updated = original.copy(
+                    amount = amount,
+                    category = category,
+                    subCategory = subCategory?.takeIf { it.isNotBlank() },
+                    merchantName = merchantName?.takeIf { it.isNotBlank() },
+                    notes = notes?.takeIf { it.isNotBlank() },
+                    userVerified = true,
+                )
+                transactionDao.update(updated)
+
+                if (original.isEmi && !lenderName.isNullOrBlank()) {
+                    val emi = autoDetectedEmiDao.getByTransactionId(id)
+                    if (emi != null && emi.lenderName != lenderName) {
+                        autoDetectedEmiDao.update(emi.copy(lenderName = lenderName))
+                    }
+                }
+
+                _editingTransaction.value = null
+            } catch (e: Exception) {
+                _editSaveError.value = e.message ?: "Save failed"
+            } finally {
+                _editSaveInProgress.value = false
+            }
         }
     }
 
