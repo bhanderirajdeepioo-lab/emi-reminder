@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -130,16 +131,20 @@ fun InflationCalculatorScreen(
                     currentAmountText = state.currentAmountText,
                     inflationRateText = state.inflationRateText,
                     yearsText = state.yearsText,
+                    selectedScenario = state.selectedScenario,
                     onCurrentAmountChange = viewModel::setCurrentAmountText,
                     onInflationRateChange = viewModel::setInflationRateText,
                     onYearsChange = viewModel::setYearsText,
+                    onScenarioSelect = viewModel::setInflationRateFromScenario,
                 )
             } else {
                 ModeBInputForm(
                     nominalRateText = state.nominalRateText,
                     inflationRateText = state.inflationRateText,
+                    selectedScenario = state.selectedScenario,
                     onNominalRateChange = viewModel::setNominalRateText,
                     onInflationRateChange = viewModel::setInflationRateText,
+                    onScenarioSelect = viewModel::setInflationRateFromScenario,
                 )
             }
 
@@ -225,9 +230,11 @@ private fun ModeAInputForm(
     currentAmountText: String,
     inflationRateText: String,
     yearsText: String,
+    selectedScenario: InflationScenario?,
     onCurrentAmountChange: (String) -> Unit,
     onInflationRateChange: (String) -> Unit,
     onYearsChange: (String) -> Unit,
+    onScenarioSelect: (InflationScenario) -> Unit,
 ) {
     InflationInputField(
         label = "Current Amount (₹)",
@@ -237,35 +244,34 @@ private fun ModeAInputForm(
         prefix = "₹",
         keyboardType = KeyboardType.Number,
     )
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        InflationInputField(
-            modifier = Modifier.weight(1f),
-            label = "Inflation Rate (% p.a.)",
-            value = inflationRateText,
-            onValueChange = onInflationRateChange,
-            placeholder = "6.00",
-            suffix = "%",
-            keyboardType = KeyboardType.Decimal,
-            helperText = "India's avg. CPI",
-        )
-        InflationInputField(
-            modifier = Modifier.weight(1f),
-            label = "Time Period (years)",
-            value = yearsText,
-            onValueChange = onYearsChange,
-            placeholder = "1–50",
-            suffix = "Yrs",
-            keyboardType = KeyboardType.Number,
-        )
-    }
+    InflationInputField(
+        label = "Inflation Rate (% p.a.)",
+        value = inflationRateText,
+        onValueChange = onInflationRateChange,
+        placeholder = "6.00",
+        suffix = "%",
+        keyboardType = KeyboardType.Decimal,
+        helperText = "India's avg. CPI",
+    )
+    ScenarioChipRow(selectedScenario = selectedScenario, onScenarioSelect = onScenarioSelect)
+    InflationInputField(
+        label = "Time Period (years)",
+        value = yearsText,
+        onValueChange = onYearsChange,
+        placeholder = "1–50",
+        suffix = "Yrs",
+        keyboardType = KeyboardType.Number,
+    )
 }
 
 @Composable
 private fun ModeBInputForm(
     nominalRateText: String,
     inflationRateText: String,
+    selectedScenario: InflationScenario?,
     onNominalRateChange: (String) -> Unit,
     onInflationRateChange: (String) -> Unit,
+    onScenarioSelect: (InflationScenario) -> Unit,
 ) {
     InflationInputField(
         label = "Nominal Return Rate (% p.a.)",
@@ -285,6 +291,45 @@ private fun ModeBInputForm(
         keyboardType = KeyboardType.Decimal,
         helperText = "India's avg. CPI",
     )
+    ScenarioChipRow(selectedScenario = selectedScenario, onScenarioSelect = onScenarioSelect)
+}
+
+@Composable
+private fun ScenarioChipRow(
+    selectedScenario: InflationScenario?,
+    onScenarioSelect: (InflationScenario) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        InflationScenario.entries.forEach { scenario ->
+            val isSelected = selectedScenario == scenario
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(if (isSelected) InfOrange else Color.White)
+                    .border(
+                        width = 1.dp,
+                        color = if (isSelected) InfOrange else Color(0xFFE2E8F0),
+                        shape = RoundedCornerShape(20.dp),
+                    )
+                    .clickable { onScenarioSelect(scenario) }
+                    .padding(vertical = 6.dp, horizontal = 4.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = scenario.label,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isSelected) Color.White else Color(0xFF64748B),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                )
+            }
+        }
+    }
 }
 
 @Composable

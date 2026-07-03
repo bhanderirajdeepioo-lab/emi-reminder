@@ -190,4 +190,57 @@ class InflationCalculatorViewModelTest {
 
         assertFalse(vm.uiState.value.isCalculateEnabled)
     }
+
+    // ── Scenario chips ────────────────────────────────────────────────────────
+
+    @Test
+    fun `setInflationRateFromScenario sets rate and selectedScenario`() {
+        val vm = viewModel()
+        vm.setInflationRateFromScenario(InflationScenario.EDUCATION)
+
+        assertEquals("8.50", vm.uiState.value.inflationRateText)
+        assertEquals(InflationScenario.EDUCATION, vm.uiState.value.selectedScenario)
+    }
+
+    @Test
+    fun `manual rate edit clears selectedScenario`() {
+        val vm = viewModel()
+        vm.setInflationRateFromScenario(InflationScenario.HEALTHCARE)
+        vm.setInflationRateText("7.50")
+
+        assertNull(vm.uiState.value.selectedScenario)
+        assertEquals("7.50", vm.uiState.value.inflationRateText)
+    }
+
+    @Test
+    fun `selecting different scenario updates both rate and selection`() {
+        val vm = viewModel()
+        vm.setInflationRateFromScenario(InflationScenario.GROCERIES)
+        vm.setInflationRateFromScenario(InflationScenario.HOUSING)
+
+        assertEquals(InflationScenario.HOUSING, vm.uiState.value.selectedScenario)
+        assertEquals("6.00", vm.uiState.value.inflationRateText)
+    }
+
+    @Test
+    fun `scenario chips have correct rates`() {
+        assertEquals("8.50", InflationScenario.EDUCATION.rate)
+        assertEquals("10.00", InflationScenario.HEALTHCARE.rate)
+        assertEquals("7.00", InflationScenario.GROCERIES.rate)
+        assertEquals("6.00", InflationScenario.HOUSING.rate)
+    }
+
+    @Test
+    fun `scenario rate is usable in calculation`() {
+        val vm = viewModel()
+        vm.setInflationRateFromScenario(InflationScenario.HEALTHCARE)
+        vm.setCurrentAmountText("100000")
+        vm.setYearsText("10")
+        vm.calculate()
+
+        val result = vm.uiState.value.resultA
+        assertNotNull(result)
+        // 1,00,000 * 1.10^10 ≈ 2,59,374
+        assertEquals(259_374.0, result!!.futureCost, 10.0)
+    }
 }

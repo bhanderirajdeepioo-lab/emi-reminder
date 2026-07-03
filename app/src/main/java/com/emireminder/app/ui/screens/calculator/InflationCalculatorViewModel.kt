@@ -10,6 +10,13 @@ import kotlin.math.pow
 
 enum class InflationMode { PURCHASING_POWER, REAL_RETURNS }
 
+enum class InflationScenario(val label: String, val rate: String) {
+    EDUCATION("Education", "8.50"),
+    HEALTHCARE("Healthcare", "10.00"),
+    GROCERIES("Groceries", "7.00"),
+    HOUSING("Housing", "6.00"),
+}
+
 data class InflationResultA(
     val currentAmount: Double,
     val inflationRate: Double,
@@ -37,6 +44,8 @@ data class InflationUiState(
     val yearsText: String = "",
     // Mode B — Real Returns (nominal rate can be negative)
     val nominalRateText: String = "",
+    // Scenario chip selection (null = none / custom rate)
+    val selectedScenario: InflationScenario? = null,
     // Results
     val showResults: Boolean = false,
     val resultA: InflationResultA? = null,
@@ -73,7 +82,19 @@ class InflationCalculatorViewModel @Inject constructor() : ViewModel() {
     }
 
     fun setInflationRateText(text: String) {
-        _uiState.value = _uiState.value.copy(inflationRateText = text, showResults = false)
+        _uiState.value = _uiState.value.copy(
+            inflationRateText = text,
+            selectedScenario = null,
+            showResults = false,
+        )
+    }
+
+    fun setInflationRateFromScenario(scenario: InflationScenario) {
+        _uiState.value = _uiState.value.copy(
+            inflationRateText = scenario.rate,
+            selectedScenario = scenario,
+            showResults = false,
+        )
     }
 
     fun setCurrentAmountText(text: String) {
