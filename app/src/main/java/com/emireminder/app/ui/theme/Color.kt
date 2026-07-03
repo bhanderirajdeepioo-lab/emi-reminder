@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 val Indigo600 = Color(0xFF4F46E5)
 val Indigo50  = Color(0xFFEEF2FF)
 val Indigo100 = Color(0xFFE0E7FF)
+val Indigo200 = Color(0xFFC7D2FE)
 
 // Secondary — Violet 600
 val Violet600 = Color(0xFF7C3AED)

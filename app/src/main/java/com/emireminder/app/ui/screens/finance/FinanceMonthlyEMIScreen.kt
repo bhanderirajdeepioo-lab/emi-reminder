@@ -380,7 +380,7 @@ private fun EmiRow(item: LoanEmiItem, selectedMonth: Int, selectedYear: Int, cur
                 // Date badge
                 Box(
                     modifier = Modifier
-                        .size(width = 40.dp, height = 48.dp)
+                        .size(width = 36.dp, height = 44.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(item.statusColor.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center,
@@ -388,7 +388,7 @@ private fun EmiRow(item: LoanEmiItem, selectedMonth: Int, selectedYear: Int, cur
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             MONTHS[selectedMonth].uppercase(),
-                            fontSize = 8.sp, fontWeight = FontWeight.Bold, color = item.statusColor,
+                            fontSize = 9.sp, fontWeight = FontWeight.SemiBold, color = item.statusColor,
                         )
                         Text(
                             "${item.dueDay}",
@@ -415,15 +415,19 @@ private fun EmiRow(item: LoanEmiItem, selectedMonth: Int, selectedYear: Int, cur
                     Spacer(Modifier.height(4.dp))
                     val statusLabel = when {
                         item.isPaid -> "PAID ✓"
-                        item.isOverdue -> "OVERDUE"
+                        item.isOverdue -> "DUE"
                         else -> "UPCOMING"
                     }
                     val statusBg = when {
                         item.isPaid -> Color(0xFFDCFCE7)
-                        item.isOverdue -> Color(0xFFFEE2E2)
-                        else -> Color(0xFF64748B)
+                        item.isOverdue -> Color(0xFFFEF3C7)
+                        else -> Color(0xFFFFF7ED)
                     }
-                    val chipTextColor = if (!item.isPaid && !item.isOverdue) Color.White else item.statusColor
+                    val chipTextColor = when {
+                        item.isPaid -> SafeGreen
+                        item.isOverdue -> WarnOrange
+                        else -> Color(0xFFF97316)
+                    }
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(11.dp))
@@ -446,7 +450,7 @@ private fun YearlyBarChart(
     modifier: Modifier = Modifier,
 ) {
     val indigo = Indigo600
-    val indigoLight = Indigo100
+    val indigoLight = Indigo200
     Canvas(
         modifier = modifier.pointerInput(Unit) {
             detectTapGestures { offset ->
