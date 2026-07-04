@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<!-- @dsCard group="Finance Tab" -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390">
+<title>HEL-588 · Screen 1 — Finance Tab (SmsDashboard) Redesign</title>
+<style>
+  :root {
+    --primary: #4F46E5;
+    --primary-light: #EEF2FF;
+    --bg: #EEF2FF;
+    --slate800: #1E293B;
+    --slate600: #475569;
+    --slate400: #94A3B8;
+    --slate200: #E2E8F0;
+    --slate100: #F1F5F9;
+    --white: #FFFFFF;
+    --safeGreen: #16A34A;
+    --urgentRed: #DC2626;
+    --amber700: #B45309;
+
+    /* Category colours */
+    --income: #16A34A;
+    --emi: #4F46E5;
+    --food: #EF6C00;
+    --transport: #0E7490;
+    --utilities: #B45309;
+    --shopping: #7C3AED;
+    --health: #DC2626;
+    --entertainment: #EC4899;
+    --investments: #0D9488;
+    --insurance: #2563EB;
+    --credit: #1E293B;
+    --atm: #92400E;
+    --bankCharges: #6B7280;
+    --uncategorised: #9CA3AF;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Roboto', -apple-system, sans-serif;
+    background: #CBD5E1;
+    display: flex;
+    gap: 32px;
+    padding: 32px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .frame-label {
+    font-family: monospace;
+    font-size: 11px;
+    color: #475569;
+    margin-bottom: 8px;
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .phone {
+    width: 390px;
+    background: var(--bg);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    border: 2px solid rgba(255,255,255,0.5);
+  }
+
+  /* Status Bar */
+  .status-bar {
+    height: 44px;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+  .status-bar .time { color: white; font-size: 14px; font-weight: 600; }
+  .status-bar .icons { display: flex; gap: 6px; align-items: center; }
+  .status-bar .icons span { color: white; font-size: 11px; }
+
+  /* Top App Bar */
+  .top-app-bar {
+    background: var(--primary);
+    padding: 12px 16px 16px;
+  }
+  .top-app-bar h1 { color: white; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .top-app-bar .subtitle { color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 2px; }
+
+  /* Month Picker */
+  .month-picker {
+    background: var(--primary);
+    padding: 0 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .month-btn {
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 14px; cursor: pointer;
+  }
+  .month-chip {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 6px 16px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    flex: 1;
+    text-align: center;
+  }
+
+  /* Content scroll area */
+  .content {
+    background: var(--bg);
+    overflow-y: auto;
+  }
+
+  /* Smart Summary Card */
+  .smart-card {
+    margin: 16px;
+    background: var(--slate800);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .smart-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    background: rgba(79,70,229,0.3);
+    border-radius: 50%;
+  }
+  .smart-card .card-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .smart-card .total-spend {
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+  .smart-card .row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+    gap: 12px;
+  }
+  .smart-card .stat {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+  }
+  .smart-card .stat .stat-label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .smart-card .stat .stat-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    margin-top: 2px;
+  }
+  .smart-card .stat.income .stat-value { color: #4ADE80; }
+  .smart-card .stat.emi .stat-value { color: #818CF8; }
+
+  /* Progress bar */
+  .progress-section { margin-top: 16px; }
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .progress-label { font-size: 11px; color: rgba(255,255,255,0.6); }
+  .progress-pct { font-size: 11px; color: rgba(255,255,255,0.8); font-weight: 600; }
+  .progress-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #818CF8, #6366F1);
+    border-radius: 3px;
+    width: 72%;
+  }
+  .progress-fill.danger { background: linear-gradient(90deg, #F87171, #EF4444); width: 90%; }
+
+  /* Category Filter Chip Bar */
+  .chip-bar-section { padding: 0 16px 0; }
+  .chip-bar-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate400);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .chip-bar {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .chip-bar::-webkit-scrollbar { display: none; }
+  .chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--slate200);
+    background: white;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate600);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .chip .chip-icon {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+  }
+  .chip.active {
+    border-color: transparent;
+    color: white;
+    font-weight: 600;
+  }
+  .chip.active-all {
+    background: var(--primary);
+    border-color: transparent;
+    color: white;
+  }
+  .chip.active-income {
+    background: var(--income);
+    border-color: transparent;
+    color: white;
+  }
+  .chip.active-emi {
+    background: var(--emi);
+    border-color: transparent;
+    color: white;
+  }
+
+  /* Summary strip (when chip active) */
+  .summary-strip {
+    margin: 8px 16px;
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-sm);
+  }
+  .summary-strip .strip-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--emi);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 16px;
+  }
+  .summary-strip .strip-info { flex: 1; }
+  .summary-strip .strip-label { font-size: 11px; color: var(--slate400); }
+  .summary-strip .strip-amount { font-size: 16px; font-weight: 700; color: var(--emi); }
+  .summary-strip .strip-count { font-size: 11px; color: var(--slate400); }
+
+  /* Date group header */
+  .date-header {
+    padding: 12px 16px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate400);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .date-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--slate200);
+  }
+
+  /* Transaction Smart Card */
+  .txn-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+  .txn-card {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  .txn-card.emi { border-left-color: var(--emi); }
+  .txn-card.food { border-left-color: var(--food); }
+  .txn-card.income { border-left-color: var(--income); }
+  .txn-card.transport { border-left-color: var(--transport); }
+  .txn-card.utilities { border-left-color: var(--utilities); }
+
+  .txn-icon-bubble {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .txn-icon-bubble.emi { background: #EEF2FF; }
+  .txn-icon-bubble.food { background: #FFF3E0; }
+  .txn-icon-bubble.income { background: #F0FFF4; }
+  .txn-icon-bubble.transport { background: #E0F7FA; }
+  .txn-icon-bubble.utilities { background: #FFFDE7; }
+
+  .txn-info { flex: 1; min-width: 0; }
+  .txn-merchant {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1E293B;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .txn-subtitle {
+    font-size: 12px;
+    color: var(--slate400);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .txn-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .txn-amount {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+  .txn-amount.debit { color: var(--urgentRed); }
+  .txn-amount.credit { color: var(--safeGreen); }
+
+  .txn-badges { display: flex; align-items: center; gap: 4px; }
+  .verified-badge {
+    width: 16px; height: 16px;
+    background: var(--safeGreen);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 9px;
+  }
+  .emi-pill {
+    background: var(--primary-light);
+    color: var(--emi);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1px solid rgba(79,70,229,0.2);
+  }
+
+  /* By Account Section */
+  .section-header {
+    padding: 16px 16px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--slate600);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .section-header .see-all { font-size: 12px; color: var(--primary); font-weight: 500; }
+
+  .account-list { padding: 0 16px; display: flex; flex-direction: column; gap: 6px; }
+  .account-row {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .account-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--primary-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .account-info { flex: 1; }
+  .account-name { font-size: 13px; font-weight: 600; color: #1E293B; }
+  .account-sub { font-size: 11px; color: var(--slate400); }
+  .account-amount { font-size: 14px; font-weight: 700; color: #1E293B; }
+
+  /* Banner Ad */
+  .banner-ad {
+    margin: 16px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--primary), #818CF8);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.8);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    background: white;
+    border-top: 1px solid var(--slate200);
+    display: flex;
+    padding: 8px 0 20px;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 0;
+    cursor: pointer;
+  }
+  .nav-icon { font-size: 22px; }
+  .nav-label { font-size: 10px; color: var(--slate400); }
+  .nav-item.active .nav-icon { filter: none; }
+  .nav-item.active .nav-label { color: var(--primary); font-weight: 600; }
+
+  /* Annotation layer */
+  .annotation {
+    width: 390px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-md);
+    font-size: 13px;
+    line-height: 1.6;
+    color: #334155;
+  }
+  .annotation h2 { font-size: 16px; font-weight: 700; color: #1E293B; margin-bottom: 12px; }
+  .annotation h3 { font-size: 13px; font-weight: 600; color: var(--primary); margin: 12px 0 4px; }
+  .annotation ul { padding-left: 16px; }
+  .annotation li { margin-bottom: 3px; }
+  .annotation .token { font-family: monospace; background: #F1F5F9; padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+
+  .section-divider {
+    height: 8px;
+    background: var(--slate100);
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     FRAME 1 — Finance / Loaded (All filter)
+     ══════════════════════════════════════════════════════════ -->
+<div>
+  <div class="frame-label">Finance / Loaded — All Filter (Default State)</div>
+  <div class="phone">
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons"><span>5G</span><span>📶</span><span>🔋</span></div>
+    </div>
+
+    <!-- Top App Bar -->
+    <div class="top-app-bar">
+      <h1>Finance</h1>
+      <div class="subtitle">Tracked from your SMS</div>
+    </div>
+
+    <!-- Month Picker -->
+    <div class="month-picker">
+      <div class="month-btn">‹</div>
+      <div class="month-chip">June 2026</div>
+      <div class="month-btn">›</div>
+    </div>
+
+    <div class="content">
+      <!-- Smart Summary Card -->
+      <div class="smart-card">
+        <div class="card-label">Total Spend</div>
+        <div class="total-spend">₹47,320</div>
+        <div class="row">
+          <div class="stat income">
+            <div class="stat-label">Income</div>
+            <div class="stat-value">₹85,000</div>
+          </div>
+          <div class="stat emi">
+            <div class="stat-label">EMIs</div>
+            <div class="stat-value">₹22,500</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Transactions</div>
+            <div class="stat-value">38</div>
+          </div>
+        </div>
+        <div class="progress-section">
+          <div class="progress-row">
+            <span class="progress-label">Spend vs Income</span>
+            <span class="progress-pct">72%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Filter Chip Bar -->
+      <div class="chip-bar-section">
+        <div class="chip-bar">
+          <div class="chip chip-all active-all">
+            <div class="chip-icon">⊞</div>
+            All
+          </div>
+          <div class="chip">
+            <div class="chip-icon" style="color:var(--income)">↑</div>
+            Income
+          </div>
+          <div class="chip">
+            <div class="chip-icon" style="color:var(--emi)">💳</div>
+            EMI
+          </div>
+          <div class="chip">
+            <div class="chip-icon" style="color:var(--food)">🍽</div>
+            Food
+          </div>
+          <div class="chip">
+            <div class="chip-icon" style="color:var(--transport)">🚗</div>
+            Transport
+          </div>
+          <div class="chip">
+            <div class="chip-icon" style="color:var(--utilities)">⚡</div>
+            Utilities
+          </div>
+          <div class="chip">
+            <div class="chip-icon" style="color:var(--shopping)">🛍</div>
+            Shopping
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Group: Today -->
+      <div class="date-header">Today</div>
+
+      <div class="txn-list">
+        <!-- EMI transaction -->
+        <div class="txn-card emi">
+          <div class="txn-icon-bubble emi">💳</div>
+          <div class="txn-info">
+            <div class="txn-merchant">HDFC Home Loan EMI</div>
+            <div class="txn-subtitle">HDFC ···· 4821 · 03 Jul</div>
+          </div>
+          <div class="txn-right">
+            <div class="txn-amount debit">−₹18,500</div>
+            <div class="txn-badges">
+              <div class="verified-badge">✓</div>
+              <div class="emi-pill">EMI</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Income transaction -->
+        <div class="txn-card income">
+          <div class="txn-icon-bubble income">↑</div>
+          <div class="txn-info">
+            <div class="txn-merchant">Salary — Acme Corp</div>
+            <div class="txn-subtitle">ICICI ···· 2034 · 03 Jul</div>
+          </div>
+          <div class="txn-right">
+            <div class="txn-amount credit">+₹85,000</div>
+            <div class="txn-badges">
+              <div class="verified-badge">✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Group: Yesterday -->
+      <div class="date-header">Yesterday</div>
+
+      <div class="txn-list">
+        <!-- Food transaction -->
+        <div class="txn-card food">
+          <div class="txn-icon-bubble food">🍽</div>
+          <div class="txn-info">
+            <div class="txn-merchant">Swiggy</div>
+            <div class="txn-subtitle">SBI ···· 7710 · 02 Jul · UPI</div>
+          </div>
+          <div class="txn-right">
+            <div class="txn-amount debit">−₹420</div>
+            <div class="txn-badges">
+              <div class="verified-badge">✓</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transport transaction -->
+        <div class="txn-card transport">
+          <div class="txn-icon-bubble transport">🚗</div>
+          <div class="txn-info">
+            <div class="txn-merchant">Uber</div>
+            <div class="txn-subtitle">HDFC ···· 4821 · 02 Jul · UPI</div>
+          </div>
+          <div class="txn-right">
+            <div class="txn-amount debit">−₹185</div>
+            <div class="txn-badges">
+              <div class="verified-badge">✓</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Utilities -->
+        <div class="txn-card utilities">
+          <div class="txn-icon-bubble utilities">⚡</div>
+          <div class="txn-info">
+            <div class="txn-merchant">MSEDCL Electricity</div>
+            <div class="txn-subtitle">ICICI ···· 2034 · 02 Jul</div>
+          </div>
+          <div class="txn-right">
+            <div class="txn-amount debit">−₹1,240</div>
+            <div class="txn-badges"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- By Account Section -->
+      <div class="section-header">
+        By Account
+        <span class="see-all">See All →</span>
+      </div>
+      <div class="account-list">
+        <div class="account-row">
+          <div class="account-icon">🏦</div>
+          <div class="account-info">
+            <div class="account-name">HDFC Bank ···· 4821</div>
+            <div class="account-sub">14 transactions</div>
+          </div>
+          <div class="account-amount">₹22,340</div>
+        </div>
+        <div class="account-row">
+          <div class="account-icon">🏦</div>
+          <div class="account-info">
+            <div class="account-name">ICICI Bank ···· 2034</div>
+            <div class="account-sub">18 transactions</div>
+          </div>
+          <div class="account-amount">₹18,680</div>
+        </div>
+      </div>
+
+      <!-- Banner Ad -->
+      <div class="banner-ad">📢 Advertisement Slot</div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+      <div class="nav-item"><div class="nav-icon">⏰</div><div class="nav-label">Reminders</div></div>
+      <div class="nav-item active"><div class="nav-icon">💰</div><div class="nav-label" style="color:var(--primary)">Finance</div></div>
+      <div class="nav-item"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     FRAME 2 — Finance / EMI Chip Active (Filtered State)
+     ══════════════════════════════════════════════════════════ -->
+<div>
+  <div class="frame-label">Finance / EMI Filter Active + Summary Strip</div>
+  <div class="phone">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons"><span>5G</span><span>📶</span><span>🔋</span></div>
+    </div>
+    <div class="top-app-bar">
+      <h1>Finance</h1>
+      <div class="subtitle">Tracked from your SMS</div>
+    </div>
+    <div class="month-picker">
+      <div class="month-btn">‹</div>
+      <div class="month-chip">June 2026</div>
+      <div class="month-btn">›</div>
+    </div>
+
+    <div class="content">
+      <div class="smart-card">
+        <div class="card-label">Total Spend</div>
+        <div class="total-spend">₹47,320</div>
+        <div class="row">
+          <div class="stat income"><div class="stat-label">Income</div><div class="stat-value">₹85,000</div></div>
+          <div class="stat emi"><div class="stat-label">EMIs</div><div class="stat-value">₹22,500</div></div>
+          <div class="stat"><div class="stat-label">Transactions</div><div class="stat-value">38</div></div>
+        </div>
+        <div class="progress-section">
+          <div class="progress-row"><span class="progress-label">Spend vs Income</span><span class="progress-pct">72%</span></div>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+        </div>
+      </div>
+
+      <div class="chip-bar-section">
+        <div class="chip-bar">
+          <div class="chip">⊞ All</div>
+          <div class="chip">↑ Income</div>
+          <div class="chip active-emi" style="background:var(--emi);color:white;border-color:transparent;display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;white-space:nowrap;font-size:13px;font-weight:600;flex-shrink:0;">💳 EMI</div>
+          <div class="chip">🍽 Food</div>
+          <div class="chip">🚗 Transport</div>
+          <div class="chip">⚡ Utilities</div>
+        </div>
+      </div>
+
+      <!-- Summary Strip -->
+      <div class="summary-strip">
+        <div class="strip-icon">💳</div>
+        <div class="strip-info">
+          <div class="strip-label">EMI & Loans</div>
+          <div class="strip-amount">₹22,500</div>
+        </div>
+        <div class="strip-count">6 transactions</div>
+      </div>
+
+      <div class="date-header">Today</div>
+
+      <div class="txn-list">
+        <div class="txn-card emi">
+          <div class="txn-icon-bubble emi">💳</div>
+          <div class="txn-info">
+            <div class="txn-merchant">HDFC Home Loan EMI</div>
+            <div class="txn-subtitle">HDFC ···· 4821 · 03 Jul</div>
+          </div>
+          <div class="txn-right">
+            <div class="txn-amount debit">−₹18,500</div>
+            <div class="txn-badges">
+              <div class="verified-badge">✓</div>
+              <div class="emi-pill">EMI</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="date-header">28 Jun</div>
+      <div class="txn-list">
+        <div class="txn-card emi">
+          <div class="txn-icon-bubble emi">💳</div>
+          <div class="txn-info">
+            <div class="txn-merchant">Car Loan — Axis Bank</div>
+            <div class="txn-subtitle">ICICI ···· 2034 · 28 Jun</div>
+          </div>
+          <div class="txn-right">
+            <div class="txn-amount debit">−₹4,000</div>
+            <div class="txn-badges">
+              <div class="verified-badge">✓</div>
+              <div class="emi-pill">EMI</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="banner-ad">📢 Advertisement Slot</div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+      <div class="nav-item"><div class="nav-icon">⏰</div><div class="nav-label">Reminders</div></div>
+      <div class="nav-item active"><div class="nav-icon">💰</div><div class="nav-label" style="color:var(--primary)">Finance</div></div>
+      <div class="nav-item"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     FRAME 3 — Finance / Empty Filter State
+     ══════════════════════════════════════════════════════════ -->
+<div>
+  <div class="frame-label">Finance / Empty Filter State</div>
+  <div class="phone">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons"><span>5G</span><span>📶</span><span>🔋</span></div>
+    </div>
+    <div class="top-app-bar">
+      <h1>Finance</h1>
+      <div class="subtitle">Tracked from your SMS</div>
+    </div>
+    <div class="month-picker">
+      <div class="month-btn">‹</div>
+      <div class="month-chip">June 2026</div>
+      <div class="month-btn">›</div>
+    </div>
+
+    <div class="content">
+      <div class="smart-card">
+        <div class="card-label">Total Spend</div>
+        <div class="total-spend">₹47,320</div>
+        <div class="row">
+          <div class="stat income"><div class="stat-label">Income</div><div class="stat-value">₹85,000</div></div>
+          <div class="stat emi"><div class="stat-label">EMIs</div><div class="stat-value">₹22,500</div></div>
+          <div class="stat"><div class="stat-label">Transactions</div><div class="stat-value">38</div></div>
+        </div>
+      </div>
+
+      <div class="chip-bar-section">
+        <div class="chip-bar">
+          <div class="chip">⊞ All</div>
+          <div class="chip">↑ Income</div>
+          <div class="chip">💳 EMI</div>
+          <div class="chip">🍽 Food</div>
+          <div class="chip" style="background:#EC4899;color:white;border-color:transparent;display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;white-space:nowrap;font-size:13px;font-weight:600;flex-shrink:0;">🎬 Entertainment</div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px;gap:16px;">
+        <div style="width:72px;height:72px;background:#F1F5F9;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;">🎬</div>
+        <div style="font-size:18px;font-weight:700;color:#1E293B;text-align:center;">No Entertainment transactions</div>
+        <div style="font-size:14px;color:var(--slate400);text-align:center;line-height:1.5;">We didn't find any Entertainment expenses in June 2026. Try a different category or month.</div>
+        <div style="background:var(--primary);color:white;padding:10px 24px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;">Clear Filter</div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+      <div class="nav-item"><div class="nav-icon">⏰</div><div class="nav-label">Reminders</div></div>
+      <div class="nav-item active"><div class="nav-icon">💰</div><div class="nav-label" style="color:var(--primary)">Finance</div></div>
+      <div class="nav-item"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ANNOTATION DOC — Screen 1
+     ══════════════════════════════════════════════════════════ -->
+<div>
+  <div class="frame-label">Screen 1 — Design Annotations</div>
+  <div class="annotation">
+    <h2>Finance Tab Redesign — Spec Notes</h2>
+
+    <h3>Month Picker</h3>
+    <ul>
+      <li>Back/forward chevron buttons: <span class="token">32×32dp</span>, <span class="token">rgba(white,0.2)</span> fill, 50% radius</li>
+      <li>Month chip: <span class="token">Indigo50 bg</span> fill at 15%, pill shape, 14sp SemiBold</li>
+      <li>Entire bar stays in AppBar colour band (Indigo600)</li>
+    </ul>
+
+    <h3>Smart Summary Card</h3>
+    <ul>
+      <li>Background: <span class="token">Slate800 (#1E293B)</span>, radius <span class="token">20dp</span>, margin <span class="token">16dp</span></li>
+      <li>Decorative blob: 120dp circle, <span class="token">Indigo600 30% opacity</span>, top-right, overflow hidden</li>
+      <li>Total Spend: <span class="token">28sp Bold</span>, white</li>
+      <li>Stat tiles: <span class="token">rgba(white,0.08)</span> bg, 8dp radius, 10dp padding</li>
+      <li>Income value: <span class="token">#4ADE80</span> (green on dark)</li>
+      <li>EMI value: <span class="token">#818CF8</span> (indigo on dark)</li>
+      <li>Progress bar: 6dp tall, <span class="token">rgba(white,0.1)</span> track, gradient fill <span class="token">#818CF8→#6366F1</span></li>
+      <li>Danger threshold (&gt;85%): fill switches to <span class="token">#F87171→#EF4444</span></li>
+    </ul>
+
+    <h3>Category Filter Chip Bar</h3>
+    <ul>
+      <li>Horizontal ScrollView, no scrollbar visible</li>
+      <li>Chip: <span class="token">7×14dp</span> padding, <span class="token">1.5dp border</span> Slate200, 20dp radius</li>
+      <li>Chip icon: 16×16dp, category colour tint</li>
+      <li>Active chip: <span class="token">solid category-colour bg</span>, white text/icon, no border</li>
+      <li>All chip: active = <span class="token">Indigo600</span></li>
+    </ul>
+
+    <h3>Summary Strip (active filter only)</h3>
+    <ul>
+      <li>Appears below chip bar when any filter ≠ All</li>
+      <li>Shows category total, count, icon bubble in category colour</li>
+    </ul>
+
+    <h3>Date Group Headers</h3>
+    <ul>
+      <li><span class="token">12sp SemiBold</span>, <span class="token">Slate400</span>, ALL CAPS, 12dp padding top</li>
+      <li>Trailing divider line to right edge</li>
+    </ul>
+
+    <h3>Transaction Smart Cards</h3>
+    <ul>
+      <li>Left accent border: <span class="token">3dp</span>, category colour</li>
+      <li>Icon bubble: <span class="token">40×40dp</span>, 12dp radius, category 10% tint bg</li>
+      <li>Merchant: <span class="token">14sp SemiBold</span>, Slate900, single line ellipsis</li>
+      <li>Subtitle: <span class="token">12sp</span> Slate400 — "Bank ···· last4 · DD MMM · channel"</li>
+      <li>Amount: <span class="token">14sp Bold</span> — red for debit, SafeGreen for credit</li>
+      <li>Verified badge: <span class="token">16dp</span> SafeGreen circle, white checkmark</li>
+      <li>EMI pill: <span class="token">10sp Bold</span> Indigo600, Indigo50 bg, 1dp border</li>
+      <li>Shadow: <span class="token">0 1px 3px rgba(0,0,0,0.08)</span></li>
+    </ul>
+
+    <h3>Interaction Notes</h3>
+    <ul>
+      <li>Tap any chip → filter list + show summary strip, scroll to top</li>
+      <li>Tap transaction card → open Transaction Detail Screen (Screen 2)</li>
+      <li>Long press card → context menu (edit, delete, share)</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function(){
+  var m = /[?&]frame=(\d+)/.exec(location.search);
+  if (!m) return;
+  var idx = parseInt(m[1], 10) - 1;
+  Array.from(document.body.children).forEach(function(el, i){ if (i !== idx) el.style.display = 'none'; });
+  document.body.style.padding = '0';
+  document.body.style.margin = '0';
+  document.body.style.background = '#fff';
+  document.body.style.gap = '0';
+  document.body.style.justifyContent = 'flex-start';
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<!-- @dsCard group="Finance Tab" -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390">
+<title>HEL-588 · Screen 2 — Transaction Detail Screen</title>
+<style>
+  :root {
+    --primary: #4F46E5;
+    --primary-light: #EEF2FF;
+    --bg: #F8FAFC;
+    --slate800: #1E293B;
+    --slate700: #334155;
+    --slate600: #475569;
+    --slate400: #94A3B8;
+    --slate200: #E2E8F0;
+    --slate100: #F1F5F9;
+    --white: #FFFFFF;
+    --safeGreen: #16A34A;
+    --urgentRed: #DC2626;
+    --amber700: #B45309;
+    --emi: #4F46E5;
+    --income: #16A34A;
+    --food: #EF6C00;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Roboto', -apple-system, sans-serif;
+    background: #CBD5E1;
+    display: flex;
+    gap: 32px;
+    padding: 32px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .frame-label {
+    font-family: monospace;
+    font-size: 11px;
+    color: #475569;
+    margin-bottom: 8px;
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .phone {
+    width: 390px;
+    background: var(--bg);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    border: 2px solid rgba(255,255,255,0.5);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Status Bar */
+  .status-bar {
+    height: 44px;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+  }
+  .status-bar .time { color: white; font-size: 14px; font-weight: 600; }
+  .status-bar .icons { display: flex; gap: 6px; align-items: center; }
+  .status-bar .icons span { color: white; font-size: 11px; }
+
+  /* Top App Bar */
+  .top-app-bar {
+    background: var(--primary);
+    padding: 8px 16px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 20px; cursor: pointer;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+  }
+  .top-app-bar h1 {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    flex: 1;
+  }
+  .share-btn {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 20px; cursor: pointer;
+  }
+
+  /* Scrollable content */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 88px;
+  }
+
+  /* Hero Section */
+  .hero {
+    background: var(--primary);
+    padding: 8px 16px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -16px;
+    left: 0; right: 0;
+    height: 32px;
+    background: var(--primary);
+    clip-path: ellipse(60% 100% at 50% 0%);
+  }
+  .hero-icon-bubble {
+    width: 64px; height: 64px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+  }
+  .hero-category {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .hero-amount {
+    font-size: 36px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -1px;
+  }
+  .hero-date {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+  }
+  .hero-badges { display: flex; gap: 8px; align-items: center; }
+  .emi-pill {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 12px;
+  }
+  .verified-pill {
+    background: rgba(22,163,74,0.3);
+    border: 1px solid rgba(22,163,74,0.5);
+    color: #4ADE80;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 12px;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* Content Cards */
+  .card {
+    margin: 24px 16px 0;
+    background: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card-header {
+    padding: 14px 16px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--slate400);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--slate100);
+  }
+
+  /* Key-value rows */
+  .kv-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--slate100);
+    gap: 12px;
+  }
+  .kv-row:last-child { border-bottom: none; }
+  .kv-label {
+    font-size: 13px;
+    color: var(--slate400);
+    width: 110px;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+  .kv-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate800);
+    flex: 1;
+  }
+  .kv-value .re-assign-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(79,70,229,0.2);
+    margin-left: 8px;
+    cursor: pointer;
+    vertical-align: middle;
+  }
+
+  /* Confidence bar */
+  .confidence-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 12px;
+    border-bottom: 1px solid var(--slate100);
+  }
+  .confidence-label { font-size: 13px; color: var(--slate400); width: 110px; flex-shrink: 0; }
+  .confidence-bar-wrap { flex: 1; }
+  .confidence-bar {
+    height: 4px;
+    background: var(--slate100);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 3px;
+  }
+  .confidence-fill {
+    height: 100%;
+    width: 87%;
+    background: linear-gradient(90deg, var(--safeGreen), #4ADE80);
+    border-radius: 2px;
+  }
+  .confidence-pct { font-size: 11px; color: var(--slate400); }
+
+  /* Expandable SMS section */
+  .sms-section {
+    margin: 12px 16px 0;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .sms-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    cursor: pointer;
+  }
+  .sms-toggle-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 600; color: var(--slate700);
+  }
+  .sms-toggle-icon { font-size: 16px; }
+  .chevron { color: var(--slate400); font-size: 14px; transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+
+  .sms-body {
+    padding: 0 16px 16px;
+    display: none;
+  }
+  .sms-body.open { display: block; }
+  .sms-text {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--slate600);
+    background: var(--slate100);
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    word-break: break-all;
+  }
+
+  /* Notes section */
+  .notes-section {
+    margin: 12px 16px 0;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .notes-header {
+    padding: 14px 16px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--slate400);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--slate100);
+  }
+  .notes-field {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--slate400);
+    font-style: italic;
+  }
+  .notes-field.filled { color: var(--slate700); font-style: normal; }
+
+  /* Sticky Bottom Bar */
+  .sticky-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 1px solid var(--slate200);
+    padding: 12px 16px 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  }
+  .verified-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+  .toggle-track {
+    width: 44px; height: 24px;
+    background: var(--safeGreen);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+  }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px; right: 2px;
+    width: 20px; height: 20px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle-label { font-size: 13px; font-weight: 500; color: var(--slate700); }
+  .toggle-label small { display: block; font-size: 11px; color: var(--safeGreen); font-weight: 600; }
+
+  .edit-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Annotation */
+  .annotation {
+    width: 390px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-md);
+    font-size: 13px;
+    line-height: 1.6;
+    color: #334155;
+  }
+  .annotation h2 { font-size: 16px; font-weight: 700; color: #1E293B; margin-bottom: 12px; }
+  .annotation h3 { font-size: 13px; font-weight: 600; color: var(--primary); margin: 12px 0 4px; }
+  .annotation ul { padding-left: 16px; }
+  .annotation li { margin-bottom: 3px; }
+  .annotation .token { font-family: monospace; background: #F1F5F9; padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     FRAME 1 — Transaction Detail / EMI Transaction
+     ══════════════════════════════════════════════════════════ -->
+<div>
+  <div class="frame-label">Transaction Detail / EMI — Verified</div>
+  <div class="phone" style="position:relative;min-height:820px;">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons"><span>5G</span><span>📶</span><span>🔋</span></div>
+    </div>
+
+    <!-- Top App Bar -->
+    <div class="top-app-bar">
+      <div class="back-btn">←</div>
+      <h1>Transaction Detail</h1>
+      <div class="share-btn">↑</div>
+    </div>
+
+    <div class="content">
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-icon-bubble">💳</div>
+        <div class="hero-category">EMI & Loans</div>
+        <div class="hero-amount">−₹18,500</div>
+        <div class="hero-date">Thursday, 3 July 2026 · 10:34 AM</div>
+        <div class="hero-badges">
+          <div class="emi-pill">EMI</div>
+          <div class="verified-pill">✓ Verified</div>
+        </div>
+      </div>
+
+      <!-- Details Card -->
+      <div class="card" style="margin-top:32px;">
+        <div class="card-header">Transaction Details</div>
+        <div class="kv-row">
+          <div class="kv-label">Merchant</div>
+          <div class="kv-value">HDFC Bank Home Loan</div>
+        </div>
+        <div class="kv-row">
+          <div class="kv-label">Bank</div>
+          <div class="kv-value">HDFC Bank</div>
+        </div>
+        <div class="kv-row">
+          <div class="kv-label">Account</div>
+          <div class="kv-value">···· ···· ···· 4821</div>
+        </div>
+        <div class="kv-row">
+          <div class="kv-label">Category</div>
+          <div class="kv-value">
+            EMI & Loans
+            <span class="re-assign-chip">✎ Re-assign</span>
+          </div>
+        </div>
+        <div class="kv-row">
+          <div class="kv-label">Sub-category</div>
+          <div class="kv-value">Home Loan</div>
+        </div>
+        <div class="kv-row">
+          <div class="kv-label">VPA / UPI ID</div>
+          <div class="kv-value" style="color:var(--slate400)">—</div>
+        </div>
+        <div class="kv-row">
+          <div class="kv-label">UTR Ref</div>
+          <div class="kv-value" style="font-family:monospace;font-size:12px;">HDFC4821JUL324567</div>
+        </div>
+        <div class="confidence-row">
+          <div class="confidence-label">Confidence</div>
+          <div class="confidence-bar-wrap">
+            <div class="confidence-bar"><div class="confidence-fill"></div></div>
+            <div class="confidence-pct">87% — High</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Original SMS (collapsed) -->
+      <div class="sms-section">
+        <div class="sms-toggle">
+          <div class="sms-toggle-label">
+            <span class="sms-toggle-icon">💬</span>
+            Original SMS
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="notes-section">
+        <div class="notes-header">Notes</div>
+        <div class="notes-field">Add a note…</div>
+      </div>
+
+      <div style="height:16px;"></div>
+    </div>
+
+    <!-- Sticky Bottom Bar -->
+    <div class="sticky-bottom">
+      <div class="verified-toggle">
+        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        <div class="toggle-label">
+          Mark Verified
+          <small>✓ Verified</small>
+        </div>
+      </div>
+      <button class="edit-btn">✎ Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     FRAME 2 — Transaction Detail / SMS Expanded + Food
+     ══════════════════════════════════════════════════════════ -->
+<div>
+  <div class="frame-label">Transaction Detail / Food — SMS Expanded</div>
+  <div class="phone" style="position:relative;min-height:900px;">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons"><span>5G</span><span>📶</span><span>🔋</span></div>
+    </div>
+    <div class="top-app-bar">
+      <div class="back-btn">←</div>
+      <h1>Transaction Detail</h1>
+      <div class="share-btn">↑</div>
+    </div>
+
+    <div class="content">
+      <div class="hero" style="background:var(--food);">
+        <div class="hero-icon-bubble">🍽</div>
+        <div class="hero-category">Food & Dining</div>
+        <div class="hero-amount">−₹420</div>
+        <div class="hero-date">Wednesday, 2 July 2026 · 08:12 PM</div>
+        <div class="hero-badges">
+          <div class="verified-pill" style="background:rgba(22,163,74,0.3);">✓ Verified</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:32px;">
+        <div class="card-header">Transaction Details</div>
+        <div class="kv-row"><div class="kv-label">Merchant</div><div class="kv-value">Swiggy</div></div>
+        <div class="kv-row"><div class="kv-label">Bank</div><div class="kv-value">SBI</div></div>
+        <div class="kv-row"><div class="kv-label">Account</div><div class="kv-value">···· ···· ···· 7710</div></div>
+        <div class="kv-row">
+          <div class="kv-label">Category</div>
+          <div class="kv-value">Food & Dining <span class="re-assign-chip">✎ Re-assign</span></div>
+        </div>
+        <div class="kv-row"><div class="kv-label">Sub-category</div><div class="kv-value">Food Delivery</div></div>
+        <div class="kv-row"><div class="kv-label">VPA / UPI ID</div><div class="kv-value" style="font-size:12px;font-family:monospace;">swiggy@icici</div></div>
+        <div class="kv-row"><div class="kv-label">UTR Ref</div><div class="kv-value" style="font-family:monospace;font-size:12px;">SBI7710JUL229843</div></div>
+        <div class="confidence-row">
+          <div class="confidence-label">Confidence</div>
+          <div class="confidence-bar-wrap">
+            <div class="confidence-bar"><div class="confidence-fill" style="width:94%;"></div></div>
+            <div class="confidence-pct">94% — Very High</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SMS Expanded -->
+      <div class="sms-section">
+        <div class="sms-toggle">
+          <div class="sms-toggle-label"><span class="sms-toggle-icon">💬</span> Original SMS</div>
+          <span class="chevron open">▲</span>
+        </div>
+        <div class="sms-body open">
+          <div class="sms-text">Dear Customer, Rs.420.00 debited from A/C XX7710 on 02-Jul-2026 towards UPI-swiggy@icici-SWIGGY-SBI7710JUL229843. Available Balance: Rs.24,580.00. -SBI</div>
+        </div>
+      </div>
+
+      <!-- Notes with content -->
+      <div class="notes-section">
+        <div class="notes-header">Notes</div>
+        <div class="notes-field filled">Dinner with family — Biryani order</div>
+      </div>
+
+      <div style="height:16px;"></div>
+    </div>
+
+    <div class="sticky-bottom">
+      <div class="verified-toggle">
+        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        <div class="toggle-label">
+          Mark Verified
+          <small>✓ Verified</small>
+        </div>
+      </div>
+      <button class="edit-btn">✎ Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     FRAME 3 — Detail Not Found (Fallback)
+     ══════════════════════════════════════════════════════════ -->
+<div>
+  <div class="frame-label">Transaction Detail / Not Found Fallback</div>
+  <div class="phone" style="position:relative;min-height:600px;">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons"><span>5G</span><span>📶</span><span>🔋</span></div>
+    </div>
+    <div class="top-app-bar">
+      <div class="back-btn">←</div>
+      <h1>Transaction Detail</h1>
+      <div class="share-btn">↑</div>
+    </div>
+    <div class="content">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 32px;gap:20px;">
+        <div style="width:80px;height:80px;background:#FEE2E2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;">⚠️</div>
+        <div style="font-size:20px;font-weight:700;color:#1E293B;text-align:center;">Transaction Not Found</div>
+        <div style="font-size:14px;color:var(--slate400);text-align:center;line-height:1.6;">This transaction may have been deleted or is no longer available. Try refreshing or go back to Finance.</div>
+        <div style="background:var(--primary);color:white;padding:12px 28px;border-radius:20px;font-size:14px;font-weight:600;cursor:pointer;">← Back to Finance</div>
+        <div style="color:var(--primary);font-size:13px;font-weight:500;cursor:pointer;">Retry</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ANNOTATION DOC — Screen 2
+     ══════════════════════════════════════════════════════════ -->
+<div>
+  <div class="frame-label">Screen 2 — Design Annotations</div>
+  <div class="annotation">
+    <h2>Transaction Detail Screen — Spec Notes</h2>
+
+    <h3>TopAppBar</h3>
+    <ul>
+      <li>Primary Indigo600 background, matching Finance Tab</li>
+      <li>Back button: <span class="token">40×40dp</span> circular, <span class="token">rgba(white,0.1)</span> bg</li>
+      <li>Title: <span class="token">18sp SemiBold</span> white, centred flex</li>
+      <li>Share icon: system Share icon, 40dp touch target</li>
+    </ul>
+
+    <h3>Hero Section</h3>
+    <ul>
+      <li>Background: solid category colour (not Indigo for non-EMI transactions)</li>
+      <li>Icon bubble: <span class="token">64×64dp</span>, 20dp radius, <span class="token">rgba(white,0.15)</span> fill, <span class="token">rgba(white,0.3) 2dp border</span></li>
+      <li>Category label: <span class="token">12sp Bold</span>, uppercase, <span class="token">rgba(white,0.7)</span></li>
+      <li>Amount: <span class="token">36sp ExtraBold</span>, white, letter-spacing -1dp</li>
+      <li>Date: <span class="token">13sp</span>, <span class="token">rgba(white,0.6)</span></li>
+      <li>EMI pill: <span class="token">rgba(white,0.2) bg</span>, <span class="token">rgba(white,0.4) 1dp border</span></li>
+      <li>Verified pill: <span class="token">SafeGreen 30% bg</span>, <span class="token">#4ADE80</span> text</li>
+      <li>Bottom: concave ellipse clip creates soft transition into content bg</li>
+    </ul>
+
+    <h3>Details Card</h3>
+    <ul>
+      <li>White card, 16dp radius, 1dp Slate100 dividers between rows</li>
+      <li>Label column: <span class="token">110dp fixed</span>, <span class="token">13sp</span> Slate400</li>
+      <li>Value column: <span class="token">13sp Medium</span> Slate800, flex:1</li>
+      <li>Re-assign chip: Indigo50 bg, Indigo600 text, tapping opens category bottom sheet</li>
+      <li>UTR Ref value: monospace <span class="token">12sp</span> to distinguish from other fields</li>
+      <li>Confidence bar: <span class="token">4dp</span> tall, SafeGreen gradient; label below shows % + tier (Low/Medium/High/Very High)</li>
+    </ul>
+
+    <h3>Original SMS (Expandable)</h3>
+    <ul>
+      <li>Collapsed by default — hides noisy raw data until needed (Progressive Disclosure)</li>
+      <li>Chevron rotates 180° on expand (purposeful animation, ~200ms ease-out)</li>
+      <li>SMS text: monospace <span class="token">12sp</span>, <span class="token">Slate100 bg</span>, 12dp padding, word-break</li>
+    </ul>
+
+    <h3>Notes Section</h3>
+    <ul>
+      <li>Tap anywhere in field → open inline edit (single-line text)</li>
+      <li>Placeholder: <span class="token">13sp italic Slate400</span></li>
+      <li>Filled: <span class="token">13sp Slate700</span></li>
+    </ul>
+
+    <h3>Sticky Bottom Bar</h3>
+    <ul>
+      <li>Always visible, above system nav</li>
+      <li>Mark Verified toggle: Material Switch — ON = SafeGreen, OFF = Slate300</li>
+      <li>Toggle label: <span class="token">13sp Medium</span> + sub-label (<span class="token">11sp SemiBold</span> green when on)</li>
+      <li>Edit button: <span class="token">Indigo600 bg</span>, white, 14sp SemiBold, 12dp radius, opens Transaction Edit Sheet (HEL-571)</li>
+      <li>Shadow: <span class="token">0 -4px 20px rgba(0,0,0,0.08)</span></li>
+    </ul>
+
+    <h3>Interaction Notes</h3>
+    <ul>
+      <li>Back button → pop to Finance Tab at same scroll position</li>
+      <li>Share → system share sheet with summary text</li>
+      <li>Re-assign chip → bottom sheet with category grid (14 options)</li>
+      <li>Verified toggle → optimistic UI: instant state change + background API call</li>
+      <li>Edit button → opens Transaction Edit Sheet (HEL-571, already in codebase)</li>
+    </ul>
+
+    <h3>Not Found Fallback</h3>
+    <ul>
+      <li>Red-tinted 80dp icon container</li>
+      <li>Two CTAs: primary (Back to Finance) + text (Retry)</li>
+      <li>Triggered when: deep-link to deleted txn, stale ID from push notification</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function(){
+  var m = /[?&]frame=(\d+)/.exec(location.search);
+  if (!m) return;
+  var idx = parseInt(m[1], 10) - 1;
+  Array.from(document.body.children).forEach(function(el, i){ if (i !== idx) el.style.display = 'none'; });
+  document.body.style.padding = '0';
+  document.body.style.margin = '0';
+  document.body.style.background = '#fff';
+  document.body.style.gap = '0';
+  document.body.style.justifyContent = 'flex-start';
+})();
+</script>
+</body>
+</html>
