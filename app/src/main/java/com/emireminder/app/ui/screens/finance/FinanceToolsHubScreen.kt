@@ -373,7 +373,7 @@ fun FinanceToolsHubScreen(
                         "INVESTMENT TOOLS",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF16A34A),
+                        color = Indigo600,
                         letterSpacing = 0.8.sp,
                         modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 6.dp),
                     )
@@ -546,14 +546,27 @@ private fun MoreToolChip(tool: MoreTool) {
             .padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(tool.iconBg),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(tool.icon, contentDescription = null, tint = tool.iconTint, modifier = Modifier.size(24.dp))
+        Box {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(tool.iconBg),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(tool.icon, contentDescription = null, tint = tool.iconTint, modifier = Modifier.size(24.dp))
+            }
+            Box(
+                modifier = Modifier
+                    .size(16.dp)
+                    .align(Alignment.TopEnd)
+                    .offset(x = 4.dp, y = (-4).dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFB45309)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("!", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            }
         }
         Spacer(Modifier.height(6.dp))
         Text(
