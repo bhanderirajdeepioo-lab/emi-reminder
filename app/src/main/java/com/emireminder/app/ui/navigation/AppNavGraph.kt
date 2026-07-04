@@ -63,7 +63,7 @@ private data class NavItem(
 
 private val bottomNavItems = listOf(
     NavItem(NavRoutes.HOME,             "Home",       Icons.Filled.Home,               Icons.Outlined.Home),
-    NavItem(NavRoutes.EMI_CALCULATOR,   "Calculator", Icons.Filled.Calculate,          Icons.Outlined.Calculate),
+    NavItem(NavRoutes.FINANCE_TOOLS_HUB, "Calculator", Icons.Filled.Calculate,          Icons.Outlined.Calculate),
     NavItem(NavRoutes.REMINDERS,        "Reminders",  Icons.Filled.Notifications,      Icons.Outlined.Notifications),
     NavItem(NavRoutes.FINANCE,          "Finance",    Icons.Filled.AccountBalanceWallet, Icons.Outlined.AccountBalanceWallet),
 )
@@ -278,18 +278,29 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 NotificationPreviewScreen(onBack = { navController.popBackStack() })
             }
 
-            // 8 — Finance Tools Hub / Calculator tab
+            // 8 — Finance Tools Hub (Calculator tab root + sub-screen from Finance tab)
             // launchSingleTop=true on every sub-screen navigation prevents a double-tap from
             // firing two navigate() calls back-to-back and landing on the wrong screen (BUG-1/BUG-3).
             composable(NavRoutes.FINANCE_TOOLS_HUB) {
+                val prevRoute = navController.previousBackStackEntry?.destination?.route
+                // Show back button only when navigated as a sub-screen (e.g. from Finance tab).
+                // When reached via Calculator tab tap, prevRoute == HOME (popUpTo root), so no back.
+                val showBackButton = prevRoute != null && prevRoute != NavRoutes.HOME
+                // Safety: if this somehow becomes the back-stack root, bring user to Home.
+                BackHandler(enabled = prevRoute == null) {
+                    navController.navigate(NavRoutes.HOME) {
+                        popUpTo(navController.graph.id)
+                        launchSingleTop = true
+                    }
+                }
                 FinanceToolsHubScreen(
+                    showBackButton             = showBackButton,
                     onNavigateBack             = { navController.popBackStack() },
                     onNavigateToEmiCalculator  = { navController.navigate(NavRoutes.EMI_CALCULATOR)         { launchSingleTop = true } },
                     onNavigateToComparison     = { navController.navigate(NavRoutes.COMPARISON_CALCULATOR)  { launchSingleTop = true } },
                     onNavigateToPrepayment     = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR)  { launchSingleTop = true } },
                     onNavigateToFdRd           = { navController.navigate(NavRoutes.FD_RD_CALCULATOR)       { launchSingleTop = true } },
                     onNavigateToSip            = { navController.navigate(NavRoutes.SIP_CALCULATOR)         { launchSingleTop = true } },
-                    onNavigateToLoanCategories = { navController.navigate(NavRoutes.LOAN_CATEGORIES)        { launchSingleTop = true } },
                     onNavigateToPpf            = { navController.navigate(NavRoutes.PPF_CALCULATOR)         { launchSingleTop = true } },
                     onNavigateToGst            = { navController.navigate(NavRoutes.GST_CALCULATOR)         { launchSingleTop = true } },
                     onNavigateToIncomeTax      = { navController.navigate(NavRoutes.INCOME_TAX_CALCULATOR)  { launchSingleTop = true } },
@@ -299,24 +310,21 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 )
             }
 
-            // 9 — EMI Calculator (also the Calculator bottom-nav tab destination)
+            // 9 — EMI Calculator (sub-screen; Calculator tab now goes to FINANCE_TOOLS_HUB)
             composable(NavRoutes.EMI_CALCULATOR) { entry ->
                 val prevRoute = navController.previousBackStackEntry?.destination?.route
-                val isTabEntry = prevRoute == null || prevRoute in bottomNavRoutes
                 val appliedInterestType by entry.savedStateHandle
                     .getStateFlow<String?>("selectedInterestType", null)
                     .collectAsState()
-                // Guard: if the bottom-nav popUpTo(HOME) silently no-op'd (HOME absent
-                // from the stack), Calculator ends up as the back-stack root.  Without
-                // this handler the system back exits the Activity instead of going HOME.
+                // Safety: deep-link or stack corruption may leave EMI_CALCULATOR as root.
                 BackHandler(enabled = prevRoute == null) {
                     navController.navigate(NavRoutes.HOME) {
-                        popUpTo(navController.graph.id)  // clear to graph root first
+                        popUpTo(navController.graph.id)
                         launchSingleTop = true
                     }
                 }
                 EMICalculatorScreen(
-                    showBackButton = !isTabEntry,
+                    showBackButton = true,
                     initialInterestType = appliedInterestType ?: "REDUCING",
                     onBack = { navController.popBackStack() },
                     onShowResults = { p, r, t, lt -> navController.navigate(NavRoutes.calculatorResults(p, r, t, lt)) },

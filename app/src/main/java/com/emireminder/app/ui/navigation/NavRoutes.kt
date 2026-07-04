@@ -78,7 +78,7 @@ object NavRoutes {
 
 val bottomNavRoutes = setOf(
     NavRoutes.HOME,
-    NavRoutes.EMI_CALCULATOR,
+    NavRoutes.FINANCE_TOOLS_HUB,
     NavRoutes.REMINDERS,
     NavRoutes.FINANCE,
 )
