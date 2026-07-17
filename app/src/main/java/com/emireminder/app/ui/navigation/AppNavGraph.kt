@@ -2,7 +2,12 @@ package com.emireminder.app.ui.navigation
 
 import android.content.Context
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
@@ -143,10 +148,24 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             // ScaffoldLayoutWithMeasureFix snapshotFlow to iterate a null IdentityArraySet entry
             // on focus-loss events (ANR: Input dispatching timed out after 5024 ms).
             modifier = Modifier.padding(innerPadding),
-            enterTransition = { slideInHorizontally(tween(280)) { it } },
-            exitTransition = { slideOutHorizontally(tween(280)) { -it } },
-            popEnterTransition = { slideInHorizontally(tween(280)) { -it } },
-            popExitTransition = { slideOutHorizontally(tween(280)) { it } },
+            enterTransition = {
+                val fromTab = initialState.destination.route in bottomNavRoutes
+                val toTab = targetState.destination.route in bottomNavRoutes
+                if (fromTab && toTab) fadeIn(tween(200, easing = FastOutSlowInEasing))
+                else slideInHorizontally(tween(280, easing = FastOutSlowInEasing)) { it }
+            },
+            exitTransition = {
+                val fromTab = initialState.destination.route in bottomNavRoutes
+                val toTab = targetState.destination.route in bottomNavRoutes
+                if (fromTab && toTab) fadeOut(tween(200, easing = FastOutSlowInEasing))
+                else slideOutHorizontally(tween(210, easing = FastOutLinearInEasing)) { -it }
+            },
+            popEnterTransition = {
+                slideInHorizontally(tween(280, easing = LinearOutSlowInEasing)) { -it }
+            },
+            popExitTransition = {
+                slideOutHorizontally(tween(210, easing = FastOutLinearInEasing)) { it }
+            },
         ) {
             // 1 — Splash
             composable(NavRoutes.SPLASH) {

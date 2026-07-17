@@ -153,6 +153,14 @@ class SmsDashboardViewModel @Inject constructor(
         _editSaveError.value = null
     }
 
+    fun deleteTransaction(transaction: ParsedTransaction) = viewModelScope.launch {
+        try { transactionDao.delete(transaction) } catch (_: Exception) {}
+    }
+
+    fun undoDeleteTransaction(transaction: ParsedTransaction) = viewModelScope.launch {
+        try { transactionDao.insert(transaction) } catch (_: Exception) {}
+    }
+
     /**
      * Persists user edits to the selected transaction.
      * Sets [ParsedTransaction.userVerified] = true.

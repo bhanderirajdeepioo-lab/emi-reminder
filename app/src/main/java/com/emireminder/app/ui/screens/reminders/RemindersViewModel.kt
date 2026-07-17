@@ -58,6 +58,10 @@ class RemindersViewModel @Inject constructor(
         reminderRepository.deleteReminder(reminder)
     }
 
+    fun undoDeleteReminder(reminder: Reminder) = viewModelScope.launch {
+        reminderRepository.insertReminder(reminder)
+    }
+
     fun markAsPaid(reminder: Reminder) = viewModelScope.launch {
         reminderRepository.updateReminder(reminder.copy(isActive = false))
     }

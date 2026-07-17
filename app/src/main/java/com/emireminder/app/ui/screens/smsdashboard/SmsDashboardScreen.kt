@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.emireminder.app.data.db.entity.BankAccount
@@ -135,6 +136,22 @@ fun SmsDashboardScreen(
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    fun onSwipeDeleteTxn(txn: ParsedTransaction) {
+        viewModel.deleteTransaction(txn)
+        scope.launch {
+            val result = snackbarHostState.showSnackbar(
+                message = "Transaction deleted",
+                actionLabel = "Undo",
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.undoDeleteTransaction(txn)
+            }
+        }
+    }
 
     LaunchedEffect(uiState.smsHistoricalScanDone, uiState.isLoading) {
         if (!uiState.isLoading && !uiState.smsHistoricalScanDone) {
@@ -191,6 +208,7 @@ fun SmsDashboardScreen(
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = Indigo50,
         contentWindowInsets = WindowInsets(0.dp),
     ) { padding ->
@@ -296,11 +314,18 @@ fun SmsDashboardScreen(
                             when (item) {
                                 is TransactionListItem.DateHeader -> DateGroupHeader(label = item.label)
                                 is TransactionListItem.TxnCard -> {
-                                    TransactionSmartCard(
+                                    SwipeableTransactionCard(
                                         txn = item.txn,
-                                        currencySymbol = uiState.currencySymbol,
-                                        onClick = { onNavigateToTransactionDetail(item.txn.id) },
-                                    )
+                                        snackbarHostState = snackbarHostState,
+                                        scope = scope,
+                                        onDelete = ::onSwipeDeleteTxn,
+                                    ) {
+                                        TransactionSmartCard(
+                                            txn = item.txn,
+                                            currencySymbol = uiState.currencySymbol,
+                                            onClick = { onNavigateToTransactionDetail(item.txn.id) },
+                                        )
+                                    }
                                     Spacer(Modifier.height(8.dp))
                                 }
                             }
@@ -730,6 +755,60 @@ private fun DateGroupHeader(label: String) {
             thickness = 1.dp,
             color = Color(0xFFE2E8F0),
         )
+    }
+}
+
+// ─── Swipeable transaction card wrapper ───────────────────────────────────────
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeableTransactionCard(
+    txn: ParsedTransaction,
+    snackbarHostState: SnackbarHostState,
+    scope: kotlinx.coroutines.CoroutineScope,
+    onDelete: (ParsedTransaction) -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { it == SwipeToDismissBoxValue.EndToStart },
+        positionalThreshold = { totalDistance -> totalDistance * 0.4f },
+    )
+
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            onDelete(txn)
+        }
+    }
+
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            val color = UrgentRed.copy(alpha = (dismissState.progress * 1.5f).coerceIn(0f, 1f))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(color),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(end = 20.dp),
+                ) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Text("Delete", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+        },
+    ) {
+        content()
     }
 }
 

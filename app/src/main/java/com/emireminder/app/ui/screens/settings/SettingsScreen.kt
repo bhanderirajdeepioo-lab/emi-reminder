@@ -221,6 +221,7 @@ fun SettingsScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clip(RoundedCornerShape(0.dp))
                     .background(Brush.linearGradient(listOf(Indigo600, Violet600)))
                     .clickable { showNameEditor = true }
                     .padding(16.dp),

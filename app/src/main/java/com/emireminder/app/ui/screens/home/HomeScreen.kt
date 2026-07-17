@@ -343,9 +343,8 @@ private fun EmptyState(
         ) {
             // Calculate EMI card
             Card(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable(onClick = onNavigateToCalculator),
+                onClick = onNavigateToCalculator,
+                modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -371,9 +370,8 @@ private fun EmptyState(
 
             // Add Loan card
             Card(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable(onClick = onAddLoan),
+                onClick = onAddLoan,
+                modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Indigo600),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -403,9 +401,8 @@ private fun EmptyState(
 
             // SMS import banner — only shown when READ_SMS is granted
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onSmsImport),
+                onClick = onSmsImport,
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -577,7 +574,8 @@ private fun QuickActionTile(
     onClick: () -> Unit,
 ) {
     Card(
-        modifier = modifier.clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = modifier,
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -612,10 +610,10 @@ private fun LoanReminderCard(loan: Loan, currencySymbol: String, onClick: () -> 
     val isUrgent = daysRemaining <= 3
 
     Card(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .clickable(onClick = onClick),
+            .padding(horizontal = 16.dp, vertical = 4.dp),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),

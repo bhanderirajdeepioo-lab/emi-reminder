@@ -38,6 +38,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.text.NumberFormat
 import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +55,22 @@ fun RemindersScreen(
     var emiConfirmData by remember { mutableStateOf<DetectedEmiUiState?>(null) }
     var showEmiConfirmSheet by remember { mutableStateOf(false) }
     val onAddReminder: () -> Unit = remember { { showAddSheet = true } }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    fun onSwipeDelete(reminder: Reminder) {
+        viewModel.deleteReminder(reminder)
+        scope.launch {
+            val result = snackbarHostState.showSnackbar(
+                message = "${reminder.loanName} deleted",
+                actionLabel = "Undo",
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.undoDeleteReminder(reminder)
+            }
+        }
+    }
     val reminders by viewModel.reminders.collectAsState()
     val currencySymbol by viewModel.currencySymbol.collectAsState()
     val detectedEmis by viewModel.detectedEmis.collectAsState()
@@ -199,6 +217,7 @@ fun RemindersScreen(
                 Icon(Icons.Default.Add, contentDescription = "Add Reminder", tint = Color.White)
             }
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0.dp),
     ) { padding ->
@@ -258,20 +277,26 @@ fun RemindersScreen(
                         SectionHeader(label = "OVERDUE", count = filteredOverdue.size, color = UrgentRed)
                     }
                     items(filteredOverdue, key = { it.id }) { r ->
-                        ReminderCard(
+                        SwipeableReminderCard(
                             reminder = r,
-                            daysText = "Overdue",
-                            chipColor = UrgentRed,
-                            isOverdue = true,
-                            isDueSoon = false,
-                            isPaid = false,
-                            currencySymbol = currencySymbol,
-                            onClick = { r.loanId?.let { onReminderClick(it) } },
-                            onDelete = { viewModel.deleteReminder(r) },
-                            onEdit = { editingReminderId = r.id; showAddSheet = true },
-                            onAction = { viewModel.markAsPaid(r) },
-                            onToggle = { viewModel.toggleReminder(r) },
-                        )
+                            snackbarHostState = snackbarHostState,
+                            scope = scope,
+                            onDelete = ::onSwipeDelete,
+                        ) {
+                            ReminderCard(
+                                reminder = r,
+                                daysText = "Overdue",
+                                chipColor = UrgentRed,
+                                isOverdue = true,
+                                isDueSoon = false,
+                                isPaid = false,
+                                currencySymbol = currencySymbol,
+                                onClick = { r.loanId?.let { onReminderClick(it) } },
+                                onEdit = { editingReminderId = r.id; showAddSheet = true },
+                                onAction = { viewModel.markAsPaid(r) },
+                                onToggle = { viewModel.toggleReminder(r) },
+                            )
+                        }
                     }
                 }
 
@@ -296,20 +321,26 @@ fun RemindersScreen(
                             daysLeft <= 3  -> "Due in ${daysLeft}d ⚠"
                             else           -> "Due in ${daysLeft}d"
                         }
-                        ReminderCard(
+                        SwipeableReminderCard(
                             reminder = r,
-                            daysText = daysText,
-                            chipColor = urgencyColor,
-                            isOverdue = false,
-                            isDueSoon = daysLeft in 0..7,
-                            isPaid = false,
-                            currencySymbol = currencySymbol,
-                            onClick = { r.loanId?.let { onReminderClick(it) } },
-                            onDelete = { viewModel.deleteReminder(r) },
-                            onEdit = { editingReminderId = r.id; showAddSheet = true },
-                            onAction = { viewModel.remindNow(r) },
-                            onToggle = { viewModel.toggleReminder(r) },
-                        )
+                            snackbarHostState = snackbarHostState,
+                            scope = scope,
+                            onDelete = ::onSwipeDelete,
+                        ) {
+                            ReminderCard(
+                                reminder = r,
+                                daysText = daysText,
+                                chipColor = urgencyColor,
+                                isOverdue = false,
+                                isDueSoon = daysLeft in 0..7,
+                                isPaid = false,
+                                currencySymbol = currencySymbol,
+                                onClick = { r.loanId?.let { onReminderClick(it) } },
+                                onEdit = { editingReminderId = r.id; showAddSheet = true },
+                                onAction = { viewModel.remindNow(r) },
+                                onToggle = { viewModel.toggleReminder(r) },
+                            )
+                        }
                     }
                 }
 
@@ -318,20 +349,26 @@ fun RemindersScreen(
                         SectionHeader(label = "PAID / INACTIVE", count = filteredDone.size, color = Color(0xFF94A3B8))
                     }
                     items(filteredDone, key = { it.id }) { r ->
-                        ReminderCard(
+                        SwipeableReminderCard(
                             reminder = r,
-                            daysText = "",
-                            chipColor = Color(0xFFE5E7EB),
-                            isOverdue = false,
-                            isDueSoon = false,
-                            isPaid = true,
-                            currencySymbol = currencySymbol,
-                            onClick = { r.loanId?.let { onReminderClick(it) } },
-                            onDelete = { viewModel.deleteReminder(r) },
-                            onEdit = { editingReminderId = r.id; showAddSheet = true },
-                            onAction = { viewModel.reactivate(r) },
-                            onToggle = { viewModel.toggleReminder(r) },
-                        )
+                            snackbarHostState = snackbarHostState,
+                            scope = scope,
+                            onDelete = ::onSwipeDelete,
+                        ) {
+                            ReminderCard(
+                                reminder = r,
+                                daysText = "",
+                                chipColor = Color(0xFFE5E7EB),
+                                isOverdue = false,
+                                isDueSoon = false,
+                                isPaid = true,
+                                currencySymbol = currencySymbol,
+                                onClick = { r.loanId?.let { onReminderClick(it) } },
+                                onEdit = { editingReminderId = r.id; showAddSheet = true },
+                                onAction = { viewModel.reactivate(r) },
+                                onToggle = { viewModel.toggleReminder(r) },
+                            )
+                        }
                     }
                 }
             }
@@ -410,7 +447,6 @@ private fun ReminderCard(
     isPaid: Boolean,
     currencySymbol: String,
     onClick: () -> Unit,
-    onDelete: () -> Unit,
     onEdit: () -> Unit,
     onAction: () -> Unit,
     onToggle: () -> Unit = {},
@@ -454,10 +490,10 @@ private fun ReminderCard(
     }
 
     Card(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .clickable(onClick = onClick),
+            .padding(horizontal = 16.dp, vertical = 4.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = cardBg),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -528,11 +564,55 @@ private fun ReminderCard(
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                 }
-                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(15.dp))
-                }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeableReminderCard(
+    reminder: Reminder,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope,
+    onDelete: (Reminder) -> Unit,
+    content: @Composable () -> Unit,
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { it == SwipeToDismissBoxValue.EndToStart },
+        positionalThreshold = { totalDistance -> totalDistance * 0.4f },
+    )
+
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            onDelete(reminder)
+        }
+    }
+
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            val color = UrgentRed.copy(alpha = (dismissState.progress * 1.5f).coerceIn(0f, 1f))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(color),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(end = 20.dp),
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White, modifier = Modifier.size(24.dp))
+                    Text("Delete", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+        },
+    ) {
+        content()
     }
 }
 
