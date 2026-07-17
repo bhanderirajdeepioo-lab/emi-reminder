@@ -32,6 +32,7 @@ import com.emireminder.app.data.db.entity.BankAccount
 import com.emireminder.app.data.db.entity.ParsedTransaction
 import com.emireminder.app.domain.model.TransactionCategory
 import com.emireminder.app.domain.model.TransactionDirection
+import com.emireminder.app.ui.components.SwipeToEditRow
 import com.emireminder.app.ui.theme.*
 import java.text.NumberFormat
 import java.time.Instant
@@ -296,11 +297,16 @@ fun SmsDashboardScreen(
                             when (item) {
                                 is TransactionListItem.DateHeader -> DateGroupHeader(label = item.label)
                                 is TransactionListItem.TxnCard -> {
-                                    TransactionSmartCard(
-                                        txn = item.txn,
-                                        currencySymbol = uiState.currencySymbol,
-                                        onClick = { onNavigateToTransactionDetail(item.txn.id) },
-                                    )
+                                    SwipeToEditRow(
+                                        onEdit = { viewModel.openEditSheet(item.txn) },
+                                        verticalPadding = 0.dp,
+                                    ) {
+                                        TransactionSmartCard(
+                                            txn = item.txn,
+                                            currencySymbol = uiState.currencySymbol,
+                                            onClick = { onNavigateToTransactionDetail(item.txn.id) },
+                                        )
+                                    }
                                     Spacer(Modifier.height(8.dp))
                                 }
                             }

@@ -143,10 +143,10 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             // ScaffoldLayoutWithMeasureFix snapshotFlow to iterate a null IdentityArraySet entry
             // on focus-loss events (ANR: Input dispatching timed out after 5024 ms).
             modifier = Modifier.padding(innerPadding),
-            enterTransition = { slideInHorizontally(tween(280)) { it } },
-            exitTransition = { slideOutHorizontally(tween(280)) { -it } },
-            popEnterTransition = { slideInHorizontally(tween(280)) { -it } },
-            popExitTransition = { slideOutHorizontally(tween(280)) { it } },
+            enterTransition = { slideInHorizontally(tween(300)) { it } },
+            exitTransition = { slideOutHorizontally(tween(300)) { -it } },
+            popEnterTransition = { slideInHorizontally(tween(300)) { -it } },
+            popExitTransition = { slideOutHorizontally(tween(300)) { it } },
         ) {
             // 1 — Splash
             composable(NavRoutes.SPLASH) {

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.data.db.entity.Reminder
+import com.emireminder.app.ui.components.SwipeToDeleteRow
 import com.emireminder.app.ui.theme.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -258,20 +259,22 @@ fun RemindersScreen(
                         SectionHeader(label = "OVERDUE", count = filteredOverdue.size, color = UrgentRed)
                     }
                     items(filteredOverdue, key = { it.id }) { r ->
-                        ReminderCard(
-                            reminder = r,
-                            daysText = "Overdue",
-                            chipColor = UrgentRed,
-                            isOverdue = true,
-                            isDueSoon = false,
-                            isPaid = false,
-                            currencySymbol = currencySymbol,
-                            onClick = { r.loanId?.let { onReminderClick(it) } },
-                            onDelete = { viewModel.deleteReminder(r) },
-                            onEdit = { editingReminderId = r.id; showAddSheet = true },
-                            onAction = { viewModel.markAsPaid(r) },
-                            onToggle = { viewModel.toggleReminder(r) },
-                        )
+                        SwipeToDeleteRow(onDelete = { viewModel.deleteReminder(r) }) {
+                            ReminderCard(
+                                reminder = r,
+                                daysText = "Overdue",
+                                chipColor = UrgentRed,
+                                isOverdue = true,
+                                isDueSoon = false,
+                                isPaid = false,
+                                currencySymbol = currencySymbol,
+                                onClick = { r.loanId?.let { onReminderClick(it) } },
+                                onDelete = { viewModel.deleteReminder(r) },
+                                onEdit = { editingReminderId = r.id; showAddSheet = true },
+                                onAction = { viewModel.markAsPaid(r) },
+                                onToggle = { viewModel.toggleReminder(r) },
+                            )
+                        }
                     }
                 }
 
@@ -296,20 +299,22 @@ fun RemindersScreen(
                             daysLeft <= 3  -> "Due in ${daysLeft}d ⚠"
                             else           -> "Due in ${daysLeft}d"
                         }
-                        ReminderCard(
-                            reminder = r,
-                            daysText = daysText,
-                            chipColor = urgencyColor,
-                            isOverdue = false,
-                            isDueSoon = daysLeft in 0..7,
-                            isPaid = false,
-                            currencySymbol = currencySymbol,
-                            onClick = { r.loanId?.let { onReminderClick(it) } },
-                            onDelete = { viewModel.deleteReminder(r) },
-                            onEdit = { editingReminderId = r.id; showAddSheet = true },
-                            onAction = { viewModel.remindNow(r) },
-                            onToggle = { viewModel.toggleReminder(r) },
-                        )
+                        SwipeToDeleteRow(onDelete = { viewModel.deleteReminder(r) }) {
+                            ReminderCard(
+                                reminder = r,
+                                daysText = daysText,
+                                chipColor = urgencyColor,
+                                isOverdue = false,
+                                isDueSoon = daysLeft in 0..7,
+                                isPaid = false,
+                                currencySymbol = currencySymbol,
+                                onClick = { r.loanId?.let { onReminderClick(it) } },
+                                onDelete = { viewModel.deleteReminder(r) },
+                                onEdit = { editingReminderId = r.id; showAddSheet = true },
+                                onAction = { viewModel.remindNow(r) },
+                                onToggle = { viewModel.toggleReminder(r) },
+                            )
+                        }
                     }
                 }
 
@@ -318,20 +323,22 @@ fun RemindersScreen(
                         SectionHeader(label = "PAID / INACTIVE", count = filteredDone.size, color = Color(0xFF94A3B8))
                     }
                     items(filteredDone, key = { it.id }) { r ->
-                        ReminderCard(
-                            reminder = r,
-                            daysText = "",
-                            chipColor = Color(0xFFE5E7EB),
-                            isOverdue = false,
-                            isDueSoon = false,
-                            isPaid = true,
-                            currencySymbol = currencySymbol,
-                            onClick = { r.loanId?.let { onReminderClick(it) } },
-                            onDelete = { viewModel.deleteReminder(r) },
-                            onEdit = { editingReminderId = r.id; showAddSheet = true },
-                            onAction = { viewModel.reactivate(r) },
-                            onToggle = { viewModel.toggleReminder(r) },
-                        )
+                        SwipeToDeleteRow(onDelete = { viewModel.deleteReminder(r) }) {
+                            ReminderCard(
+                                reminder = r,
+                                daysText = "",
+                                chipColor = Color(0xFFE5E7EB),
+                                isOverdue = false,
+                                isDueSoon = false,
+                                isPaid = true,
+                                currencySymbol = currencySymbol,
+                                onClick = { r.loanId?.let { onReminderClick(it) } },
+                                onDelete = { viewModel.deleteReminder(r) },
+                                onEdit = { editingReminderId = r.id; showAddSheet = true },
+                                onAction = { viewModel.reactivate(r) },
+                                onToggle = { viewModel.toggleReminder(r) },
+                            )
+                        }
                     }
                 }
             }
