@@ -3,6 +3,8 @@ package com.emireminder.app.ui.navigation
 import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
@@ -143,10 +145,20 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             // ScaffoldLayoutWithMeasureFix snapshotFlow to iterate a null IdentityArraySet entry
             // on focus-loss events (ANR: Input dispatching timed out after 5024 ms).
             modifier = Modifier.padding(innerPadding),
-            enterTransition = { slideInHorizontally(tween(300)) { it } },
-            exitTransition = { slideOutHorizontally(tween(300)) { -it } },
-            popEnterTransition = { slideInHorizontally(tween(300)) { -it } },
-            popExitTransition = { slideOutHorizontally(tween(300)) { it } },
+            enterTransition = {
+                val isTabSwitch = initialState.destination.route in bottomNavRoutes
+                    && targetState.destination.route in bottomNavRoutes
+                if (isTabSwitch) fadeIn(tween(200))
+                else fadeIn(tween(300)) + slideInHorizontally(tween(300)) { it / 8 }
+            },
+            exitTransition = {
+                val isTabSwitch = initialState.destination.route in bottomNavRoutes
+                    && targetState.destination.route in bottomNavRoutes
+                if (isTabSwitch) fadeOut(tween(200))
+                else fadeOut(tween(300)) + slideOutHorizontally(tween(300)) { -it / 8 }
+            },
+            popEnterTransition = { fadeIn(tween(300)) + slideInHorizontally(tween(300)) { -it / 8 } },
+            popExitTransition = { fadeOut(tween(300)) + slideOutHorizontally(tween(300)) { it / 8 } },
         ) {
             // 1 — Splash
             composable(NavRoutes.SPLASH) {
