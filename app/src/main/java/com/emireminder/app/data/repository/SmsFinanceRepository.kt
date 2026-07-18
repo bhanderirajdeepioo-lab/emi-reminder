@@ -257,4 +257,17 @@ class SmsFinanceRepository @Inject constructor(
         return DateTimeFormatter.ofPattern("yyyy-MM").format(local)
     }
 
+    // ── Transaction CRUD (called by SmsDashboardViewModel) ─────────────────────
+
+    suspend fun deleteTransaction(transaction: ParsedTransactionEntity) {
+        parsedTransactionDao.delete(transaction)
+    }
+
+    suspend fun insertTransaction(transaction: ParsedTransactionEntity): Long =
+        parsedTransactionDao.insert(transaction)
+
+    suspend fun updateTransaction(transaction: ParsedTransactionEntity) {
+        parsedTransactionDao.update(transaction)
+    }
+
 }

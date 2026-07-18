@@ -8,6 +8,7 @@ import com.emireminder.app.data.db.entity.BankAccount
 import com.emireminder.app.data.db.entity.ParsedTransaction
 import com.emireminder.app.data.preferences.UserPreferencesRepository
 import com.emireminder.app.data.repository.BankAccountRepository
+import com.emireminder.app.data.repository.SmsFinanceRepository
 import com.emireminder.app.domain.model.TransactionCategory
 import com.emireminder.app.domain.model.TransactionDirection
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,6 +26,7 @@ class SmsDashboardViewModel @Inject constructor(
     private val autoDetectedEmiDao: AutoDetectedEmiDao,
     private val bankAccountRepository: BankAccountRepository,
     private val prefsRepository: UserPreferencesRepository,
+    private val smsFinanceRepository: SmsFinanceRepository,
 ) : ViewModel() {
 
     private val fmt = DateTimeFormatter.ofPattern("yyyy-MM")
@@ -46,6 +48,7 @@ class SmsDashboardViewModel @Inject constructor(
     private val _editingTransaction = MutableStateFlow<ParsedTransaction?>(null)
     private val _editSaveInProgress = MutableStateFlow(false)
     private val _editSaveError = MutableStateFlow<String?>(null)
+    private val _deleteError = MutableStateFlow<String?>(null)
     private val _selectedCategoryFilter = MutableStateFlow<TransactionCategory?>(null)
 
     private val _baseState: Flow<SmsDashboardUiState> = combine(
@@ -90,13 +93,15 @@ class SmsDashboardViewModel @Inject constructor(
         _editSaveInProgress,
         _editSaveError,
         _selectedCategoryFilter,
-    ) { base, editing, saving, error, filter ->
+    ) { base, editing, saving, editError, filter ->
         base.copy(
             editingTransaction = editing,
             editSaveInProgress = saving,
-            editSaveError = error,
+            editSaveError = editError,
             selectedCategoryFilter = filter,
         )
+    }.combine(_deleteError) { state, deleteErr ->
+        state.copy(deleteError = deleteErr)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -181,7 +186,7 @@ class SmsDashboardViewModel @Inject constructor(
                     notes = notes?.takeIf { it.isNotBlank() },
                     userVerified = true,
                 )
-                transactionDao.update(updated)
+                smsFinanceRepository.updateTransaction(updated)
 
                 if (original.isEmi && !lenderName.isNullOrBlank()) {
                     val emi = autoDetectedEmiDao.getByTransactionId(id)
@@ -197,6 +202,30 @@ class SmsDashboardViewModel @Inject constructor(
                 _editSaveInProgress.value = false
             }
         }
+    }
+
+    fun deleteTransaction(txn: ParsedTransaction) {
+        viewModelScope.launch {
+            try {
+                smsFinanceRepository.deleteTransaction(txn)
+            } catch (e: Exception) {
+                _deleteError.value = e.message ?: "Delete failed"
+            }
+        }
+    }
+
+    fun undoDeleteTransaction(txn: ParsedTransaction) {
+        viewModelScope.launch {
+            try {
+                smsFinanceRepository.insertTransaction(txn)
+            } catch (e: Exception) {
+                _deleteError.value = e.message ?: "Undo failed"
+            }
+        }
+    }
+
+    fun clearDeleteError() {
+        _deleteError.value = null
     }
 
     private fun computeSummary(txns: List<ParsedTransaction>): MonthlySummaryData {

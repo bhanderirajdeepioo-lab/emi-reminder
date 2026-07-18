@@ -54,6 +54,7 @@ data class SmsDashboardUiState(
     val editingTransaction: ParsedTransaction? = null,
     val editSaveInProgress: Boolean = false,
     val editSaveError: String? = null,
+    val deleteError: String? = null,
     /** Null = show All; non-null = filter to this category. */
     val selectedCategoryFilter: TransactionCategory? = null,
 ) {
