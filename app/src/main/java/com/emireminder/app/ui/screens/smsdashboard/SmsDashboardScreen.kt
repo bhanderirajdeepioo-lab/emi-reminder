@@ -311,13 +311,15 @@ fun SmsDashboardScreen(
                                         onEdit = { viewModel.openEditSheet(item.txn) },
                                         verticalPadding = 0.dp,
                                     ) {
-                                        TransactionSmartCard(
-                                            txn = item.txn,
-                                            currencySymbol = uiState.currencySymbol,
-                                            onClick = { onNavigateToTransactionDetail(item.txn.id) },
-                                        )
+                                        Column {
+                                            TransactionSmartCard(
+                                                txn = item.txn,
+                                                currencySymbol = uiState.currencySymbol,
+                                                onClick = { onNavigateToTransactionDetail(item.txn.id) },
+                                            )
+                                            Spacer(Modifier.height(8.dp))
+                                        }
                                     }
-                                    Spacer(Modifier.height(8.dp))
                                 }
                             }
                         }
