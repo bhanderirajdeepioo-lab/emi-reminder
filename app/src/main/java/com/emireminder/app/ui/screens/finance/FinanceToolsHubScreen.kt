@@ -259,7 +259,6 @@ fun FinanceToolsHubScreen(
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(bottom = 24.dp),
         ) {
             // Search bar
             item {
