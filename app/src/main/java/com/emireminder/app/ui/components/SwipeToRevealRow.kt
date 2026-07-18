@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -59,7 +60,7 @@ fun SwipeToDeleteRow(
         backgroundContent = {
             val bg by animateColorAsState(
                 targetValue = if (state.targetValue == SwipeToDismissBoxValue.EndToStart)
-                    Color(0xFFEF4444) else Color.Transparent,
+                    MaterialTheme.colorScheme.error else Color.Transparent,
                 animationSpec = tween(150),
                 label = "swipe_delete_bg",
             )
@@ -116,7 +117,7 @@ fun SwipeToEditRow(
         backgroundContent = {
             val bg by animateColorAsState(
                 targetValue = if (state.targetValue == SwipeToDismissBoxValue.EndToStart)
-                    Color(0xFF6366F1) else Color.Transparent,
+                    MaterialTheme.colorScheme.primary else Color.Transparent,
                 animationSpec = tween(150),
                 label = "swipe_edit_bg",
             )
