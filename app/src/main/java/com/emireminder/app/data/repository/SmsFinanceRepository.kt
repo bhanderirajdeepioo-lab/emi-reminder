@@ -6,6 +6,7 @@ import com.emireminder.app.data.db.entity.MonthlyFinanceSummary
 import com.emireminder.app.data.db.entity.ParsedTransaction as ParsedTransactionEntity
 import com.emireminder.app.domain.model.TransactionCategory
 import com.emireminder.app.domain.model.TransactionDirection
+import com.emireminder.app.sms.MerchantClassifier
 import com.emireminder.app.sms.SmsParser
 import com.emireminder.app.sms.TransactionCategory as SmsCategory
 import java.text.SimpleDateFormat
@@ -51,8 +52,9 @@ class SmsFinanceRepository @Inject constructor(
         val bankName = SmsParser.extractBankName(senderAddress, body)
         val bankAccountId = bankAccountRepository.resolveAccount(senderAddress, bankName, last4)
 
-        val direction = mapDirection(parsed.category)
-        val domainCategory = mapCategory(parsed.category)
+        val enrichedCategory = enrichWithMerchant(parsed.category, body, parsed.vpa, parsed.merchantName)
+        val direction = mapDirection(enrichedCategory)
+        val domainCategory = mapCategory(enrichedCategory)
         val transactionDate = parseTransactionDate(parsed.date, receivedAtMs)
         val yearMonth = formatYearMonth(transactionDate)
         val isEmi = parsed.category == SmsCategory.EMI_DEBIT
@@ -107,8 +109,9 @@ class SmsFinanceRepository @Inject constructor(
         val bankName = SmsParser.extractBankName(senderAddress, body)
         val bankAccountId = bankAccountRepository.resolveAccount(senderAddress, bankName, last4)
 
-        val direction = mapDirection(parsed.category)
-        val domainCategory = mapCategory(parsed.category)
+        val enrichedCategory = enrichWithMerchant(parsed.category, body, parsed.vpa, parsed.merchantName)
+        val direction = mapDirection(enrichedCategory)
+        val domainCategory = mapCategory(enrichedCategory)
         val transactionDate = parseTransactionDate(parsed.date, dateMs)
         val yearMonth = formatYearMonth(transactionDate)
         val isEmi = parsed.category == SmsCategory.EMI_DEBIT
@@ -183,6 +186,16 @@ class SmsFinanceRepository @Inject constructor(
             createdAt     = existing?.createdAt ?: System.currentTimeMillis(),
         )
         monthlyFinanceSummaryDao.insert(summary)
+    }
+
+    private fun enrichWithMerchant(
+        category: SmsCategory,
+        body: String,
+        vpa: String?,
+        merchantName: String?,
+    ): SmsCategory {
+        if (category != SmsCategory.UPI_DEBIT && category != SmsCategory.UNKNOWN) return category
+        return MerchantClassifier.classify(body, vpa, merchantName) ?: category
     }
 
     private fun mapDirection(category: SmsCategory): TransactionDirection = when (category) {
