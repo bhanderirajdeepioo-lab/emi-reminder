@@ -2,11 +2,16 @@ package com.emireminder.app.ui.navigation
 
 import android.content.Context
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -689,52 +694,67 @@ private fun PillNavItem(item: NavItem, selected: Boolean, onClick: () -> Unit, m
         modifier = modifier.fillMaxHeight(),
         contentAlignment = Alignment.Center,
     ) {
-        if (selected) {
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50.dp))
-                    .background(Indigo600)
-                    .clickable(onClick = onClick)
-                    .padding(horizontal = 14.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Icon(
-                    item.filledIcon,
-                    contentDescription = item.label,
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp),
-                )
-                Text(
-                    item.label,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White,
-                    maxLines = 1,
-                )
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50.dp))
-                    .clickable(onClick = onClick)
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Icon(
-                    item.outlinedIcon,
-                    contentDescription = item.label,
-                    tint = Color(0xFF94A3B8),
-                    modifier = Modifier.size(20.dp),
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    item.label,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color(0xFF94A3B8),
-                    maxLines = 1,
-                )
+        AnimatedContent(
+            targetState = selected,
+            transitionSpec = {
+                fadeIn(spring(stiffness = Spring.StiffnessMediumLow))
+                    .togetherWith(fadeOut(spring(stiffness = Spring.StiffnessMediumLow)))
+                    .using(SizeTransform { _, _ ->
+                        spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMediumLow,
+                        )
+                    })
+            },
+            label = "pill_${item.label}",
+        ) { isSelected ->
+            if (isSelected) {
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50.dp))
+                        .background(Indigo600)
+                        .clickable(onClick = onClick)
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Icon(
+                        item.filledIcon,
+                        contentDescription = item.label,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(
+                        item.label,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White,
+                        maxLines = 1,
+                    )
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50.dp))
+                        .clickable(onClick = onClick)
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Icon(
+                        item.outlinedIcon,
+                        contentDescription = item.label,
+                        tint = Color(0xFF94A3B8),
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        item.label,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF94A3B8),
+                        maxLines = 1,
+                    )
+                }
             }
         }
     }
