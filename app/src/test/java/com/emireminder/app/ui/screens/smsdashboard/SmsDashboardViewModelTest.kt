@@ -264,6 +264,96 @@ class SmsDashboardViewModelTest {
         assertEquals(50000.0, state.previousSummary!!.totalIncome, 0.01)
     }
 
+    // ── HEL-621: categoriesWithTransactions (AC-11 / AC-12 / AC-13 / AC-15) ──────
+
+    @Test
+    fun `AC-11 categoriesWithTransactions excludes FOOD_AND_DINING when no food txns`() = runTest {
+        val txns = listOf(makeTxn(TransactionCategory.INCOME, TransactionDirection.CREDIT, 50000.0))
+        every { transactionDao.getByMonth(any()) } returns flowOf(txns)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
+        var state = viewModel.uiState.value
+        backgroundScope.launch { viewModel.uiState.collect { state = it } }
+        advanceUntilIdle()
+        assertFalse(TransactionCategory.FOOD_AND_DINING in state.categoriesWithTransactions)
+    }
+
+    @Test
+    fun `AC-12 categoriesWithTransactions includes FOOD_AND_DINING when food txn present`() = runTest {
+        val txns = listOf(makeTxn(TransactionCategory.FOOD_AND_DINING, TransactionDirection.DEBIT, 500.0))
+        every { transactionDao.getByMonth(any()) } returns flowOf(txns)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
+        var state = viewModel.uiState.value
+        backgroundScope.launch { viewModel.uiState.collect { state = it } }
+        advanceUntilIdle()
+        assertTrue(TransactionCategory.FOOD_AND_DINING in state.categoriesWithTransactions)
+    }
+
+    @Test
+    fun `AC-13 each spend-vertical chip is tracked independently`() = runTest {
+        val txns = listOf(
+            makeTxn(TransactionCategory.FOOD_AND_DINING, TransactionDirection.DEBIT, 500.0),
+            makeTxn(TransactionCategory.SHOPPING,         TransactionDirection.DEBIT, 300.0),
+        )
+        every { transactionDao.getByMonth(any()) } returns flowOf(txns)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
+        var state = viewModel.uiState.value
+        backgroundScope.launch { viewModel.uiState.collect { state = it } }
+        advanceUntilIdle()
+        assertTrue(TransactionCategory.FOOD_AND_DINING in state.categoriesWithTransactions)
+        assertTrue(TransactionCategory.SHOPPING in state.categoriesWithTransactions)
+        assertFalse(TransactionCategory.TRANSPORT in state.categoriesWithTransactions)
+        assertFalse(TransactionCategory.HEALTH in state.categoriesWithTransactions)
+        assertFalse(TransactionCategory.BANK_CHARGES in state.categoriesWithTransactions)
+    }
+
+    @Test
+    fun `AC-14 non-spend-vertical categories are always tracked when present`() = runTest {
+        val txns = listOf(
+            makeTxn(TransactionCategory.INCOME,        TransactionDirection.CREDIT, 50000.0),
+            makeTxn(TransactionCategory.EMI_AND_LOANS, TransactionDirection.DEBIT,  10000.0),
+            makeTxn(TransactionCategory.UTILITIES,     TransactionDirection.DEBIT,   1000.0),
+            makeTxn(TransactionCategory.ATM_AND_CASH,  TransactionDirection.DEBIT,    500.0),
+            makeTxn(TransactionCategory.UNCATEGORISED, TransactionDirection.DEBIT,    200.0),
+        )
+        every { transactionDao.getByMonth(any()) } returns flowOf(txns)
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
+        var state = viewModel.uiState.value
+        backgroundScope.launch { viewModel.uiState.collect { state = it } }
+        advanceUntilIdle()
+        assertTrue(TransactionCategory.INCOME in state.categoriesWithTransactions)
+        assertTrue(TransactionCategory.EMI_AND_LOANS in state.categoriesWithTransactions)
+        assertTrue(TransactionCategory.UTILITIES in state.categoriesWithTransactions)
+        assertTrue(TransactionCategory.ATM_AND_CASH in state.categoriesWithTransactions)
+        assertTrue(TransactionCategory.UNCATEGORISED in state.categoriesWithTransactions)
+    }
+
+    @Test
+    fun `AC-15 categoriesWithTransactions updates when period changes`() = runTest {
+        val currentYm = YearMonth.now().format(fmt)
+        val prevYm = YearMonth.now().minusMonths(1).format(fmt)
+        every { transactionDao.getByMonth(currentYm) } returns flowOf(
+            listOf(makeTxn(TransactionCategory.FOOD_AND_DINING, TransactionDirection.DEBIT, 500.0))
+        )
+        every { transactionDao.getByMonth(prevYm) } returns flowOf(
+            listOf(makeTxn(TransactionCategory.TRANSPORT, TransactionDirection.DEBIT, 200.0))
+        )
+        viewModel = SmsDashboardViewModel(transactionDao, autoDetectedEmiDao, bankAccountRepository, prefsRepository)
+        val states = mutableListOf<SmsDashboardUiState>()
+        backgroundScope.launch { viewModel.uiState.collect { states.add(it) } }
+        advanceUntilIdle()
+
+        val currentState = states.last()
+        assertTrue(TransactionCategory.FOOD_AND_DINING in currentState.categoriesWithTransactions)
+        assertFalse(TransactionCategory.TRANSPORT in currentState.categoriesWithTransactions)
+
+        viewModel.previousMonth()
+        advanceUntilIdle()
+
+        val prevState = viewModel.uiState.value
+        assertFalse(TransactionCategory.FOOD_AND_DINING in prevState.categoriesWithTransactions)
+        assertTrue(TransactionCategory.TRANSPORT in prevState.categoriesWithTransactions)
+    }
+
     private fun makeTxn(
         category: TransactionCategory,
         direction: TransactionDirection,

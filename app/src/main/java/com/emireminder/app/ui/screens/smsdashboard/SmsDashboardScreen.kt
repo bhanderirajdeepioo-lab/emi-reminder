@@ -79,6 +79,16 @@ private val categoryFilterOrder = listOf(
     TransactionCategory.UNCATEGORISED,
 )
 
+// Only these five chips are conditional — hidden when no transactions exist in the period.
+// All other chips remain always-visible regardless of period data.
+private val spendVerticalCategories = setOf(
+    TransactionCategory.FOOD_AND_DINING,
+    TransactionCategory.TRANSPORT,
+    TransactionCategory.SHOPPING,
+    TransactionCategory.HEALTH,
+    TransactionCategory.BANK_CHARGES,
+)
+
 // ─── Date-grouped flat list helpers ───────────────────────────────────────────
 
 private sealed interface TransactionListItem {
@@ -581,7 +591,9 @@ private fun CategoryFilterChipBar(
     onFilterSelected: (TransactionCategory?) -> Unit,
 ) {
     val visibleCategories = remember(categoriesWithTransactions) {
-        categoryFilterOrder.filter { it in categoriesWithTransactions }
+        categoryFilterOrder.filter { cat ->
+            cat !in spendVerticalCategories || cat in categoriesWithTransactions
+        }
     }
 
     LazyRow(
