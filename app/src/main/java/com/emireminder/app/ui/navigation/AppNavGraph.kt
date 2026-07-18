@@ -2,9 +2,16 @@ package com.emireminder.app.ui.navigation
 
 import android.content.Context
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -143,10 +150,22 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             // ScaffoldLayoutWithMeasureFix snapshotFlow to iterate a null IdentityArraySet entry
             // on focus-loss events (ANR: Input dispatching timed out after 5024 ms).
             modifier = Modifier.padding(innerPadding),
-            enterTransition = { slideInHorizontally(tween(300)) { it } },
-            exitTransition = { slideOutHorizontally(tween(300)) { -it } },
-            popEnterTransition = { slideInHorizontally(tween(300)) { -it } },
-            popExitTransition = { slideOutHorizontally(tween(300)) { it } },
+            enterTransition = {
+                if (initialState.destination.route in bottomNavRoutes && targetState.destination.route in bottomNavRoutes) {
+                    fadeIn(tween(200))
+                } else {
+                    fadeIn(tween(300)) + slideInHorizontally(tween(300)) { it / 8 }
+                }
+            },
+            exitTransition = {
+                if (initialState.destination.route in bottomNavRoutes && targetState.destination.route in bottomNavRoutes) {
+                    fadeOut(tween(200))
+                } else {
+                    fadeOut(tween(300)) + slideOutHorizontally(tween(300)) { -it / 8 }
+                }
+            },
+            popEnterTransition = { fadeIn(tween(300)) + slideInHorizontally(tween(300)) { -it / 8 } },
+            popExitTransition = { fadeOut(tween(300)) + slideOutHorizontally(tween(300)) { it / 8 } },
         ) {
             // 1 — Splash
             composable(NavRoutes.SPLASH) {
@@ -677,7 +696,18 @@ private fun PillNavItem(item: NavItem, selected: Boolean, onClick: () -> Unit, m
         modifier = modifier.fillMaxHeight(),
         contentAlignment = Alignment.Center,
     ) {
-        if (selected) {
+        AnimatedContent(
+            targetState = selected,
+            transitionSpec = {
+                fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) togetherWith
+                    fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) using
+                    SizeTransform(clip = false) { _, _ ->
+                        spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow)
+                    }
+            },
+            label = "pill_nav_${item.label}",
+        ) { isSelected ->
+        if (isSelected) {
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
@@ -724,6 +754,7 @@ private fun PillNavItem(item: NavItem, selected: Boolean, onClick: () -> Unit, m
                     maxLines = 1,
                 )
             }
+        }
         }
     }
 }

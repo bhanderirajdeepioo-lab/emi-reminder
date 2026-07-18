@@ -2,7 +2,10 @@ package com.emireminder.app.ui.screens.smsdashboard
 
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -428,8 +431,8 @@ private fun ExpandableSmsSection(rawBody: String) {
             }
             AnimatedVisibility(
                 visible = expanded,
-                enter = expandVertically(),
-                exit = shrinkVertically(),
+                enter = expandVertically(tween(300)) + fadeIn(tween(300)),
+                exit = shrinkVertically(tween(300)) + fadeOut(tween(300)),
             ) {
                 Column {
                     HorizontalDivider(color = Color(0xFFFDE68A))
