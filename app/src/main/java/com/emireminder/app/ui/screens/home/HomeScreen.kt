@@ -109,7 +109,6 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(bottom = 72.dp),
         ) {
             item {
                 DashboardHeader(

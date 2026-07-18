@@ -226,7 +226,6 @@ fun RemindersScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(bottom = 72.dp),
             ) {
                 // ── EMI Auto-Detection cards (top banner, AC #2) ───────────────────
                 if (detectedEmis.isNotEmpty()) {
