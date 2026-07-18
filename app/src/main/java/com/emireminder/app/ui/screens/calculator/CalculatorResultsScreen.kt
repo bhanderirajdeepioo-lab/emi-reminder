@@ -1,6 +1,8 @@
 package com.emireminder.app.ui.screens.calculator
 
+import android.app.Activity
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,6 +18,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.emireminder.app.ads.InterstitialAdManager
 import com.emireminder.app.ui.theme.*
 import java.text.NumberFormat
 import java.util.Locale
@@ -59,12 +63,26 @@ fun CalculatorResultsScreen(
     fun fmtAmt(amount: Double): String = "$currencySymbol${numFmt.format(amount)}"
     val context = LocalContext.current
     var showReminderSheet by remember { mutableStateOf(false) }
+    val enteredAt = remember { System.currentTimeMillis() }
+
+    LaunchedEffect(Unit) { InterstitialAdManager.preload(context) }
+
+    val handleBack = {
+        val activity = context as? Activity
+        if (activity != null && System.currentTimeMillis() - enteredAt >= 3_000L) {
+            InterstitialAdManager.showIfAvailable(activity) { onBack() }
+        } else {
+            onBack()
+        }
+    }
+
+    BackHandler { handleBack() }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("EMI Results", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) } },
+                navigationIcon = { IconButton(onClick = { handleBack() }) { Icon(Icons.Default.ArrowBack, null) } },
                 actions = {
                     IconButton(onClick = {
                         val shareText = buildString {

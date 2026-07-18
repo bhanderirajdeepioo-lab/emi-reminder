@@ -1,5 +1,6 @@
 package com.emireminder.app.ui.screens.loan
 
+import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,7 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.emireminder.app.ads.InterstitialAdManager
 import com.emireminder.app.domain.model.LoanType
 import com.emireminder.app.ui.theme.Indigo50
 import com.emireminder.app.ui.theme.Indigo600
@@ -39,6 +42,7 @@ fun AddLoanScreen(
     val fmt = remember { NumberFormat.getCurrencyInstance(Locale("en", "IN")) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     BackHandler { onBack() }
 
@@ -310,8 +314,15 @@ fun AddLoanScreen(
             Button(
                 onClick = {
                     saving = true
+                    val activity = context as? Activity
                     viewModel.save(
-                        onSuccess = onBack,
+                        onSuccess = {
+                            if (activity != null) {
+                                InterstitialAdManager.showIfAvailable(activity) { onBack() }
+                            } else {
+                                onBack()
+                            }
+                        },
                         onError = {
                             saving = false
                             scope.launch { snackbarHostState.showSnackbar("Failed to save loan. Please try again.") }

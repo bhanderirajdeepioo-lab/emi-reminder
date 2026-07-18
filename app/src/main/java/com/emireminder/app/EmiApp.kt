@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.emireminder.app.ads.AppOpenAdManager
+import com.emireminder.app.ads.InterstitialAdManager
 import com.emireminder.app.data.db.AppDatabase
 import com.google.android.gms.ads.MobileAds
 import dagger.hilt.android.HiltAndroidApp
@@ -40,6 +41,7 @@ class EmiApp : Application(), Configuration.Provider {
         super.onCreate()
         MobileAds.initialize(this) {}
         AppOpenAdManager.initialize(this)
+        InterstitialAdManager.preload(this)
         createNotificationChannels()
         warmupDatabase()
     }
