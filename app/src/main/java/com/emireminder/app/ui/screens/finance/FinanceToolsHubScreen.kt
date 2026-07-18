@@ -204,6 +204,10 @@ fun FinanceToolsHubScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        // Zero out window insets — the outer Scaffold in AppNavGraph already accounts for the
+        // navigation bar via its innerPadding (PillNavBar height). Without this, the default
+        // safeDrawing insets add a second navigationBars.bottom gap below the content (HEL-629).
+        contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             Box(
                 modifier = Modifier
