@@ -1,13 +1,15 @@
 package com.emireminder.app.receiver
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.provider.Telephony
+import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
-import com.emireminder.app.data.db.entity.SMSImport
-import com.emireminder.app.data.repository.ReminderRepository
-import com.emireminder.app.sms.SmsParser
+import com.emireminder.app.data.repository.SmsFinanceRepository
+import com.emireminder.app.service.SmsMonitorController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,32 +19,35 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class SMSReceiver : BroadcastReceiver() {
 
-    @Inject lateinit var reminderRepository: ReminderRepository
+    @Inject lateinit var smsFinanceRepository: SmsFinanceRepository
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
-        val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
 
+        if (!hasReceiveSmsPermission(context)) {
+            SmsMonitorController.stop(context)
+            return
+        }
+
+        val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
         val pendingResult = goAsync()
+
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
                 messages.forEach { sms ->
-                    val result = SmsParser.parse(sms.originatingAddress ?: "", sms.messageBody ?: "")
-                    if (result.confidence >= 0.4f) {
-                        reminderRepository.insertSmsImport(
-                            SMSImport(
-                                senderAddress     = sms.originatingAddress ?: "",
-                                rawBody           = sms.messageBody ?: "",
-                                detectedLoanName  = result.bank.name,
-                                detectedEmiAmount = result.emiAmount,
-                                detectedDueDate   = "",
-                            ),
-                        )
-                    }
+                    smsFinanceRepository.processIncomingSms(
+                        senderAddress = sms.originatingAddress ?: return@forEach,
+                        body          = sms.messageBody ?: return@forEach,
+                        receivedAtMs  = sms.timestampMillis,
+                    )
                 }
             } finally {
                 pendingResult.finish()
             }
         }
     }
+
+    private fun hasReceiveSmsPermission(context: Context): Boolean =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.RECEIVE_SMS) ==
+            PackageManager.PERMISSION_GRANTED
 }

@@ -1,5 +1,10 @@
 package com.emireminder.app.ui.screens.calculator
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -109,28 +114,34 @@ fun SIPCalculatorScreen(
                 shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        if (state.selectedTab == SipTab.LUMPSUM) "Lump Sum Amount" else "Monthly SIP Amount",
-                        fontSize = 11.sp, color = Color(0xFF64748B),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    val displayAmt = if (state.selectedTab == SipTab.LUMPSUM) state.lumpSumAmount else state.monthlyAmount
-                    Text(fmtSip(displayAmt.toDouble()), fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Slate800)
-                    if (state.selectedTab == SipTab.LUMPSUM) {
-                        Slider(
-                            value = state.lumpSumAmount,
-                            onValueChange = { viewModel.setLumpSumAmount(it) },
-                            valueRange = 10_000f..50_00_000f,
-                            colors = SliderDefaults.colors(thumbColor = Indigo600, activeTrackColor = Indigo600, inactiveTrackColor = Indigo100),
+                AnimatedContent(
+                    targetState = state.selectedTab,
+                    transitionSpec = { fadeIn(tween(200)).togetherWith(fadeOut(tween(200))) },
+                    label = "sip_tab_body",
+                ) { tab ->
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            if (tab == SipTab.LUMPSUM) "Lump Sum Amount" else "Monthly SIP Amount",
+                            fontSize = 11.sp, color = Color(0xFF64748B),
                         )
-                    } else {
-                        Slider(
-                            value = state.monthlyAmount,
-                            onValueChange = { viewModel.setMonthlyAmount(it) },
-                            valueRange = 500f..2_00_000f,
-                            colors = SliderDefaults.colors(thumbColor = Indigo600, activeTrackColor = Indigo600, inactiveTrackColor = Indigo100),
-                        )
+                        Spacer(Modifier.height(4.dp))
+                        val displayAmt = if (tab == SipTab.LUMPSUM) state.lumpSumAmount else state.monthlyAmount
+                        Text(fmtSip(displayAmt.toDouble()), fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Slate800)
+                        if (tab == SipTab.LUMPSUM) {
+                            Slider(
+                                value = state.lumpSumAmount,
+                                onValueChange = { viewModel.setLumpSumAmount(it) },
+                                valueRange = 10_000f..50_00_000f,
+                                colors = SliderDefaults.colors(thumbColor = Indigo600, activeTrackColor = Indigo600, inactiveTrackColor = Indigo100),
+                            )
+                        } else {
+                            Slider(
+                                value = state.monthlyAmount,
+                                onValueChange = { viewModel.setMonthlyAmount(it) },
+                                valueRange = 500f..2_00_000f,
+                                colors = SliderDefaults.colors(thumbColor = Indigo600, activeTrackColor = Indigo600, inactiveTrackColor = Indigo100),
+                            )
+                        }
                     }
                 }
             }

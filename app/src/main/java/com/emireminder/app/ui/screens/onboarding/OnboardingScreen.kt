@@ -6,6 +6,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,6 +31,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -77,6 +80,8 @@ private val pages = listOf(
 fun OnboardingScreen(onComplete: () -> Unit, onSkip: () -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val density = LocalDensity.current
+    val slideOffset = remember(density) { with(density) { 48.dp.roundToPx() } }
 
     // Use remember (not rememberSaveable) so a Bundle-restored page index from a previous
     // interrupted onboarding session cannot put a returning user on page 2 unexpectedly (HEL-217).
@@ -173,8 +178,12 @@ fun OnboardingScreen(onComplete: () -> Unit, onSkip: () -> Unit) {
                 .fillMaxSize()
                 .padding(start = 24.dp, end = 24.dp, top = 72.dp, bottom = 200.dp),
             transitionSpec = {
-                (fadeIn(tween(400)) + slideInHorizontally(tween(400)) { it / 4 })
-                    .togetherWith(fadeOut(tween(200)) + slideOutHorizontally(tween(400)) { -it / 4 })
+                (fadeIn(tween(300, easing = LinearEasing)) +
+                    slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { slideOffset })
+                    .togetherWith(
+                        fadeOut(tween(200, easing = LinearEasing)) +
+                            slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -slideOffset }
+                    )
             },
             contentAlignment = Alignment.Center,
             label = "onboarding_page",

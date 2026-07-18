@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844"
+     font-family="-apple-system, system-ui, sans-serif" stroke="none">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background: dimmed Finance Dashboard (simplified) -->
+  <rect width="390" height="844" fill="#EEF2FF"/>
+  <rect width="390" height="48" fill="#4F46E5"/>
+  <text x="16" y="32" font-size="12" fill="#C7D2FE">9:41</text>
+  <rect x="340" y="16" width="36" height="16" rx="3" fill="none" stroke="#C7D2FE" stroke-width="1.5"/>
+  <rect x="342" y="19" width="24" height="10" rx="1" fill="#C7D2FE"/>
+  <rect x="0" y="48" width="390" height="56" fill="url(#hdr)"/>
+  <text x="20" y="84" font-size="20" font-weight="800" fill="#FFFFFF">Finance</text>
+  <!-- Month selector bar -->
+  <rect x="16" y="116" width="358" height="40" rx="12" fill="#FFFFFF" opacity="0.7"/>
+  <text x="195" y="141" font-size="14" font-weight="700" text-anchor="middle" fill="#94A3B8">July 2026</text>
+  <!-- Summary card ghosts -->
+  <rect x="16" y="168" width="174" height="72" rx="14" fill="#FFFFFF" opacity="0.6"/>
+  <rect x="200" y="168" width="174" height="72" rx="14" fill="#FFFFFF" opacity="0.6"/>
+  <rect x="16" y="250" width="174" height="72" rx="14" fill="#FFFFFF" opacity="0.6"/>
+  <rect x="200" y="250" width="174" height="72" rx="14" fill="#FFFFFF" opacity="0.6"/>
+  <!-- Category bars ghost -->
+  <rect x="16" y="340" width="358" height="124" rx="14" fill="#FFFFFF" opacity="0.6"/>
+
+  <!-- Dark scrim overlay -->
+  <rect width="390" height="844" fill="#0F172A" opacity="0.60"/>
+
+  <!-- Bottom sheet -->
+  <rect x="0" y="388" width="390" height="456" rx="24" fill="#FFFFFF"/>
+
+  <!-- Drag handle -->
+  <rect x="163" y="402" width="64" height="4" rx="2" fill="#E2E8F0"/>
+
+  <!-- Bank icon circle -->
+  <circle cx="195" cy="446" r="28" fill="#EEF2FF"/>
+  <rect x="179" y="433" width="32" height="20" rx="4" fill="#4F46E5"/>
+  <text x="195" y="448" font-size="10" font-weight="700" text-anchor="middle" fill="#FFFFFF">HDFC</text>
+  <!-- "New account" badge -->
+  <circle cx="218" cy="431" r="9" fill="#059669"/>
+  <text x="218" y="435" font-size="10" font-weight="700" text-anchor="middle" fill="#FFFFFF">+</text>
+
+  <!-- Sheet header -->
+  <text x="195" y="492" font-size="17" font-weight="800" text-anchor="middle" fill="#1E293B">New HDFC account detected</text>
+  <text x="195" y="510" font-size="13" text-anchor="middle" fill="#64748B">Account ending in 5678</text>
+
+  <!-- Divider -->
+  <line x1="20" y1="526" x2="370" y2="526" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- Body copy -->
+  <text x="195" y="550" font-size="14" font-weight="600" text-anchor="middle" fill="#1E293B">What is this account?</text>
+  <text x="195" y="568" font-size="12" text-anchor="middle" fill="#64748B">Give it a name so you can tell it apart.</text>
+
+  <!-- 3 quick-select chips (equal width, 8px gaps) -->
+  <!-- Salary Account -->
+  <rect x="16" y="586" width="114" height="44" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="73" y="613" font-size="12" font-weight="600" text-anchor="middle" fill="#1E293B">Salary Account</text>
+
+  <!-- Savings Account -->
+  <rect x="138" y="586" width="114" height="44" rx="10" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="195" y="613" font-size="12" font-weight="600" text-anchor="middle" fill="#1E293B">Savings Account</text>
+
+  <!-- Other (selected state) -->
+  <rect x="260" y="586" width="114" height="44" rx="10" fill="#EEF2FF" stroke="#4F46E5" stroke-width="2"/>
+  <text x="317" y="608" font-size="12" font-weight="600" text-anchor="middle" fill="#4F46E5">Other</text>
+  <circle cx="349" cy="621" r="7" fill="#4F46E5"/>
+  <text x="349" y="625" font-size="9" font-weight="700" text-anchor="middle" fill="#FFFFFF">✓</text>
+
+  <!-- Custom name text field (appears when Other is selected) -->
+  <rect x="16" y="646" width="358" height="52" rx="12" fill="#FFFFFF" stroke="#4F46E5" stroke-width="1.5"/>
+  <text x="32" y="663" font-size="10" fill="#4F46E5">ACCOUNT NAME</text>
+  <text x="32" y="683" font-size="14" fill="#CBD5E1">e.g. Joint Account, Business Savings…</text>
+  <!-- Text cursor -->
+  <rect x="32" y="668" width="2" height="18" rx="1" fill="#4F46E5" opacity="0.8"/>
+
+  <!-- Settings note -->
+  <text x="195" y="718" font-size="11" text-anchor="middle" fill="#94A3B8">You can rename accounts anytime in Settings</text>
+
+  <!-- CTAs -->
+  <!-- Save Name (primary, indigo) -->
+  <rect x="16" y="732" width="210" height="52" rx="14" fill="#4F46E5"/>
+  <text x="121" y="763" font-size="14" font-weight="700" text-anchor="middle" fill="#FFFFFF">Save Name</text>
+
+  <!-- Skip for now (ghost) -->
+  <rect x="234" y="732" width="140" height="52" rx="14" fill="none" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="304" y="763" font-size="14" font-weight="600" text-anchor="middle" fill="#64748B">Skip for now</text>
+
+  <!-- Home indicator bar -->
+  <rect x="0" y="800" width="390" height="44" fill="#FFFFFF" opacity="0.96"/>
+  <rect x="140" y="820" width="110" height="5" rx="2.5" fill="#1E293B" opacity="0.2"/>
+</svg>

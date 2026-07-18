@@ -1,5 +1,10 @@
 package com.emireminder.app.ui.screens.calculator
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -98,39 +103,45 @@ fun FDRDCalculatorScreen(
                 shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        if (state.selectedTab == FdTab.FD) "Deposit Amount" else "Monthly Deposit",
-                        fontSize = 11.sp, color = Color(0xFF64748B),
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    val display = if (state.selectedTab == FdTab.FD) state.principal else state.monthly
-                    Text(
-                        fmt(display.toDouble()),
-                        fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Slate800,
-                    )
-                    if (state.selectedTab == FdTab.FD) {
-                        Slider(
-                            value = state.principal,
-                            onValueChange = { viewModel.setPrincipal(it) },
-                            valueRange = 10_000f..5_000_000f,
-                            colors = SliderDefaults.colors(
-                                thumbColor = Amber700,
-                                activeTrackColor = Amber700,
-                                inactiveTrackColor = Amber100,
-                            ),
+                AnimatedContent(
+                    targetState = state.selectedTab,
+                    transitionSpec = { fadeIn(tween(200)).togetherWith(fadeOut(tween(200))) },
+                    label = "fdrd_tab_body",
+                ) { tab ->
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            if (tab == FdTab.FD) "Deposit Amount" else "Monthly Deposit",
+                            fontSize = 11.sp, color = Color(0xFF64748B),
                         )
-                    } else {
-                        Slider(
-                            value = state.monthly,
-                            onValueChange = { viewModel.setMonthly(it) },
-                            valueRange = 500f..200_000f,
-                            colors = SliderDefaults.colors(
-                                thumbColor = Amber700,
-                                activeTrackColor = Amber700,
-                                inactiveTrackColor = Amber100,
-                            ),
+                        Spacer(Modifier.height(4.dp))
+                        val display = if (tab == FdTab.FD) state.principal else state.monthly
+                        Text(
+                            fmt(display.toDouble()),
+                            fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = Slate800,
                         )
+                        if (tab == FdTab.FD) {
+                            Slider(
+                                value = state.principal,
+                                onValueChange = { viewModel.setPrincipal(it) },
+                                valueRange = 10_000f..5_000_000f,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = Amber700,
+                                    activeTrackColor = Amber700,
+                                    inactiveTrackColor = Amber100,
+                                ),
+                            )
+                        } else {
+                            Slider(
+                                value = state.monthly,
+                                onValueChange = { viewModel.setMonthly(it) },
+                                valueRange = 500f..200_000f,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = Amber700,
+                                    activeTrackColor = Amber700,
+                                    inactiveTrackColor = Amber100,
+                                ),
+                            )
+                        }
                     }
                 }
             }

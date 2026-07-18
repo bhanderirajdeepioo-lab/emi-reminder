@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<!-- @dsCard group="Finance Tab" -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390">
+<title>HEL-588 · Screen 3 — Finance Tools Hub</title>
+<style>
+  :root {
+    --primary: #4F46E5;
+    --primary-light: #EEF2FF;
+    --violet: #7C3AED;
+    --violet-light: #F3E8FF;
+    --bg: #EEF2FF;
+    --slate800: #1E293B;
+    --slate700: #334155;
+    --slate600: #475569;
+    --slate400: #94A3B8;
+    --slate200: #E2E8F0;
+    --slate100: #F1F5F9;
+    --white: #FFFFFF;
+    --safeGreen: #16A34A;
+    --green-light: #F0FDF4;
+    --amber700: #B45309;
+    --amber-light: #FFFBEB;
+    --teal: #0D9488;
+    --teal-light: #F0FDFA;
+    --pink: #EC4899;
+    --pink-light: #FDF2F8;
+    --red: #DC2626;
+    --red-light: #FEF2F2;
+    --blue: #2563EB;
+    --blue-light: #EFF6FF;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 14px;
+    --radius-xl: 16px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.09);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Roboto', -apple-system, sans-serif;
+    background: #CBD5E1;
+    display: flex;
+    gap: 32px;
+    padding: 32px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .frame-label {
+    font-family: monospace;
+    font-size: 11px;
+    color: #475569;
+    margin-bottom: 8px;
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .phone {
+    width: 390px;
+    background: var(--bg);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    border: 2px solid rgba(255,255,255,0.5);
+    display: flex;
+    flex-direction: column;
+    max-height: 844px;
+  }
+  /* Status Bar */
+  .status-bar {
+    height: 44px;
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; flex-shrink: 0;
+  }
+  .status-bar .time { color: white; font-size: 14px; font-weight: 600; }
+  .status-bar .icons { display: flex; gap: 6px; align-items: center; }
+  .status-bar .icons span { color: white; font-size: 11px; }
+
+  /* Top App Bar */
+  .top-app-bar {
+    background: linear-gradient(135deg, var(--primary), var(--violet));
+    padding: 8px 16px 14px;
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 18px;
+    background: rgba(255,255,255,0.1); border-radius: 50%;
+  }
+  .top-app-bar h1 { color: white; font-size: 18px; font-weight: 700; flex: 1; }
+  .top-app-bar .search-icon {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 18px;
+  }
+
+  /* Search bar */
+  .search-bar {
+    margin: 12px 16px;
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+  }
+  .search-bar .search-icon { font-size: 16px; color: var(--slate400); }
+  .search-bar input {
+    border: none; outline: none; font-size: 14px; color: var(--slate400);
+    flex: 1; background: transparent;
+    pointer-events: none;
+    font-family: inherit;
+  }
+
+  /* Scrollable content */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 16px;
+  }
+
+  /* Section headers */
+  .section-header {
+    padding: 12px 16px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  /* Tool Row (Loan Calculators) */
+  .tool-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+  .tool-row {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 12px 14px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: box-shadow 80ms;
+  }
+  .tool-row:hover { box-shadow: var(--shadow-md); }
+  .tool-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .tool-info { flex: 1; min-width: 0; }
+  .tool-name {
+    font-size: 14px; font-weight: 600; color: var(--slate800);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tool-desc { font-size: 12px; color: var(--slate400); margin-top: 2px; }
+  .tool-chevron { color: var(--slate200); font-size: 16px; flex-shrink: 0; }
+  .new-badge {
+    font-size: 9px; font-weight: 700; background: var(--primary); color: white;
+    padding: 2px 6px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.3px;
+  }
+
+  /* Investment Tools Grid (2×2) */
+  .invest-grid {
+    margin: 0 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .invest-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 16px 14px;
+    display: flex; flex-direction: column; gap: 8px;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .invest-card::before {
+    content: '';
+    position: absolute;
+    top: -16px; right: -16px;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    opacity: 0.08;
+  }
+  .invest-card.sip::before { background: var(--teal); }
+  .invest-card.fd::before { background: var(--amber700); }
+  .invest-card.ppf::before { background: var(--safeGreen); }
+  .invest-card.gst::before { background: var(--blue); }
+
+  .invest-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .invest-name { font-size: 13px; font-weight: 700; color: var(--slate800); }
+  .invest-desc { font-size: 11px; color: var(--slate400); line-height: 1.4; }
+
+  /* 4 More strip */
+  .more-strip {
+    margin: 10px 16px 0;
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 12px 14px;
+    box-shadow: var(--shadow-sm);
+  }
+  .more-strip .strip-label {
+    font-size: 11px; font-weight: 700; color: var(--slate400);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .more-tools {
+    display: flex; gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .more-tools::-webkit-scrollbar { display: none; }
+  .more-tool {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    flex-shrink: 0; width: 72px;
+    cursor: pointer;
+  }
+  .more-tool-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    position: relative;
+  }
+  .coming-soon-badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    width: 16px; height: 16px;
+    background: var(--amber700);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: white; font-weight: 700;
+    border: 2px solid white;
+  }
+  .more-tool-label {
+    font-size: 10px; font-weight: 500; color: var(--slate600);
+    text-align: center; line-height: 1.2;
+  }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    background: white;
+    border-top: 1px solid var(--slate200);
+    display: flex;
+    padding: 8px 0 20px;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 3px; padding: 4px 0; cursor: pointer;
+  }
+  .nav-icon { font-size: 22px; }
+  .nav-label { font-size: 10px; color: var(--slate400); }
+  .nav-item.active .nav-label { color: var(--primary); font-weight: 600; }
+
+  /* Annotation */
+  .annotation {
+    width: 390px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+    font-size: 13px;
+    line-height: 1.6;
+    color: #334155;
+  }
+  .annotation h2 { font-size: 16px; font-weight: 700; color: #1E293B; margin-bottom: 12px; }
+  .annotation h3 { font-size: 13px; font-weight: 600; color: var(--primary); margin: 12px 0 4px; }
+  .annotation ul { padding-left: 16px; }
+  .annotation li { margin-bottom: 4px; }
+  .annotation .token { font-family: monospace; background: #F1F5F9; padding: 1px 5px; border-radius: 3px; font-size: 11px; }
+  .annotation .route { font-size: 11px; background: var(--primary-light); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     FRAME 1 — Finance Tools Hub (Default / Full View)
+     ══════════════════════════════════════════════════════════ -->
+<div>
+  <div class="frame-label">Finance Tools Hub — All Sections Visible</div>
+  <div class="phone">
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons"><span>5G</span><span>📶</span><span>🔋</span></div>
+    </div>
+
+    <!-- Top App Bar (Indigo→Violet gradient matching existing s19 SVG) -->
+    <div class="top-app-bar">
+      <div class="back-btn">←</div>
+      <h1>Finance Tools</h1>
+      <div class="search-icon">🔍</div>
+    </div>
+
+    <!-- Search bar -->
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Search tools…" readonly>
+    </div>
+
+    <div class="content">
+
+      <!-- ── LOAN CALCULATORS ── -->
+      <div class="section-header">Loan Calculators</div>
+      <div class="tool-list">
+
+        <!-- EMI Calculator -->
+        <div class="tool-row">
+          <div class="tool-icon" style="background:var(--primary-light);">⚡</div>
+          <div class="tool-info">
+            <div class="tool-name">EMI Calculator</div>
+            <div class="tool-desc">Reducing balance &amp; flat rate</div>
+          </div>
+          <div class="tool-chevron">›</div>
+        </div>
+
+        <!-- Loan Comparison -->
+        <div class="tool-row">
+          <div class="tool-icon" style="background:var(--violet-light);">⚖️</div>
+          <div class="tool-info">
+            <div class="tool-name">Loan Comparison</div>
+            <div class="tool-desc">Compare 2 loan offers side by side</div>
+          </div>
+          <div class="tool-chevron">›</div>
+        </div>
+
+        <!-- Prepayment -->
+        <div class="tool-row">
+          <div class="tool-icon" style="background:var(--green-light);">💰</div>
+          <div class="tool-info">
+            <div class="tool-name">Prepayment / Foreclosure</div>
+            <div class="tool-desc">Save interest with early payoff</div>
+          </div>
+          <div class="tool-chevron">›</div>
+        </div>
+
+        <!-- Step-up EMI (NEW) -->
+        <div class="tool-row">
+          <div class="tool-icon" style="background:#FFF7ED;">📈</div>
+          <div class="tool-info">
+            <div class="tool-name">
+              Step-up EMI
+              <span class="new-badge">NEW</span>
+            </div>
+            <div class="tool-desc">Graduated EMI with annual increment</div>
+          </div>
+          <div class="tool-chevron">›</div>
+        </div>
+
+        <!-- Balance Transfer (NEW) -->
+        <div class="tool-row">
+          <div class="tool-icon" style="background:var(--pink-light);">🔄</div>
+          <div class="tool-info">
+            <div class="tool-name">
+              Balance Transfer
+              <span class="new-badge">NEW</span>
+            </div>
+            <div class="tool-desc">Switch loan to a lower rate bank</div>
+          </div>
+          <div class="tool-chevron">›</div>
+        </div>
+
+      </div>
+
+      <!-- ── INVESTMENT TOOLS ── -->
+      <div class="section-header" style="margin-top:8px;">Investment Tools</div>
+      <div class="invest-grid">
+
+        <!-- SIP -->
+        <div class="invest-card sip">
+          <div class="invest-icon" style="background:var(--teal-light);">📊</div>
+          <div class="invest-name">SIP Calculator</div>
+          <div class="invest-desc">Wealth projection &amp; step-up SIP</div>
+        </div>
+
+        <!-- FD/RD -->
+        <div class="invest-card fd">
+          <div class="invest-icon" style="background:var(--amber-light);">🏦</div>
+          <div class="invest-name">FD / RD Calc</div>
+          <div class="invest-desc">Fixed &amp; recurring deposit returns</div>
+        </div>
+
+        <!-- PPF -->
+        <div class="invest-card ppf">
+          <div class="invest-icon" style="background:var(--green-light);">🛡️</div>
+          <div class="invest-name">PPF Calculator</div>
+          <div class="invest-desc">15-yr compounding at 7.1% p.a.</div>
+        </div>
+
+        <!-- GST -->
+        <div class="invest-card gst">
+          <div class="invest-icon" style="background:var(--blue-light);">🧾</div>
+          <div class="invest-name">GST Calculator</div>
+          <div class="invest-desc">Inclusive &amp; exclusive tax calc</div>
+        </div>
+
+      </div>
+
+      <!-- ── 4 MORE strip ── -->
+      <div class="more-strip">
+        <div class="strip-label">4 More Tools</div>
+        <div class="more-tools">
+
+          <!-- Income Tax -->
+          <div class="more-tool">
+            <div class="more-tool-icon" style="background:var(--violet-light);">
+              📋
+              <div class="coming-soon-badge">!</div>
+            </div>
+            <div class="more-tool-label">Income Tax</div>
+          </div>
+
+          <!-- Inflation -->
+          <div class="more-tool">
+            <div class="more-tool-icon" style="background:var(--amber-light);">
+              📉
+              <div class="coming-soon-badge">!</div>
+            </div>
+            <div class="more-tool-label">Inflation Calc</div>
+          </div>
+
+          <!-- HRA -->
+          <div class="more-tool">
+            <div class="more-tool-icon" style="background:var(--blue-light);">
+              🏠
+              <div class="coming-soon-badge">!</div>
+            </div>
+            <div class="more-tool-label">HRA Calc</div>
+          </div>
+
+          <!-- CIBIL Score -->
+          <div class="more-tool">
+            <div class="more-tool-icon" style="background:var(--green-light);">
+              ⭐
+              <div class="coming-soon-badge">!</div>
+            </div>
+            <div class="more-tool-label">CIBIL Score</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+      <div class="nav-item"><div class="nav-icon">⏰</div><div class="nav-label">Reminders</div></div>
+      <div class="nav-item active"><div class="nav-icon">💰</div><div class="nav-label" style="color:var(--primary)">Finance</div></div>
+      <div class="nav-item"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     FRAME 2 — Finance Tools Hub (Search Active)
+     ══════════════════════════════════════════════════════════ -->
+<div>
+  <div class="frame-label">Finance Tools Hub — Search Active State</div>
+  <div class="phone">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons"><span>5G</span><span>📶</span><span>🔋</span></div>
+    </div>
+    <div class="top-app-bar">
+      <div class="back-btn">←</div>
+      <h1>Finance Tools</h1>
+      <div class="search-icon">🔍</div>
+    </div>
+
+    <!-- Search bar — active with query -->
+    <div class="search-bar" style="border:1.5px solid var(--primary);">
+      <span class="search-icon" style="color:var(--primary);">🔍</span>
+      <input type="text" value="sip" readonly style="color:var(--slate800);font-weight:500;">
+      <span style="font-size:14px;color:var(--slate400);cursor:pointer;">✕</span>
+    </div>
+
+    <div class="content">
+      <div class="section-header" style="color:var(--slate400);">1 result for "sip"</div>
+      <div class="tool-list">
+
+        <!-- SIP result as a row (matching loan calc style) -->
+        <div class="tool-row" style="border:1.5px solid var(--primary);">
+          <div class="tool-icon" style="background:var(--teal-light);">📊</div>
+          <div class="tool-info">
+            <div class="tool-name">SIP Calculator</div>
+            <div class="tool-desc">Wealth projection &amp; step-up SIP · Investment Tools</div>
+          </div>
+          <div class="tool-chevron" style="color:var(--primary);">›</div>
+        </div>
+
+      </div>
+
+      <!-- No more results placeholder -->
+      <div style="display:flex;flex-direction:column;align-items:center;padding:40px 24px;gap:12px;opacity:0.5;">
+        <div style="font-size:32px;">🔍</div>
+        <div style="font-size:13px;color:var(--slate400);text-align:center;">Try "EMI", "tax", "FD", "PPF"…</div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+      <div class="nav-item"><div class="nav-icon">⏰</div><div class="nav-label">Reminders</div></div>
+      <div class="nav-item active"><div class="nav-icon">💰</div><div class="nav-label" style="color:var(--primary)">Finance</div></div>
+      <div class="nav-item"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ANNOTATION DOC — Screen 3
+     ══════════════════════════════════════════════════════════ -->
+<div>
+  <div class="frame-label">Screen 3 — Design Annotations</div>
+  <div class="annotation">
+    <h2>Finance Tools Hub — Spec Notes (HEL-588 × s19)</h2>
+    <p style="font-size:12px;color:#64748B;margin-bottom:12px;">Aligned with existing wireframe at <span class="route">design/emi-app/wireframes/19-finance-tools-hub.svg</span>. Adds Search state (Frame 2) and updates to match HEL-588 brand tokens.</p>
+
+    <h3>Top App Bar</h3>
+    <ul>
+      <li>Background: <span class="token">Indigo600 → Violet600</span> linear gradient (135°) — matches existing s19 SVG</li>
+      <li>Back button: <span class="token">36×36dp</span> circle, <span class="token">rgba(white,0.1)</span> bg</li>
+      <li>Title: <span class="token">18sp Bold</span> white, flex:1 centred</li>
+      <li>Search icon: 36dp touch target</li>
+    </ul>
+
+    <h3>Search Bar</h3>
+    <ul>
+      <li>White card, <span class="token">12dp</span> radius, <span class="token">1px Slate200</span> border (idle), <span class="token">1.5px Indigo600</span> border (active)</li>
+      <li>Padding: <span class="token">10×14dp</span>; font: <span class="token">14sp</span> Slate400 placeholder</li>
+      <li>Active: clears on ✕ tap, result list replaces full section layout</li>
+    </ul>
+
+    <h3>Loan Calculators (Vertical List)</h3>
+    <ul>
+      <li>Row anatomy: <span class="token">40×40dp icon bubble</span> (12dp radius, category-tint bg) + tool name <span class="token">14sp SemiBold</span> + desc <span class="token">12sp Slate400</span> + chevron <span class="token">›</span> Slate200</li>
+      <li>Row height: <span class="token">56dp</span> minimum, 8dp gap between rows</li>
+      <li>Step-up EMI + Balance Transfer: NEW badge (<span class="token">9sp Bold</span> uppercase, Indigo600 bg, white text, 6dp radius)</li>
+      <li>Icon tints: EMI=Indigo50, Comparison=Violet50, Prepayment=Green50, Step-up=Orange50, BalTrans=Pink50</li>
+    </ul>
+
+    <h3>Investment Tools Grid (2×2)</h3>
+    <ul>
+      <li>Grid: <span class="token">2 cols, 10dp gap</span>, 16dp horizontal margin</li>
+      <li>Card: <span class="token">16dp radius</span>, white, 1dp shadow; decorative tint blob top-right (category colour, 8% opacity)</li>
+      <li>Card content: 40dp icon bubble + tool name <span class="token">13sp Bold</span> + desc <span class="token">11sp Slate400</span></li>
+      <li>SIP=Teal, FD/RD=Amber, PPF=SafeGreen, GST=Blue</li>
+    </ul>
+
+    <h3>"4 More" Strip</h3>
+    <ul>
+      <li>White card, horizontal scroll, <span class="token">no scrollbar</span>, 4 tools visible (no overflow cue)</li>
+      <li>Each tool: <span class="token">48×48dp</span> icon (14dp radius) + label <span class="token">10sp</span> Slate600 below</li>
+      <li>Coming-soon badge: <span class="token">16dp</span> Amber700 circle, <span class="token">!</span> white, top-right absolute, <span class="token">2dp white border</span></li>
+      <li>Tapping a coming-soon tool → bottom sheet: "Coming in Q3 2026 — tap to get notified"</li>
+    </ul>
+
+    <h3>Navigation</h3>
+    <ul>
+      <li>Reachable from: Finance Tab via "Tools" entry in the tab bar / header action</li>
+      <li>Back button → Finance Tab (SmsDashboard, Screen 1)</li>
+      <li>Each tool row / card tap → opens that calculator screen (s20–s28)</li>
+    </ul>
+
+    <h3>Consistency with HEL-588 Smart Card + Detail Screens</h3>
+    <ul>
+      <li>Same Indigo600 primary, same Slate200 borders, same 8dp-grid spacing</li>
+      <li>Same bottom nav (Finance tab active)</li>
+      <li>Gradient AppBar matches s19 existing SVG — <em>no change</em> to established brand</li>
+      <li>Row shadows: <span class="token">0 1px 3px rgba(0,0,0,0.07)</span> — lighter than Finance Tab txn cards to de-emphasise tool rows vs. transaction data</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function(){
+  var m = /[?&]frame=(\d+)/.exec(location.search);
+  if (!m) return;
+  var idx = parseInt(m[1], 10) - 1;
+  Array.from(document.body.children).forEach(function(el, i){ if (i !== idx) el.style.display = 'none'; });
+  document.body.style.padding = '0';
+  document.body.style.margin = '0';
+  document.body.style.background = '#fff';
+  document.body.style.gap = '0';
+  document.body.style.justifyContent = 'flex-start';
+})();
+</script>
+</body>
+</html>

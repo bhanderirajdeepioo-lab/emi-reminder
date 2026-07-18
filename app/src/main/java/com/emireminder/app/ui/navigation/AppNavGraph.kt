@@ -2,9 +2,16 @@ package com.emireminder.app.ui.navigation
 
 import android.content.Context
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,15 +43,23 @@ import androidx.navigation.navArgument
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.ui.screens.calculator.*
 import com.emireminder.app.ui.screens.finance.*
+import com.emireminder.app.ui.screens.financeaccounts.FinanceAccountsScreen
 import com.emireminder.app.ui.screens.home.HomeScreen
+import com.emireminder.app.ui.screens.smsdashboard.MonthlyReportScreen
+import com.emireminder.app.ui.screens.smsdashboard.SmsDashboardScreen
+import com.emireminder.app.ui.screens.smsdashboard.TransactionDetailScreen
 import com.emireminder.app.ui.screens.loan.*
 import com.emireminder.app.ui.screens.onboarding.CountrySelectScreen
 import com.emireminder.app.ui.screens.onboarding.LanguageSelectScreen
 import com.emireminder.app.ui.screens.onboarding.OnboardingScreen
 import com.emireminder.app.ui.screens.onboarding.OnboardingViewModel
 import com.emireminder.app.ui.screens.reminders.*
+import com.emireminder.app.ui.screens.settings.MyFinanceDataScreen
 import com.emireminder.app.ui.screens.settings.SettingsScreen
+import com.emireminder.app.ui.screens.sms.HistoricalScanScreen
 import com.emireminder.app.ui.screens.sms.SMSImportScreen
+import com.emireminder.app.ui.screens.sms.SmsIntelligenceOnboardingScreen
+import com.emireminder.app.ui.components.BannerAdView
 import com.emireminder.app.ui.screens.splash.SplashScreen
 import com.emireminder.app.ui.theme.Indigo600
 
@@ -56,7 +72,7 @@ private data class NavItem(
 
 private val bottomNavItems = listOf(
     NavItem(NavRoutes.HOME,             "Home",       Icons.Filled.Home,               Icons.Outlined.Home),
-    NavItem(NavRoutes.EMI_CALCULATOR,   "Calculator", Icons.Filled.Calculate,          Icons.Outlined.Calculate),
+    NavItem(NavRoutes.FINANCE_TOOLS_HUB, "Calculator", Icons.Filled.Calculate,          Icons.Outlined.Calculate),
     NavItem(NavRoutes.REMINDERS,        "Reminders",  Icons.Filled.Notifications,      Icons.Outlined.Notifications),
     NavItem(NavRoutes.FINANCE,          "Finance",    Icons.Filled.AccountBalanceWallet, Icons.Outlined.AccountBalanceWallet),
 )
@@ -84,6 +100,10 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
     // Async read introduced a race: firstLaunch started false so first-time users
     // saw HOME instead of Onboarding when SplashScreen fired before the IO result.
     val firstLaunch = remember { isFirstLaunch(context) }
+    // Fixed 56dp translate captured once so NavHost lambdas (non-Composable scope) can read it.
+    // Material Motion Shared Axis X uses a fixed dp offset, not a fraction of screen width.
+    val density = LocalDensity.current
+    val slideOffset = remember(density) { with(density) { 56.dp.roundToPx() } }
     val showBottomBar = currentRoute in bottomNavRoutes
 
     // Returning users skip SPLASH entirely; deep link is fired from LaunchedEffect below.
@@ -104,19 +124,22 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                PillNavBar(
-                    currentRoute = currentRoute,
-                    onNavigate = { route ->
-                        navController.navigate(route) {
-                            // Never save or restore sub-nav state when switching tabs.
-                            // saveState=true caused Finance→ToolsHub→Comparison to be
-                            // restored when tapping Finance tab again (HEL-115).
-                            popUpTo(NavRoutes.HOME) { saveState = false }
-                            launchSingleTop = true
-                            restoreState = false
+                Column {
+                    BannerAdView()
+                    PillNavBar(
+                        currentRoute = currentRoute,
+                        onNavigate = { route ->
+                            navController.navigate(route) {
+                                // Never save or restore sub-nav state when switching tabs.
+                                // saveState=true caused Finance→ToolsHub→Comparison to be
+                                // restored when tapping Finance tab again (HEL-115).
+                                popUpTo(NavRoutes.HOME) { saveState = false }
+                                launchSingleTop = true
+                                restoreState = false
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -136,10 +159,28 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             // ScaffoldLayoutWithMeasureFix snapshotFlow to iterate a null IdentityArraySet entry
             // on focus-loss events (ANR: Input dispatching timed out after 5024 ms).
             modifier = Modifier.padding(innerPadding),
-            enterTransition = { slideInHorizontally(tween(280)) { it } },
-            exitTransition = { slideOutHorizontally(tween(280)) { -it } },
-            popEnterTransition = { slideInHorizontally(tween(280)) { -it } },
-            popExitTransition = { slideOutHorizontally(tween(280)) { it } },
+            enterTransition = {
+                val isTabSwitch = initialState.destination.route in bottomNavRoutes
+                    && targetState.destination.route in bottomNavRoutes
+                if (isTabSwitch) fadeIn(tween(200, easing = LinearEasing))
+                else fadeIn(tween(300, easing = LinearEasing)) +
+                    slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { slideOffset }
+            },
+            exitTransition = {
+                val isTabSwitch = initialState.destination.route in bottomNavRoutes
+                    && targetState.destination.route in bottomNavRoutes
+                if (isTabSwitch) fadeOut(tween(200, easing = LinearEasing))
+                else fadeOut(tween(200, easing = LinearEasing)) +
+                    slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -slideOffset }
+            },
+            popEnterTransition = {
+                fadeIn(tween(300, easing = LinearEasing)) +
+                    slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { -slideOffset }
+            },
+            popExitTransition = {
+                fadeOut(tween(200, easing = LinearEasing)) +
+                    slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { slideOffset }
+            },
         ) {
             // 1 — Splash
             composable(NavRoutes.SPLASH) {
@@ -271,39 +312,53 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 NotificationPreviewScreen(onBack = { navController.popBackStack() })
             }
 
-            // 8 — Finance Tools Hub / Calculator tab
+            // 8 — Finance Tools Hub (Calculator tab root + sub-screen from Finance tab)
             // launchSingleTop=true on every sub-screen navigation prevents a double-tap from
             // firing two navigate() calls back-to-back and landing on the wrong screen (BUG-1/BUG-3).
             composable(NavRoutes.FINANCE_TOOLS_HUB) {
+                val prevRoute = navController.previousBackStackEntry?.destination?.route
+                // Show back button only when navigated as a sub-screen (e.g. from Finance tab).
+                // When reached via Calculator tab tap, prevRoute == HOME (popUpTo root), so no back.
+                val showBackButton = prevRoute != null && prevRoute != NavRoutes.HOME
+                // Safety: if this somehow becomes the back-stack root, bring user to Home.
+                BackHandler(enabled = prevRoute == null) {
+                    navController.navigate(NavRoutes.HOME) {
+                        popUpTo(navController.graph.id)
+                        launchSingleTop = true
+                    }
+                }
                 FinanceToolsHubScreen(
+                    showBackButton             = showBackButton,
                     onNavigateBack             = { navController.popBackStack() },
-                    onNavigateToEmiCalculator  = { navController.navigate(NavRoutes.EMI_CALCULATOR)       { launchSingleTop = true } },
-                    onNavigateToComparison     = { navController.navigate(NavRoutes.COMPARISON_CALCULATOR) { launchSingleTop = true } },
-                    onNavigateToPrepayment     = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR) { launchSingleTop = true } },
-                    onNavigateToFdRd           = { navController.navigate(NavRoutes.FD_RD_CALCULATOR)      { launchSingleTop = true } },
-                    onNavigateToSip            = { navController.navigate(NavRoutes.SIP_CALCULATOR)        { launchSingleTop = true } },
-                    onNavigateToLoanCategories = { navController.navigate(NavRoutes.LOAN_CATEGORIES)       { launchSingleTop = true } },
+                    onNavigateToEmiCalculator  = { navController.navigate(NavRoutes.EMI_CALCULATOR)         { launchSingleTop = true } },
+                    onNavigateToComparison     = { navController.navigate(NavRoutes.COMPARISON_CALCULATOR)  { launchSingleTop = true } },
+                    onNavigateToPrepayment     = { navController.navigate(NavRoutes.PREPAYMENT_CALCULATOR)  { launchSingleTop = true } },
+                    onNavigateToFdRd           = { navController.navigate(NavRoutes.FD_RD_CALCULATOR)       { launchSingleTop = true } },
+                    onNavigateToSip            = { navController.navigate(NavRoutes.SIP_CALCULATOR)         { launchSingleTop = true } },
+                    onNavigateToPpf            = { navController.navigate(NavRoutes.PPF_CALCULATOR)         { launchSingleTop = true } },
+                    onNavigateToGst            = { navController.navigate(NavRoutes.GST_CALCULATOR)         { launchSingleTop = true } },
+                    onNavigateToIncomeTax      = { navController.navigate(NavRoutes.INCOME_TAX_CALCULATOR)  { launchSingleTop = true } },
+                    onNavigateToInflation      = { navController.navigate(NavRoutes.INFLATION_CALCULATOR)   { launchSingleTop = true } },
+                    onNavigateToHra            = { navController.navigate(NavRoutes.HRA_CALCULATOR)         { launchSingleTop = true } },
+                    onNavigateToCibil          = { navController.navigate(NavRoutes.CIBIL_SCORE)            { launchSingleTop = true } },
                 )
             }
 
-            // 9 — EMI Calculator (also the Calculator bottom-nav tab destination)
+            // 9 — EMI Calculator (sub-screen; Calculator tab now goes to FINANCE_TOOLS_HUB)
             composable(NavRoutes.EMI_CALCULATOR) { entry ->
                 val prevRoute = navController.previousBackStackEntry?.destination?.route
-                val isTabEntry = prevRoute == null || prevRoute in bottomNavRoutes
                 val appliedInterestType by entry.savedStateHandle
                     .getStateFlow<String?>("selectedInterestType", null)
                     .collectAsState()
-                // Guard: if the bottom-nav popUpTo(HOME) silently no-op'd (HOME absent
-                // from the stack), Calculator ends up as the back-stack root.  Without
-                // this handler the system back exits the Activity instead of going HOME.
+                // Safety: deep-link or stack corruption may leave EMI_CALCULATOR as root.
                 BackHandler(enabled = prevRoute == null) {
                     navController.navigate(NavRoutes.HOME) {
-                        popUpTo(navController.graph.id)  // clear to graph root first
+                        popUpTo(navController.graph.id)
                         launchSingleTop = true
                     }
                 }
                 EMICalculatorScreen(
-                    showBackButton = !isTabEntry,
+                    showBackButton = true,
                     initialInterestType = appliedInterestType ?: "REDUCING",
                     onBack = { navController.popBackStack() },
                     onShowResults = { p, r, t, lt -> navController.navigate(NavRoutes.calculatorResults(p, r, t, lt)) },
@@ -399,6 +454,31 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 )
             }
 
+            // 15a — SMS Intelligence Onboarding
+            composable(NavRoutes.SMS_INTELLIGENCE_ONBOARDING) {
+                SmsIntelligenceOnboardingScreen(
+                    onGranted = {
+                        // Navigate to historical scan — it determines first-vs-rescan internally.
+                        navController.navigate(NavRoutes.SMS_HISTORICAL_SCAN) {
+                            popUpTo(NavRoutes.SMS_INTELLIGENCE_ONBOARDING) { inclusive = true }
+                        }
+                    },
+                    onBack = { navController.popBackStack() },
+                )
+            }
+
+            // 15b — Historical SMS Scan (first-time background scan, HEL-572)
+            composable(NavRoutes.SMS_HISTORICAL_SCAN) {
+                HistoricalScanScreen(
+                    onNavigateToFinanceDashboard = {
+                        navController.navigate(NavRoutes.FINANCE) {
+                            popUpTo(NavRoutes.SMS_HISTORICAL_SCAN) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
             // 15 — SMS Import
             // Explicit BackHandler covers KEYCODE_BACK / gesture back.  The NavHost's
             // implicit handler is only active when previousBackStackEntry != null; if the
@@ -414,7 +494,26 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
 
             // 16 — Settings
             composable(NavRoutes.SETTINGS) {
-                SettingsScreen(onBack = { navController.popBackStack() })
+                SettingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToSmsIntelligence = {
+                        navController.navigate(NavRoutes.SMS_INTELLIGENCE_ONBOARDING) { launchSingleTop = true }
+                    },
+                    onNavigateToFinanceAccounts = {
+                        navController.navigate(NavRoutes.FINANCE_ACCOUNTS) { launchSingleTop = true }
+                    },
+                    onNavigateToSmsHistoricalScan = {
+                        navController.navigate(NavRoutes.SMS_HISTORICAL_SCAN) { launchSingleTop = true }
+                    },
+                    onNavigateToMyFinanceData = {
+                        navController.navigate(NavRoutes.MY_FINANCE_DATA) { launchSingleTop = true }
+                    },
+                )
+            }
+
+            // 16b — My Finance Data — DPDP Act Right to Access (HEL-602)
+            composable(NavRoutes.MY_FINANCE_DATA) {
+                MyFinanceDataScreen(onBack = { navController.popBackStack() })
             }
 
             // Add Loan form
@@ -483,10 +582,45 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                 )
             }
 
-            // 20 — Finance Monthly EMI (bottom tab)
+            // 20 — Finance Dashboard (bottom tab, SMS Finance Intelligence)
             composable(NavRoutes.FINANCE) {
+                SmsDashboardScreen(
+                    onNavigateToFinanceToolsHub      = { navController.navigate(NavRoutes.FINANCE_TOOLS_HUB) },
+                    onNavigateToMonthlyReport        = { ym -> navController.navigate(NavRoutes.smsMonthlyReport(ym)) { launchSingleTop = true } },
+                    onNavigateToFinanceAccounts      = { navController.navigate(NavRoutes.FINANCE_ACCOUNTS) { launchSingleTop = true } },
+                    onNavigateToScan                 = { navController.navigate(NavRoutes.SMS_HISTORICAL_SCAN) { launchSingleTop = true } },
+                    onNavigateToTransactionDetail    = { id -> navController.navigate(NavRoutes.transactionDetail(id)) { launchSingleTop = true } },
+                )
+            }
+
+            // 20e — Transaction Detail (HEL-591)
+            composable(
+                NavRoutes.TRANSACTION_DETAIL,
+                arguments = listOf(navArgument("transactionId") { type = NavType.StringType }),
+            ) {
+                TransactionDetailScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 20d — Finance Accounts (Settings → Finance Accounts / "Manage" button in Finance tab)
+            composable(NavRoutes.FINANCE_ACCOUNTS) {
+                FinanceAccountsScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 20b — SMS Monthly Report (drill-down from Finance Dashboard)
+            composable(
+                NavRoutes.SMS_MONTHLY_REPORT,
+                arguments = listOf(navArgument("yearMonth") { type = NavType.StringType }),
+            ) { back ->
+                MonthlyReportScreen(
+                    yearMonth = back.arguments?.getString("yearMonth").orEmpty(),
+                    onBack = { navController.popBackStack() },
+                )
+            }
+
+            // 20c — Finance Monthly EMI (legacy EMI tracker; accessible from Finance Tools Hub)
+            composable("finance_monthly_emi") {
                 FinanceMonthlyEMIScreen(
-                    onNavigateToLoanDetail     = { id -> navController.navigate(NavRoutes.loanDetail(id)) },
+                    onNavigateToLoanDetail      = { id -> navController.navigate(NavRoutes.loanDetail(id)) },
                     onNavigateToFinanceToolsHub = { navController.navigate(NavRoutes.FINANCE_TOOLS_HUB) },
                 )
             }
@@ -500,6 +634,36 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             composable(NavRoutes.SIP_CALCULATOR) {
                 SIPCalculatorScreen(onBack = { navController.popBackStack() })
             }
+
+            // 23 — PPF Calculator
+            composable(NavRoutes.PPF_CALCULATOR) {
+                PPFCalculatorScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 24 — GST Calculator
+            composable(NavRoutes.GST_CALCULATOR) {
+                GSTCalculatorScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 25 — Income Tax Calculator
+            composable(NavRoutes.INCOME_TAX_CALCULATOR) {
+                IncomeTaxCalculatorScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 26 — Inflation Calculator
+            composable(NavRoutes.INFLATION_CALCULATOR) {
+                InflationCalculatorScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 27 — HRA Calculator
+            composable(NavRoutes.HRA_CALCULATOR) {
+                HRACalculatorScreen(onBack = { navController.popBackStack() })
+            }
+
+            // 28 — CIBIL Score
+            composable(NavRoutes.CIBIL_SCORE) {
+                CIBILScoreScreen(onBack = { navController.popBackStack() })
+            }
         }
     }
 }
@@ -510,7 +674,7 @@ private fun PillNavBar(currentRoute: String?, onNavigate: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
-            .padding(horizontal = 16.dp, bottom = 10.dp),
+            .padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -547,52 +711,64 @@ private fun PillNavItem(item: NavItem, selected: Boolean, onClick: () -> Unit, m
         modifier = modifier.fillMaxHeight(),
         contentAlignment = Alignment.Center,
     ) {
-        if (selected) {
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50.dp))
-                    .background(Indigo600)
-                    .clickable(onClick = onClick)
-                    .padding(horizontal = 14.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Icon(
-                    item.filledIcon,
-                    contentDescription = item.label,
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp),
-                )
-                Text(
-                    item.label,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White,
-                    maxLines = 1,
-                )
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50.dp))
-                    .clickable(onClick = onClick)
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Icon(
-                    item.outlinedIcon,
-                    contentDescription = item.label,
-                    tint = Color(0xFF94A3B8),
-                    modifier = Modifier.size(20.dp),
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    item.label,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color(0xFF94A3B8),
-                    maxLines = 1,
-                )
+        AnimatedContent(
+            targetState = selected,
+            transitionSpec = {
+                fadeIn(tween(200, easing = FastOutSlowInEasing))
+                    .togetherWith(fadeOut(tween(150, easing = LinearEasing)))
+                    .using(SizeTransform(clip = false) { _, _ ->
+                        tween(durationMillis = 250, easing = FastOutSlowInEasing)
+                    })
+            },
+            label = "pill_${item.label}",
+        ) { isSelected ->
+            if (isSelected) {
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50.dp))
+                        .background(Indigo600)
+                        .clickable(onClick = onClick)
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Icon(
+                        item.filledIcon,
+                        contentDescription = item.label,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(
+                        item.label,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White,
+                        maxLines = 1,
+                    )
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50.dp))
+                        .clickable(onClick = onClick)
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Icon(
+                        item.outlinedIcon,
+                        contentDescription = item.label,
+                        tint = Color(0xFF94A3B8),
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        item.label,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF94A3B8),
+                        maxLines = 1,
+                    )
+                }
             }
         }
     }

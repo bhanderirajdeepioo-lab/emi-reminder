@@ -23,6 +23,10 @@ data class UserPreferences(
     val language: String = "English",
     val smsImportEnabled: Boolean = false,
     val userName: String = "",
+    val smsIntelligenceEnabled: Boolean = false,
+    val smsNudgeDismissedAt: Long = 0L,
+    val smsHistoricalScanDone: Boolean = false,
+    val smsHistoricalAdShown: Boolean = false,
 ) {
     val currencySymbol: String get() = when (currency) {
         "USD" -> "$"
@@ -39,16 +43,20 @@ class UserPreferencesRepository @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
     private object Keys {
-        val EMI_REMINDERS_ENABLED  = booleanPreferencesKey("emi_reminders_enabled")
-        val ADVANCE_REMINDER_DAYS  = intPreferencesKey("advance_reminder_days")
-        val REMINDER_TIME_HOUR     = intPreferencesKey("reminder_time_hour")
-        val REMINDER_TIME_MINUTE   = intPreferencesKey("reminder_time_minute")
-        val OVERDUE_ALERTS_ENABLED = booleanPreferencesKey("overdue_alerts_enabled")
-        val THEME                  = stringPreferencesKey("theme")
-        val CURRENCY               = stringPreferencesKey("currency")
-        val LANGUAGE               = stringPreferencesKey("language")
-        val SMS_IMPORT_ENABLED     = booleanPreferencesKey("sms_import_enabled")
-        val USER_NAME              = stringPreferencesKey("user_name")
+        val EMI_REMINDERS_ENABLED      = booleanPreferencesKey("emi_reminders_enabled")
+        val ADVANCE_REMINDER_DAYS      = intPreferencesKey("advance_reminder_days")
+        val REMINDER_TIME_HOUR         = intPreferencesKey("reminder_time_hour")
+        val REMINDER_TIME_MINUTE       = intPreferencesKey("reminder_time_minute")
+        val OVERDUE_ALERTS_ENABLED     = booleanPreferencesKey("overdue_alerts_enabled")
+        val THEME                      = stringPreferencesKey("theme")
+        val CURRENCY                   = stringPreferencesKey("currency")
+        val LANGUAGE                   = stringPreferencesKey("language")
+        val SMS_IMPORT_ENABLED         = booleanPreferencesKey("sms_import_enabled")
+        val USER_NAME                  = stringPreferencesKey("user_name")
+        val SMS_INTELLIGENCE_ENABLED   = booleanPreferencesKey("sms_intelligence_enabled")
+        val SMS_NUDGE_DISMISSED_AT     = longPreferencesKey("sms_nudge_dismissed_at")
+        val SMS_HISTORICAL_SCAN_DONE   = booleanPreferencesKey("sms_historical_scan_done")
+        val SMS_HISTORICAL_AD_SHOWN    = booleanPreferencesKey("sms_historical_ad_shown")
     }
 
     val userPreferences: Flow<UserPreferences> = context.dataStore.data
@@ -63,8 +71,12 @@ class UserPreferencesRepository @Inject constructor(
                 theme                = prefs[Keys.THEME]                  ?: "System",
                 currency             = prefs[Keys.CURRENCY]               ?: "INR",
                 language             = prefs[Keys.LANGUAGE]               ?: "English",
-                smsImportEnabled     = prefs[Keys.SMS_IMPORT_ENABLED]     ?: false,
-                userName             = prefs[Keys.USER_NAME]              ?: "",
+                smsImportEnabled         = prefs[Keys.SMS_IMPORT_ENABLED]         ?: false,
+                userName                 = prefs[Keys.USER_NAME]                  ?: "",
+                smsIntelligenceEnabled   = prefs[Keys.SMS_INTELLIGENCE_ENABLED]   ?: false,
+                smsNudgeDismissedAt      = prefs[Keys.SMS_NUDGE_DISMISSED_AT]     ?: 0L,
+                smsHistoricalScanDone    = prefs[Keys.SMS_HISTORICAL_SCAN_DONE]  ?: false,
+                smsHistoricalAdShown     = prefs[Keys.SMS_HISTORICAL_AD_SHOWN]   ?: false,
             )
         }
 
@@ -97,4 +109,16 @@ class UserPreferencesRepository @Inject constructor(
 
     suspend fun setUserName(name: String) =
         context.dataStore.edit { it[Keys.USER_NAME] = name }
+
+    suspend fun setSmsIntelligenceEnabled(enabled: Boolean) =
+        context.dataStore.edit { it[Keys.SMS_INTELLIGENCE_ENABLED] = enabled }
+
+    suspend fun setSmsNudgeDismissedAt(epochMs: Long) =
+        context.dataStore.edit { it[Keys.SMS_NUDGE_DISMISSED_AT] = epochMs }
+
+    suspend fun setSmsHistoricalScanDone(done: Boolean) =
+        context.dataStore.edit { it[Keys.SMS_HISTORICAL_SCAN_DONE] = done }
+
+    suspend fun setSmsHistoricalAdShown(shown: Boolean) =
+        context.dataStore.edit { it[Keys.SMS_HISTORICAL_AD_SHOWN] = shown }
 }

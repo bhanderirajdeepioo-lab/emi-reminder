@@ -10,13 +10,14 @@ import com.emireminder.app.data.repository.ReminderRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     loanRepository: LoanRepository,
     reminderRepository: ReminderRepository,
-    prefsRepository: UserPreferencesRepository,
+    private val prefsRepository: UserPreferencesRepository,
 ) : ViewModel() {
 
     val activeLoans = loanRepository.getActiveLoans()
@@ -33,4 +34,15 @@ class HomeViewModel @Inject constructor(
     val userName = prefsRepository.userPreferences
         .map { it.userName }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
+
+    val smsIntelligenceEnabled = prefsRepository.userPreferences
+        .map { it.smsIntelligenceEnabled }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    fun onSmsPermissionRevoked() {
+        viewModelScope.launch {
+            prefsRepository.setSmsIntelligenceEnabled(false)
+            prefsRepository.setSmsImportEnabled(false)
+        }
+    }
 }

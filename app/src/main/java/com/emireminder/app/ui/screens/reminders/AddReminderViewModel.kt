@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.emireminder.app.data.db.entity.Reminder
+import com.emireminder.app.data.repository.AutoDetectedEmiRepository
 import com.emireminder.app.data.repository.ReminderRepository
 import com.emireminder.app.notification.NotificationScheduler
 import kotlinx.coroutines.launch
@@ -17,10 +18,12 @@ import javax.inject.Inject
 class AddReminderViewModel @Inject constructor(
     private val reminderRepository: ReminderRepository,
     private val notificationScheduler: NotificationScheduler,
+    private val autoDetectedEmiRepository: AutoDetectedEmiRepository,
 ) : ViewModel() {
 
     private var editingReminderId: Int? = null
     private var editingLoanId: Int? = null
+    private var pendingEmiId: String? = null
 
     var loanName by mutableStateOf("")
         private set
@@ -84,11 +87,26 @@ class AddReminderViewModel @Inject constructor(
         this.loanName = loanName
     }
 
+    fun prefillFromAutoDetectedEmi(
+        emiId: String,
+        lenderName: String,
+        emiAmount: Double,
+        recurringDay: Int,
+    ) {
+        pendingEmiId = emiId
+        loanName = "$lenderName EMI"
+        bankName = lenderName
+        this.emiAmount = "%.2f".format(emiAmount).trimEnd('0').trimEnd('.')
+        dueDay = recurringDay.coerceIn(1, 31).toString()
+        repeatFrequency = "Monthly"
+    }
+
     fun onErrorDismissed() { errorMessage = null }
 
     fun resetForm() {
         editingReminderId = null
         editingLoanId = null
+        pendingEmiId = null
         loanName = ""
         bankName = ""
         emiAmount = ""
@@ -143,6 +161,9 @@ class AddReminderViewModel @Inject constructor(
                     val insertedId = reminderRepository.insertReminder(reminder)
                     if (notificationEnabled) {
                         notificationScheduler.scheduleReminder(reminder.copy(id = insertedId.toInt()))
+                    }
+                    pendingEmiId?.let { emiId ->
+                        autoDetectedEmiRepository.confirmEmi(emiId, insertedId.toInt())
                     }
                 }
                 isSaving = false

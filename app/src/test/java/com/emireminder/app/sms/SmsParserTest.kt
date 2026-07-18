@@ -1,6 +1,8 @@
 package com.emireminder.app.sms
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -226,5 +228,108 @@ class SmsParserTest {
     @Test fun confidenceContract_lowConfidenceIsNotAutoImportEligible() {
         val result = SmsParser.parse("VM-OFFERS", "Recharge now and get 10% cashback!")
         assertTrue("Expected low confidence for unrelated SMS", result.confidence < 0.4f)
+    }
+
+    // ──── HEL-589 new category tests ─────────────────────────────────────────
+
+    @Test fun parseTransaction_loanDisbursal_unknownSender() {
+        val result = SmsParser.parseTransaction(
+            "VM-NBFCX",
+            "Your personal loan of Rs.2,00,000 has been credited to a/c XX1234 on 01-Jul-26. Loan disbursed. Ref: LN12345.",
+        )
+        assertNotNull(result)
+        assertEquals(TransactionCategory.LOAN_DISBURSAL, result!!.category)
+        assertTrue("NBFC fallback confidence should be ≥ 50", result.confidenceScore >= 50)
+    }
+
+    @Test fun parseTransaction_insurancePremium_unknownSenderBodyMatch_highConfidence() {
+        val result = SmsParser.parseTransaction(
+            "VM-LICAGNT",
+            "LIC of India: Your premium of Rs.12,500 for policy 123456789 has been deducted via auto-pay on 01-Jul-26.",
+        )
+        assertNotNull(result)
+        assertEquals(TransactionCategory.INSURANCE_PREMIUM, result!!.category)
+        assertTrue("LIC body-match confidence should be ≥ 50", result.confidenceScore >= 50)
+    }
+
+    @Test fun parseTransaction_jioRecharge_telecomCategory() {
+        val result = SmsParser.parseTransaction(
+            "AX-JIOIND",
+            "Jio: Your prepaid plan of Rs.239 has been recharged for 28 days validity on 01-Jul-26.",
+        )
+        assertNotNull(result)
+        assertEquals(TransactionCategory.TELECOM_RECHARGE, result!!.category)
+    }
+
+    @Test fun parseTransaction_netflix_subscriptionCategory() {
+        val result = SmsParser.parseTransaction(
+            "VM-NFLX",
+            "Your Netflix subscription of Rs.649 has been debited from a/c XX1234 on 15-Jul-26.",
+        )
+        assertNotNull(result)
+        assertEquals(TransactionCategory.SUBSCRIPTION, result!!.category)
+    }
+
+    @Test fun parseTransaction_youtubePremium_subscriptionCategory() {
+        val result = SmsParser.parseTransaction(
+            "VM-GOOGL",
+            "Your YouTube Premium subscription of Rs.129 has been debited from a/c XX5678 on 01-Jul-26.",
+        )
+        assertNotNull(result)
+        assertEquals(TransactionCategory.SUBSCRIPTION, result!!.category)
+    }
+
+    @Test fun parseTransaction_licPremium_insuranceCategory() {
+        val result = SmsParser.parseTransaction(
+            "VM-LICAGNT",
+            "LIC of India: Your premium of Rs.12,500 for policy 123456789 has been deducted via auto-pay on 01-Jul-26.",
+        )
+        assertNotNull(result)
+        assertEquals(TransactionCategory.INSURANCE_PREMIUM, result!!.category)
+    }
+
+    @Test fun parseTransaction_balanceAlertOnly_returnsNull() {
+        val result = SmsParser.parseTransaction(
+            "HDFCBK",
+            "HDFC Bank: Avl Bal: Rs.25,000.00 in your a/c XX1234.",
+        )
+        assertNull("Balance-only SMS must be filtered by Gate 4", result)
+    }
+
+    @Test fun parseTransaction_neftDebit_bankTransferDebit() {
+        val result = SmsParser.parseTransaction(
+            "HDFCBK",
+            "HDFC Bank: Rs.25,000 debited from your a/c XX1234 via NEFT to XXXXXX5678 on 15-Jul-26.",
+        )
+        assertEquals(TransactionCategory.BANK_TRANSFER_DEBIT, result?.category)
+    }
+
+    @Test fun parseTransaction_neftCredit_bankTransferCredit() {
+        val result = SmsParser.parseTransaction(
+            "HDFCBK",
+            "HDFC Bank: Rs.10,000 received via NEFT in your a/c XX1234 from XXXXXX9876 on 15-Jul-26.",
+        )
+        assertEquals(TransactionCategory.BANK_TRANSFER_CREDIT, result?.category)
+    }
+
+    @Test fun parseTransaction_refund_refundCategory() {
+        val result = SmsParser.parseTransaction(
+            "HDFCBK",
+            "HDFC Bank: Rs.1,200 refund credited to your a/c XX1234 on 15-Jul-26. Ref: 123456.",
+        )
+        assertEquals(TransactionCategory.REFUND, result?.category)
+    }
+
+    @Test fun parseTransaction_spotifyPremium_subscriptionCategory() {
+        val result = SmsParser.parseTransaction(
+            "VM-SPOTFY",
+            "Your Spotify Premium plan of Rs.119 has been debited from a/c XX5678 on 01-Jul-26.",
+        )
+        assertNotNull(result)
+        assertEquals(
+            "Spotify Premium must classify as SUBSCRIPTION, not INSURANCE_PREMIUM",
+            TransactionCategory.SUBSCRIPTION,
+            result!!.category,
+        )
     }
 }

@@ -6,7 +6,9 @@ import android.app.NotificationManager
 import android.os.Build
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.emireminder.app.ads.AppOpenAdManager
 import com.emireminder.app.data.db.AppDatabase
+import com.google.android.gms.ads.MobileAds
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,6 +38,8 @@ class EmiApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        MobileAds.initialize(this) {}
+        AppOpenAdManager.initialize(this)
         createNotificationChannels()
         warmupDatabase()
     }
@@ -65,11 +69,19 @@ class EmiApp : Application(), Configuration.Provider {
                     NotificationManager.IMPORTANCE_DEFAULT
                 ).apply { description = "Notifications when a loan EMI is detected via SMS" }
             )
+            manager.createNotificationChannel(
+                NotificationChannel(
+                    CHANNEL_SMS_MONITOR,
+                    "SMS Finance Monitor",
+                    NotificationManager.IMPORTANCE_LOW
+                ).apply { description = "Persistent notification while monitoring bank SMS in background" }
+            )
         }
     }
 
     companion object {
-        const val CHANNEL_REMINDERS = "emi_reminders"
-        const val CHANNEL_SMS = "emi_sms_detected"
+        const val CHANNEL_REMINDERS  = "emi_reminders"
+        const val CHANNEL_SMS        = "emi_sms_detected"
+        const val CHANNEL_SMS_MONITOR = "emi_sms_monitor"
     }
 }

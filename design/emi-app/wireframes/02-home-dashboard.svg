@@ -110,6 +110,23 @@
   <rect x="286" y="642" width="70" height="22" rx="11" fill="#EEF2FF"/>
   <text x="321" y="657" font-size="11" font-weight="600" text-anchor="middle" fill="#4F46E5">Due in 12d</text>
 
+  <!-- FINANCE INTELLIGENCE card — entry point (OQ-5: card on Dashboard, not a 5th tab) -->
+  <text x="16" y="698" font-size="11" font-weight="700" fill="#64748B">FINANCE INTELLIGENCE</text>
+  <rect x="16" y="706" width="358" height="82" rx="14" fill="#1E293B"/>
+  <!-- "SMS Intelligence ON" badge -->
+  <rect x="28" y="718" width="124" height="18" rx="9" fill="#059669"/>
+  <text x="90" y="731" font-size="9" font-weight="700" text-anchor="middle" fill="#FFFFFF">⚡ SMS Intelligence ON</text>
+  <!-- Month label -->
+  <text x="28" y="756" font-size="11" fill="#94A3B8">July 2026</text>
+  <!-- Stats row -->
+  <text x="28" y="776" font-size="13" font-weight="700" fill="#FFFFFF">₹41,200 spent · ₹20,300 saved</text>
+  <!-- View Finance CTA -->
+  <rect x="262" y="748" width="104" height="30" rx="15" fill="#4F46E5"/>
+  <text x="314" y="767" font-size="11" font-weight="700" text-anchor="middle" fill="#FFFFFF">View Finance →</text>
+  <!-- annotation 5 -->
+  <circle cx="168" cy="718" r="12" fill="#1E293B" stroke="#d33" stroke-dasharray="4 2" stroke-width="1.5"/>
+  <text x="168" y="722" font-size="12" font-weight="700" text-anchor="middle" fill="#d33">5</text>
+
   <!-- bottom nav — 4 tabs with icons -->
   <rect x="0" y="796" width="390" height="48" fill="#FFFFFF"/>
   <rect x="0" y="796" width="390" height="1" fill="#E2E8F0"/>
