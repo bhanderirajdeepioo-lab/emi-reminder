@@ -58,6 +58,8 @@ import com.emireminder.app.ui.screens.settings.SettingsScreen
 import com.emireminder.app.ui.screens.sms.HistoricalScanScreen
 import com.emireminder.app.ui.screens.sms.SMSImportScreen
 import com.emireminder.app.ui.screens.sms.SmsIntelligenceOnboardingScreen
+import com.emireminder.app.ui.ads.AppOpenAdManager
+import com.emireminder.app.ui.components.BannerAdView
 import com.emireminder.app.ui.screens.splash.SplashScreen
 import com.emireminder.app.ui.theme.Indigo600
 
@@ -88,7 +90,10 @@ private fun markOnboardingDone(context: Context) {
 }
 
 @Composable
-fun AppNavGraph(deepLinkLoanId: Int = -1) {
+fun AppNavGraph(
+    deepLinkLoanId: Int = -1,
+    onSplashComplete: () -> Unit = {},
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -107,6 +112,11 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
     // completed (HEL-217).
     val startDestination = if (firstLaunch) NavRoutes.SPLASH else NavRoutes.HOME
 
+    // Returning users start at HOME directly — mark ads as ready on first composition.
+    if (!firstLaunch) {
+        AppOpenAdManager.markAppReady()
+    }
+
     // For returning users, SPLASH's onNavigateToHome callback is never reached, so we fire
     // the notification deep-link here instead.
     LaunchedEffect(deepLinkLoanId) {
@@ -118,19 +128,22 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                PillNavBar(
-                    currentRoute = currentRoute,
-                    onNavigate = { route ->
-                        navController.navigate(route) {
-                            // Never save or restore sub-nav state when switching tabs.
-                            // saveState=true caused Finance→ToolsHub→Comparison to be
-                            // restored when tapping Finance tab again (HEL-115).
-                            popUpTo(NavRoutes.HOME) { saveState = false }
-                            launchSingleTop = true
-                            restoreState = false
+                Column {
+                    BannerAdView()
+                    PillNavBar(
+                        currentRoute = currentRoute,
+                        onNavigate = { route ->
+                            navController.navigate(route) {
+                                // Never save or restore sub-nav state when switching tabs.
+                                // saveState=true caused Finance→ToolsHub→Comparison to be
+                                // restored when tapping Finance tab again (HEL-115).
+                                popUpTo(NavRoutes.HOME) { saveState = false }
+                                launchSingleTop = true
+                                restoreState = false
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -174,6 +187,8 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
                         }
                     },
                     onNavigateToHome = {
+                        AppOpenAdManager.markAppReady()
+                        onSplashComplete()
                         navController.navigate(NavRoutes.HOME) { popUpTo(NavRoutes.SPLASH) { inclusive = true } }
                         // Notification deep link: open the tapped loan detail on top of Home.
                         if (deepLinkLoanId != -1) {

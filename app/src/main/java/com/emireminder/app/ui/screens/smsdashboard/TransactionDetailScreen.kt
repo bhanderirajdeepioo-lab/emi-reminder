@@ -118,7 +118,6 @@ fun TransactionDetailScreen(
                             onToggleVerified = viewModel::toggleVerified,
                             onEdit = viewModel::openEditSheet,
                         )
-                        BannerAdPlaceholder(modifier = Modifier.padding(bottom = 8.dp))
                     }
                 }
             }

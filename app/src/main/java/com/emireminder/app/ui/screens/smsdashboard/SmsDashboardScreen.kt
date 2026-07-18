@@ -398,11 +398,6 @@ fun SmsDashboardScreen(
                 }
             }
 
-            item {
-                Spacer(Modifier.height(8.dp))
-                BannerAdPlaceholder()
-                Spacer(Modifier.height(8.dp))
-            }
         }
     }
 }

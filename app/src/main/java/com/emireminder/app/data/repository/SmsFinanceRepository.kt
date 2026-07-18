@@ -4,6 +4,7 @@ import com.emireminder.app.data.db.dao.MonthlyFinanceSummaryDao
 import com.emireminder.app.data.db.dao.ParsedTransactionDao
 import com.emireminder.app.data.db.entity.MonthlyFinanceSummary
 import com.emireminder.app.data.db.entity.ParsedTransaction as ParsedTransactionEntity
+import kotlinx.coroutines.flow.Flow
 import com.emireminder.app.domain.model.TransactionCategory
 import com.emireminder.app.domain.model.TransactionDirection
 import com.emireminder.app.sms.MerchantClassifier
@@ -271,5 +272,7 @@ class SmsFinanceRepository @Inject constructor(
     suspend fun updateTransaction(transaction: ParsedTransactionEntity) {
         parsedTransactionDao.update(transaction)
     }
+
+    fun observeAllTransactions(): Flow<List<ParsedTransactionEntity>> = parsedTransactionDao.getAll()
 
 }

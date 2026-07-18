@@ -110,8 +110,9 @@ dependencies {
     // AppCompat — for per-app locale switching via AppCompatDelegate
     implementation(libs.appcompat)
 
-    // AdMob (interstitial after first historical scan)
+    // AdMob
     implementation(libs.play.services.ads)
+    implementation(libs.user.messaging.platform)
 
     testImplementation(libs.junit)
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")

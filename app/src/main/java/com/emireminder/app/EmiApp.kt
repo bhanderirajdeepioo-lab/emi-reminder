@@ -8,6 +8,7 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.emireminder.app.data.db.AppDatabase
 import com.google.android.gms.ads.MobileAds
+import com.emireminder.app.ui.ads.AppOpenAdManager
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +38,9 @@ class EmiApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        MobileAds.initialize(this) {}
+        MobileAds.initialize(this) {
+            AppOpenAdManager.init(this)
+        }
         createNotificationChannels()
         warmupDatabase()
     }
