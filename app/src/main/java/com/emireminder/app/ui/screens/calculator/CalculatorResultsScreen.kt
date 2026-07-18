@@ -1,6 +1,8 @@
 package com.emireminder.app.ui.screens.calculator
 
+import android.app.Activity
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,11 +18,13 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.emireminder.app.ui.ads.InterstitialAdManager
 import com.emireminder.app.ui.screens.reminders.AddReminderSheet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,11 +64,28 @@ fun CalculatorResultsScreen(
     val context = LocalContext.current
     var showReminderSheet by remember { mutableStateOf(false) }
 
+    val entryTimeMs = remember { System.currentTimeMillis() }
+    LaunchedEffect(Unit) { InterstitialAdManager.preload(context) }
+
+    // Show interstitial on back-navigate only when user has viewed results for ≥3 seconds.
+    val activity = context as? Activity
+    val performBack: () -> Unit = remember(onBack) {
+        {
+            val elapsed = System.currentTimeMillis() - entryTimeMs
+            if (elapsed >= 3_000L && activity != null) {
+                InterstitialAdManager.showIfAvailable(activity) { onBack() }
+            } else {
+                onBack()
+            }
+        }
+    }
+    BackHandler { performBack() }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("EMI Results", fontWeight = FontWeight.Bold) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) } },
+                navigationIcon = { IconButton(onClick = performBack) { Icon(Icons.Default.ArrowBack, null) } },
                 actions = {
                     IconButton(onClick = {
                         val shareText = buildString {
