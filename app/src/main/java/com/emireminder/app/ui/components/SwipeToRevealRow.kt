@@ -86,6 +86,91 @@ fun SwipeToDeleteRow(
 }
 
 /**
+ * Swipe right to edit (springs back) and swipe left to delete (confirms dismiss).
+ * Gives both actions on a single card without nested SwipeToDismissBox conflicts.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SwipeToEditDeleteRow(
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+    cardCornerRadius: Dp = 12.dp,
+    horizontalPadding: Dp = 16.dp,
+    verticalPadding: Dp = 0.dp,
+    content: @Composable () -> Unit,
+) {
+    val state = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            when (value) {
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    onEdit()
+                    false // Never confirm — spring back
+                }
+                SwipeToDismissBoxValue.EndToStart -> true // Confirm delete
+                else -> false
+            }
+        },
+        positionalThreshold = { totalDistance -> totalDistance * 0.4f },
+    )
+
+    LaunchedEffect(state.currentValue) {
+        if (state.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            onDelete()
+        }
+    }
+
+    SwipeToDismissBox(
+        state = state,
+        modifier = modifier,
+        enableDismissFromStartToEnd = true,
+        enableDismissFromEndToStart = true,
+        backgroundContent = {
+            val isDeleteTarget = state.targetValue == SwipeToDismissBoxValue.EndToStart
+            val isEditTarget = state.targetValue == SwipeToDismissBoxValue.StartToEnd
+            val bgColor by animateColorAsState(
+                targetValue = when {
+                    isDeleteTarget -> MaterialTheme.colorScheme.error
+                    isEditTarget -> MaterialTheme.colorScheme.primary
+                    else -> Color.Transparent
+                },
+                animationSpec = tween(150),
+                label = "swipe_dual_bg",
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = horizontalPadding, vertical = verticalPadding)
+                    .clip(RoundedCornerShape(cardCornerRadius))
+                    .background(bgColor),
+                contentAlignment = if (isDeleteTarget) Alignment.CenterEnd else Alignment.CenterStart,
+            ) {
+                when {
+                    isDeleteTarget -> Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .padding(end = 20.dp)
+                            .size(22.dp),
+                    )
+                    isEditTarget -> Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .padding(start = 20.dp)
+                            .size(22.dp),
+                    )
+                }
+            }
+        },
+    ) {
+        content()
+    }
+}
+
+/**
  * Swipe left to trigger edit. Item springs back after edit is triggered — it is not dismissed.
  */
 @OptIn(ExperimentalMaterial3Api::class)

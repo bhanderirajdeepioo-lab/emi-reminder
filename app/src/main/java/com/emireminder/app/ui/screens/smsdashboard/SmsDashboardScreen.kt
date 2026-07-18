@@ -32,7 +32,8 @@ import com.emireminder.app.data.db.entity.BankAccount
 import com.emireminder.app.data.db.entity.ParsedTransaction
 import com.emireminder.app.domain.model.TransactionCategory
 import com.emireminder.app.domain.model.TransactionDirection
-import com.emireminder.app.ui.components.SwipeToEditRow
+import com.emireminder.app.ui.components.SwipeToEditDeleteRow
+import kotlinx.coroutines.launch
 import com.emireminder.app.ui.theme.*
 import java.text.NumberFormat
 import java.time.Instant
@@ -146,6 +147,14 @@ fun SmsDashboardScreen(
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(uiState.deleteError) {
+        val error = uiState.deleteError ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(message = error, duration = SnackbarDuration.Long)
+        viewModel.clearDeleteError()
+    }
 
     LaunchedEffect(uiState.smsHistoricalScanDone, uiState.isLoading) {
         if (!uiState.isLoading && !uiState.smsHistoricalScanDone) {
@@ -202,6 +211,7 @@ fun SmsDashboardScreen(
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = Indigo50,
         contentWindowInsets = WindowInsets(0.dp),
     ) { padding ->
@@ -307,8 +317,22 @@ fun SmsDashboardScreen(
                             when (item) {
                                 is TransactionListItem.DateHeader -> DateGroupHeader(label = item.label)
                                 is TransactionListItem.TxnCard -> {
-                                    SwipeToEditRow(
+                                    SwipeToEditDeleteRow(
                                         onEdit = { viewModel.openEditSheet(item.txn) },
+                                        onDelete = {
+                                            val txn = item.txn
+                                            viewModel.deleteTransaction(txn)
+                                            scope.launch {
+                                                val result = snackbarHostState.showSnackbar(
+                                                    message = "Transaction deleted",
+                                                    actionLabel = "Undo",
+                                                    duration = SnackbarDuration.Short,
+                                                )
+                                                if (result == SnackbarResult.ActionPerformed) {
+                                                    viewModel.undoDeleteTransaction(txn)
+                                                }
+                                            }
+                                        },
                                         verticalPadding = 0.dp,
                                     ) {
                                         Column {
