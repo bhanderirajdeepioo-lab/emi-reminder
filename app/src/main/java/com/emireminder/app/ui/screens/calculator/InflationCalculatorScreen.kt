@@ -2,8 +2,10 @@ package com.emireminder.app.ui.screens.calculator
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -168,7 +170,8 @@ fun InflationCalculatorScreen(
             // Results card (animated in after calculate)
             AnimatedVisibility(
                 visible = state.showResults,
-                enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 4 },
+                enter = expandVertically(tween(300)) + fadeIn(tween(300)),
+                exit = shrinkVertically(tween(300)) + fadeOut(tween(300)),
             ) {
                 when (state.mode) {
                     InflationMode.PURCHASING_POWER -> state.resultA?.let { result ->

@@ -1,6 +1,7 @@
 package com.emireminder.app.ui.screens.calculator
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -103,8 +104,8 @@ fun IncomeTaxCalculatorScreen(
             // Old regime deductions — animates in for OLD and COMPARE tabs
             AnimatedVisibility(
                 visible = state.regime == TaxRegime.OLD || state.regime == TaxRegime.COMPARE,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut(),
+                enter = expandVertically(tween(300)) + fadeIn(tween(300)),
+                exit = shrinkVertically(tween(300)) + fadeOut(tween(300)),
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
@@ -150,8 +151,8 @@ fun IncomeTaxCalculatorScreen(
             // Standard deduction info — hidden in COMPARE (each regime card carries its own label)
             AnimatedVisibility(
                 visible = state.regime != TaxRegime.COMPARE,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut(),
+                enter = expandVertically(tween(300)) + fadeIn(tween(300)),
+                exit = shrinkVertically(tween(300)) + fadeOut(tween(300)),
             ) {
                 Card(
                     shape = RoundedCornerShape(14.dp),
@@ -488,8 +489,8 @@ private fun SlabBreakdown(state: IncomeTaxUiState) {
 
             AnimatedVisibility(
                 visible = expanded,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut(),
+                enter = expandVertically(tween(300)) + fadeIn(tween(300)),
+                exit = shrinkVertically(tween(300)) + fadeOut(tween(300)),
             ) {
                 Column(Modifier.padding(bottom = 12.dp)) {
                     when (state.regime) {

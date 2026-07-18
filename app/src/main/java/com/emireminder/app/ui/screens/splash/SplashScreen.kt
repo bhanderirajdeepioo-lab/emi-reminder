@@ -47,9 +47,9 @@ fun SplashScreen(
 
     LaunchedEffect(Unit) {
         launch { logoScale.animateTo(1f, animationSpec = tween(350, easing = FastOutSlowInEasing)) }
-        launch { logoAlpha.animateTo(1f, animationSpec = tween(350)) }
+        launch { logoAlpha.animateTo(1f, animationSpec = tween(350, easing = FastOutSlowInEasing)) }
         delay(150)
-        textAlpha.animateTo(1f, animationSpec = tween(300, easing = EaseInOut))
+        textAlpha.animateTo(1f, animationSpec = tween(300, easing = FastOutSlowInEasing))
         delay(400)
         if (currentIsFirstLaunch) onNavigateToOnboarding() else onNavigateToHome()
     }

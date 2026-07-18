@@ -173,8 +173,8 @@ fun OnboardingScreen(onComplete: () -> Unit, onSkip: () -> Unit) {
                 .fillMaxSize()
                 .padding(start = 24.dp, end = 24.dp, top = 72.dp, bottom = 200.dp),
             transitionSpec = {
-                (fadeIn(tween(400)) + slideInHorizontally(tween(400)) { it / 4 })
-                    .togetherWith(fadeOut(tween(200)) + slideOutHorizontally(tween(400)) { -it / 4 })
+                (fadeIn(tween(300)) + slideInHorizontally(tween(300)) { it / 4 })
+                    .togetherWith(fadeOut(tween(200)) + slideOutHorizontally(tween(300)) { -it / 4 })
             },
             contentAlignment = Alignment.Center,
             label = "onboarding_page",
