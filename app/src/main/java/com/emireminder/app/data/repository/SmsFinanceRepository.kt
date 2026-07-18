@@ -78,6 +78,7 @@ class SmsFinanceRepository @Inject constructor(
             confidenceScore  = parsed.confidenceScore,
             isEmi            = isEmi,
             loanAccountLast4 = if (isEmi) last4 else null,
+            rawSmsBody       = body,
         )
 
         val rowId = parsedTransactionDao.insert(entity)
@@ -134,6 +135,7 @@ class SmsFinanceRepository @Inject constructor(
             confidenceScore  = parsed.confidenceScore,
             isEmi            = isEmi,
             loanAccountLast4 = if (isEmi) last4 else null,
+            rawSmsBody       = body,
         )
 
         val rowId = parsedTransactionDao.insert(entity)
