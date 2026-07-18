@@ -46,12 +46,25 @@ import com.emireminder.app.ui.theme.Violet600
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.emireminder.app.ui.components.NativeAdCardView
 import com.emireminder.app.ui.screens.sms.SmsRevocationBanner
 import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
+
+private sealed interface HomeLoanListItem {
+    data class LoanItem(val loan: Loan) : HomeLoanListItem
+    data class AdItem(val index: Int) : HomeLoanListItem
+}
+
+private fun buildHomeLoanListItems(sortedLoans: List<Loan>): List<HomeLoanListItem> = buildList {
+    sortedLoans.forEachIndexed { i, loan ->
+        add(HomeLoanListItem.LoanItem(loan))
+        if ((i + 1) % 5 == 0) add(HomeLoanListItem.AdItem(i / 5))
+    }
+}
 
 private val headerGradient = Brush.linearGradient(
     colors = listOf(Indigo600, Violet600)
@@ -79,6 +92,15 @@ fun HomeScreen(
     val smsPermission = rememberPermissionState(android.Manifest.permission.READ_SMS)
     val lifecycleOwner = LocalLifecycleOwner.current
     var showRevocationBanner by remember { mutableStateOf(false) }
+
+    val sortedLoanListItems = remember(loans) {
+        val sorted = loans.sortedBy { loan ->
+            val today = LocalDate.now().dayOfMonth
+            val due = loan.emiDueDay
+            if (due >= today) due - today else (LocalDate.now().lengthOfMonth() - today) + due
+        }
+        buildHomeLoanListItems(sorted)
+    }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -163,14 +185,24 @@ fun HomeScreen(
                     }
                 }
                 items(
-                    loans.sortedBy { loan ->
-                        val today = LocalDate.now().dayOfMonth
-                        val due = loan.emiDueDay
-                        if (due >= today) due - today else (LocalDate.now().lengthOfMonth() - today) + due
-                    }.take(2),
-                    key = { it.id },
-                ) { loan ->
-                    LoanReminderCard(loan = loan, currencySymbol = currencySymbol, onClick = { onNavigateToLoanDetail(loan.id) })
+                    sortedLoanListItems,
+                    key = { item ->
+                        when (item) {
+                            is HomeLoanListItem.LoanItem -> item.loan.id
+                            is HomeLoanListItem.AdItem -> "loan_ad_${item.index}"
+                        }
+                    },
+                ) { item ->
+                    when (item) {
+                        is HomeLoanListItem.LoanItem ->
+                            LoanReminderCard(
+                                loan = item.loan,
+                                currencySymbol = currencySymbol,
+                                onClick = { onNavigateToLoanDetail(item.loan.id) },
+                            )
+                        is HomeLoanListItem.AdItem ->
+                            NativeAdCardView(modifier = Modifier.padding(vertical = 4.dp))
+                    }
                 }
             }
         }

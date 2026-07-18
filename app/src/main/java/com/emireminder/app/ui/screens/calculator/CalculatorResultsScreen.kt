@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.emireminder.app.ads.InterstitialAdManager
+import com.emireminder.app.ui.components.NativeAdCardView
 import com.emireminder.app.ui.theme.*
 import java.text.NumberFormat
 import java.util.Locale
@@ -225,6 +226,8 @@ fun CalculatorResultsScreen(
                     Spacer(Modifier.width(8.dp))
                     Text("+ Save as Loan Reminder", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 }
+
+                NativeAdCardView(modifier = Modifier.padding(top = 8.dp))
             }
         }
     }
