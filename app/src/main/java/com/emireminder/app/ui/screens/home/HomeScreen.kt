@@ -46,6 +46,7 @@ import com.emireminder.app.ui.theme.Violet600
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.emireminder.app.ui.components.NativeAdCard
 import com.emireminder.app.ui.screens.sms.SmsRevocationBanner
 import java.text.NumberFormat
 import java.time.LocalDate
@@ -171,6 +172,11 @@ fun HomeScreen(
                     key = { it.id },
                 ) { loan ->
                     LoanReminderCard(loan = loan, currencySymbol = currencySymbol, onClick = { onNavigateToLoanDetail(loan.id) })
+                }
+                item(key = "home_native_ad") {
+                    NativeAdCard(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    )
                 }
             }
         }

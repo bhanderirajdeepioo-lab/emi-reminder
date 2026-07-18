@@ -32,6 +32,7 @@ import com.emireminder.app.data.db.entity.BankAccount
 import com.emireminder.app.data.db.entity.ParsedTransaction
 import com.emireminder.app.domain.model.TransactionCategory
 import com.emireminder.app.domain.model.TransactionDirection
+import com.emireminder.app.ui.components.NativeAdCard
 import com.emireminder.app.ui.components.SwipeToEditDeleteRow
 import kotlinx.coroutines.launch
 import com.emireminder.app.ui.theme.*
@@ -95,6 +96,7 @@ private val spendVerticalCategories = setOf(
 private sealed interface TransactionListItem {
     data class DateHeader(val label: String) : TransactionListItem
     data class TxnCard(val txn: ParsedTransaction) : TransactionListItem
+    data class NativeAd(val id: Int) : TransactionListItem
 }
 
 private fun buildTransactionListItems(transactions: List<ParsedTransaction>): List<TransactionListItem> {
@@ -103,6 +105,7 @@ private fun buildTransactionListItems(transactions: List<ParsedTransaction>): Li
     val yesterday = now.minusDays(1)
     val items = mutableListOf<TransactionListItem>()
     var lastDate: LocalDate? = null
+    var txnCardCount = 0
     for (txn in transactions) {
         val date = Instant.ofEpochMilli(txn.transactionDate).atZone(ZoneId.systemDefault()).toLocalDate()
         if (date != lastDate) {
@@ -115,6 +118,10 @@ private fun buildTransactionListItems(transactions: List<ParsedTransaction>): Li
             lastDate = date
         }
         items.add(TransactionListItem.TxnCard(txn))
+        txnCardCount++
+        if (txnCardCount % 5 == 0) {
+            items.add(TransactionListItem.NativeAd(id = txnCardCount))
+        }
     }
     return items
 }
@@ -311,6 +318,7 @@ fun SmsDashboardScreen(
                                 when (item) {
                                     is TransactionListItem.DateHeader -> "header_${item.label}"
                                     is TransactionListItem.TxnCard -> "txn_${item.txn.id}"
+                                    is TransactionListItem.NativeAd -> "native_ad_${item.id}"
                                 }
                             },
                         ) { item ->
@@ -344,6 +352,11 @@ fun SmsDashboardScreen(
                                             Spacer(Modifier.height(8.dp))
                                         }
                                     }
+                                }
+                                is TransactionListItem.NativeAd -> {
+                                    NativeAdCard(
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                                    )
                                 }
                             }
                         }

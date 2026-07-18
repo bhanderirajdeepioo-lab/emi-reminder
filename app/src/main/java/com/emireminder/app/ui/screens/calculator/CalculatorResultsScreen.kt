@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.emireminder.app.ui.ads.InterstitialAdManager
+import com.emireminder.app.ui.components.NativeAdCard
 import com.emireminder.app.ui.screens.reminders.AddReminderSheet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -228,6 +229,8 @@ fun CalculatorResultsScreen(
                     Spacer(Modifier.width(8.dp))
                     Text("+ Save as Loan Reminder", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
                 }
+
+                NativeAdCard()
             }
         }
     }
