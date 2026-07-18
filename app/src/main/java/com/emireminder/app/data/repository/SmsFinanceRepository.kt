@@ -4,6 +4,7 @@ import com.emireminder.app.data.db.dao.MonthlyFinanceSummaryDao
 import com.emireminder.app.data.db.dao.ParsedTransactionDao
 import com.emireminder.app.data.db.entity.MonthlyFinanceSummary
 import com.emireminder.app.data.db.entity.ParsedTransaction as ParsedTransactionEntity
+import kotlinx.coroutines.flow.Flow
 import com.emireminder.app.domain.model.TransactionCategory
 import com.emireminder.app.domain.model.TransactionDirection
 import com.emireminder.app.sms.MerchantClassifier
@@ -63,6 +64,7 @@ class SmsFinanceRepository @Inject constructor(
         val entity = ParsedTransactionEntity(
             id               = UUID.randomUUID().toString(),
             smsId            = smsId,
+            rawSmsBody       = body,
             parsedAt         = System.currentTimeMillis(),
             transactionDate  = transactionDate,
             yearMonth        = yearMonth,
@@ -119,6 +121,7 @@ class SmsFinanceRepository @Inject constructor(
         val entity = ParsedTransactionEntity(
             id               = UUID.randomUUID().toString(),
             smsId            = smsId,
+            rawSmsBody       = body,
             parsedAt         = System.currentTimeMillis(),
             transactionDate  = transactionDate,
             yearMonth        = yearMonth,
@@ -156,6 +159,8 @@ class SmsFinanceRepository @Inject constructor(
         autoDetectedEmiRepository.deleteAll()
         bankAccountRepository.deleteAll()
     }
+
+    fun observeAllTransactions(): Flow<List<ParsedTransactionEntity>> = parsedTransactionDao.getAll()
 
     // ── Private helpers ────────────────────────────────────────────────────────
 

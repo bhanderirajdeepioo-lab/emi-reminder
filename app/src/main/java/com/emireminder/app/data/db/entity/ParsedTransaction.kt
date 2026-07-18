@@ -33,7 +33,6 @@ data class ParsedTransaction(
     @ColumnInfo(name = "sms_id")
     val smsId: String,
 
-    /** Null in release builds; populated only when BuildConfig.DEBUG is true. */
     @ColumnInfo(name = "raw_sms_body")
     val rawSmsBody: String? = null,
 

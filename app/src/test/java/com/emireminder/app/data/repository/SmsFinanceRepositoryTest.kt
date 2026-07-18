@@ -125,4 +125,27 @@ class SmsFinanceRepositoryTest {
         )
         assertEquals(TransactionCategory.UNCATEGORISED, category)
     }
+
+    // ── AC-9: rawSmsBody is stored by processIncomingSms (HEL-640) ───────────────
+
+    @Test
+    fun `AC-9 processIncomingSms stores rawSmsBody so ExpandableSmsSection is reachable`() = runTest {
+        val body = "Rs.350 debited from a/c XX1234 via UPI to swiggy@icici on 18-Jul-26. UPI Ref: 123456."
+        repository.processIncomingSms("VK-HDFCBK", body)
+        assertEquals(body, capturedEntity.captured.rawSmsBody)
+    }
+
+    // ── AC-10: rawSmsBody is stored by processHistoricalSms (HEL-640) ────────────
+
+    @Test
+    fun `AC-10 processHistoricalSms stores rawSmsBody so ExpandableSmsSection is reachable`() = runTest {
+        val body = "Rs.5000 credited to a/c XX1234 on 18-Jul-26. Ref: 654321. HDFC Bank."
+        repository.processHistoricalSms(
+            smsId = "42",
+            senderAddress = "VK-HDFCBK",
+            body = body,
+            dateMs = System.currentTimeMillis(),
+        )
+        assertEquals(body, capturedEntity.captured.rawSmsBody)
+    }
 }
