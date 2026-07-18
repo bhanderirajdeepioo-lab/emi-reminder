@@ -210,6 +210,11 @@ class SmsFinanceRepository @Inject constructor(
         SmsCategory.TELECOM_RECHARGE       -> TransactionCategory.UTILITIES
         SmsCategory.SUBSCRIPTION           -> TransactionCategory.ENTERTAINMENT
         SmsCategory.REFUND                 -> TransactionCategory.INCOME
+        SmsCategory.FOOD_AND_DINING        -> TransactionCategory.FOOD_AND_DINING
+        SmsCategory.TRANSPORT              -> TransactionCategory.TRANSPORT
+        SmsCategory.SHOPPING               -> TransactionCategory.SHOPPING
+        SmsCategory.HEALTH                 -> TransactionCategory.HEALTH
+        SmsCategory.BANK_CHARGES           -> TransactionCategory.BANK_CHARGES
         SmsCategory.BALANCE_ALERT,
         SmsCategory.IGNORED,
         SmsCategory.UNKNOWN                -> TransactionCategory.UNCATEGORISED
