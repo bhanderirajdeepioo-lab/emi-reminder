@@ -18,5 +18,10 @@ enum class TransactionCategory {
     BANK_TRANSFER_CREDIT,
     BALANCE_ALERT,
     IGNORED,   // OTP / promotional — never stored as transactions
+    FOOD_AND_DINING,
+    TRANSPORT,
+    SHOPPING,
+    HEALTH,
+    BANK_CHARGES,
     UNKNOWN,
 }
