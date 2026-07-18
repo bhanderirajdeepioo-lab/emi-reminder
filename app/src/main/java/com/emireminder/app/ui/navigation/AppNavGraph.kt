@@ -59,6 +59,7 @@ import com.emireminder.app.ui.screens.settings.SettingsScreen
 import com.emireminder.app.ui.screens.sms.HistoricalScanScreen
 import com.emireminder.app.ui.screens.sms.SMSImportScreen
 import com.emireminder.app.ui.screens.sms.SmsIntelligenceOnboardingScreen
+import com.emireminder.app.ui.components.BannerAdView
 import com.emireminder.app.ui.screens.splash.SplashScreen
 import com.emireminder.app.ui.theme.Indigo600
 
@@ -123,19 +124,22 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                PillNavBar(
-                    currentRoute = currentRoute,
-                    onNavigate = { route ->
-                        navController.navigate(route) {
-                            // Never save or restore sub-nav state when switching tabs.
-                            // saveState=true caused Finance→ToolsHub→Comparison to be
-                            // restored when tapping Finance tab again (HEL-115).
-                            popUpTo(NavRoutes.HOME) { saveState = false }
-                            launchSingleTop = true
-                            restoreState = false
+                Column {
+                    BannerAdView()
+                    PillNavBar(
+                        currentRoute = currentRoute,
+                        onNavigate = { route ->
+                            navController.navigate(route) {
+                                // Never save or restore sub-nav state when switching tabs.
+                                // saveState=true caused Finance→ToolsHub→Comparison to be
+                                // restored when tapping Finance tab again (HEL-115).
+                                popUpTo(NavRoutes.HOME) { saveState = false }
+                                launchSingleTop = true
+                                restoreState = false
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         },
         containerColor = MaterialTheme.colorScheme.background,
