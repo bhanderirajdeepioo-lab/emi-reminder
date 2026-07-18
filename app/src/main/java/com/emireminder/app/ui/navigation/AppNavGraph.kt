@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -98,6 +99,10 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
     // Async read introduced a race: firstLaunch started false so first-time users
     // saw HOME instead of Onboarding when SplashScreen fired before the IO result.
     val firstLaunch = remember { isFirstLaunch(context) }
+    // Fixed 56dp translate captured once so NavHost lambdas (non-Composable scope) can read it.
+    // Material Motion Shared Axis X uses a fixed dp offset, not a fraction of screen width.
+    val density = LocalDensity.current
+    val slideOffset = remember(density) { with(density) { 56.dp.roundToPx() } }
     val showBottomBar = currentRoute in bottomNavRoutes
 
     // Returning users skip SPLASH entirely; deep link is fired from LaunchedEffect below.
@@ -153,17 +158,25 @@ fun AppNavGraph(deepLinkLoanId: Int = -1) {
             enterTransition = {
                 val isTabSwitch = initialState.destination.route in bottomNavRoutes
                     && targetState.destination.route in bottomNavRoutes
-                if (isTabSwitch) fadeIn(tween(200))
-                else fadeIn(tween(300)) + slideInHorizontally(tween(300)) { it / 8 }
+                if (isTabSwitch) fadeIn(tween(200, easing = LinearEasing))
+                else fadeIn(tween(300, easing = LinearEasing)) +
+                    slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { slideOffset }
             },
             exitTransition = {
                 val isTabSwitch = initialState.destination.route in bottomNavRoutes
                     && targetState.destination.route in bottomNavRoutes
-                if (isTabSwitch) fadeOut(tween(200))
-                else fadeOut(tween(300)) + slideOutHorizontally(tween(300)) { -it / 8 }
+                if (isTabSwitch) fadeOut(tween(200, easing = LinearEasing))
+                else fadeOut(tween(200, easing = LinearEasing)) +
+                    slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { -slideOffset }
             },
-            popEnterTransition = { fadeIn(tween(300)) + slideInHorizontally(tween(300)) { -it / 8 } },
-            popExitTransition = { fadeOut(tween(300)) + slideOutHorizontally(tween(300)) { it / 8 } },
+            popEnterTransition = {
+                fadeIn(tween(300, easing = LinearEasing)) +
+                    slideInHorizontally(tween(300, easing = FastOutSlowInEasing)) { -slideOffset }
+            },
+            popExitTransition = {
+                fadeOut(tween(200, easing = LinearEasing)) +
+                    slideOutHorizontally(tween(300, easing = FastOutSlowInEasing)) { slideOffset }
+            },
         ) {
             // 1 — Splash
             composable(NavRoutes.SPLASH) {
@@ -697,13 +710,10 @@ private fun PillNavItem(item: NavItem, selected: Boolean, onClick: () -> Unit, m
         AnimatedContent(
             targetState = selected,
             transitionSpec = {
-                fadeIn(spring(stiffness = Spring.StiffnessMediumLow))
-                    .togetherWith(fadeOut(spring(stiffness = Spring.StiffnessMediumLow)))
-                    .using(SizeTransform { _, _ ->
-                        spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessMediumLow,
-                        )
+                fadeIn(tween(200, easing = FastOutSlowInEasing))
+                    .togetherWith(fadeOut(tween(150, easing = LinearEasing)))
+                    .using(SizeTransform(clip = false) { _, _ ->
+                        tween(durationMillis = 250, easing = FastOutSlowInEasing)
                     })
             },
             label = "pill_${item.label}",
